@@ -1,4 +1,9 @@
 {
-  "ExpandedNodes": [],
+  "ExpandedNodes": [
+    "",
+    "\\SolutionIEI",
+    "\\SolutionIEI\\UI"
+  ],
+  "SelectedNode": "\\SolutionIEI\\UI\\Program.cs",
   "PreviewInSolutionExplorer": false
 }

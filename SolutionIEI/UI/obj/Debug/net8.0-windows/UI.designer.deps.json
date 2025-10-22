@@ -1,0 +1,65 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "AjaxMin/5.14.5506.26202": {
+        "runtime": {
+          "lib/net40/AjaxMin.dll": {
+            "assemblyVersion": "5.14.5506.26196",
+            "fileVersion": "5.14.5506.26196"
+          }
+        }
+      },
+      "GMap.Net/1.0.1": {
+        "dependencies": {
+          "AjaxMin": "5.14.5506.26202"
+        },
+        "runtime": {
+          "lib/Gmap.net.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "GMap.NET.WindowsForms/1.7.5": {
+        "runtime": {
+          "lib/net40/GMap.NET.Core.dll": {
+            "assemblyVersion": "1.7.5.0",
+            "fileVersion": "1.7.5.0"
+          },
+          "lib/net40/GMap.NET.WindowsForms.dll": {
+            "assemblyVersion": "1.7.5.0",
+            "fileVersion": "1.7.5.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AjaxMin/5.14.5506.26202": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ayrhrlFSQEAw+1w7cdUGozbZ8BxakITQcTezeLKByp69zk0tdto8/Jt3U2ieCq3U1dlvwXGvlthMaTJXeHEaFw==",
+      "path": "ajaxmin/5.14.5506.26202",
+      "hashPath": "ajaxmin.5.14.5506.26202.nupkg.sha512"
+    },
+    "GMap.Net/1.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gzWEuTCzVPMxUsjhhHEqJ2jPOVFolHbBEm7qNQrI3hATIgT1+91tkNKA7rBwqB0YI9eetlI0SqOtj73uDpWacw==",
+      "path": "gmap.net/1.0.1",
+      "hashPath": "gmap.net.1.0.1.nupkg.sha512"
+    },
+    "GMap.NET.WindowsForms/1.7.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VA2836bCMgIAhcvpQIJpmDJrQFm+nnH8AiqKzGqvMAoamO+UqAoNy6b+YPKNAqS1+2RRAcq12nrC582tUcb90A==",
+      "path": "gmap.net.windowsforms/1.7.5",
+      "hashPath": "gmap.net.windowsforms.1.7.5.nupkg.sha512"
+    }
+  }
+}
