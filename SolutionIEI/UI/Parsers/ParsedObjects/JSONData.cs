@@ -11,5 +11,13 @@ namespace UI.Parsers.ParsedObjects
     /// </summary>
     public struct JSONData
     {
+        string TIPO_ESTACION;
+        string PROVINCIA;
+        string MUNICIPIO;
+        string C_POSTAL;
+        string DIRECCION;
+        string Nº_ESTACION;
+        string HORARIOS;
+        string CORREOS;
     }
 }
