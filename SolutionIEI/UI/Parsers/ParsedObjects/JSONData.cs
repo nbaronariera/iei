@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace UI.Parsers.ParsedObjects
@@ -9,15 +10,37 @@ namespace UI.Parsers.ParsedObjects
     /// <summary>
     ///  Objeto representando la estructura de datos del archivo JSON
     /// </summary>
-    public struct JSONData
+    public class JSONData
     {
-        string TIPO_ESTACION;
-        string PROVINCIA;
-        string MUNICIPIO;
-        string C_POSTAL;
-        string DIRECCION;
-        string Nº_ESTACION;
-        string HORARIOS;
-        string CORREOS;
+        [JsonPropertyName("TIPO ESTACIÓN")]
+        public string TIPO_ESTACION { get; set; }
+
+        [JsonPropertyName("PROVINCIA")]
+        public string PROVINCIA { get; set; }
+
+        [JsonPropertyName("MUNICIPIO")]
+        public string MUNICIPIO { get; set; }
+
+        [JsonPropertyName("C.POSTAL")]
+        [JsonConverter(typeof(FlexibleConverter))]
+        public string C_POSTAL { get; set; }
+
+        [JsonPropertyName("DIRECCIÓN")]
+        public string DIRECCION { get; set; }
+
+        [JsonPropertyName("Nº ESTACIÓN")]
+        [JsonConverter(typeof(FlexibleConverter))]
+        public string Nº_ESTACION { get; set; }
+
+        [JsonPropertyName("HORARIOS")]
+        public string HORARIOS { get; set; }
+
+        [JsonPropertyName("CORREO")]
+        public string CORREOS { get; set; }
+
+        public override string ToString()
+        {
+            return TIPO_ESTACION + "\n" + PROVINCIA + "\n" + MUNICIPIO + "\n" + C_POSTAL + "\n" + DIRECCION + "\n" + Nº_ESTACION + "\n" + HORARIOS + "\n" + CORREOS;
+        }
     }
 }

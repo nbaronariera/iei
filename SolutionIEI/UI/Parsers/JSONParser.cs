@@ -17,7 +17,12 @@ namespace UI.Parsers
 
         protected override List<JSONData> ExecuteParse()
         {
-            if (JsonSerializer.Deserialize<List<JSONData>>(new StreamReader(file!).ReadToEnd()) is not List<JSONData> res) { return new List<JSONData>(); }
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
+            if (JsonSerializer.Deserialize<List<JSONData>>(new StreamReader(file!).ReadToEnd(), options) is not List<JSONData> res) { return new List<JSONData>(); }
             return res;
         }
     }

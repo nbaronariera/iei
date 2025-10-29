@@ -21,10 +21,10 @@ namespace UI.Parsers
             if (file is not null) { file.Close(); }
         }
 
-        public List<ResultObject> ParseList()
+        public List<T> ParseList()
         {
-            if (file is null) { return new List<ResultObject>(); }
-            return FromParsedToUsefull(ExecuteParse());
+            if (file is null) { return new List<T>(); }
+            return ExecuteParse();
         }
 
         protected abstract List<ResultObject> FromParsedToUsefull(List<T> parsed);
