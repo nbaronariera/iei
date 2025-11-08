@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UI.Entidades
 {
-    internal class Estacion
+    public class Estacion
     {
         public int cod_estacion { get; set; }
         public String nombre { get; set; } = "";

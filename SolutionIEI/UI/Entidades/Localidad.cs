@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UI.Entidades
 {
-    internal class Localidad
+    public class Localidad
     {
         public int codigo { get; set; }
 

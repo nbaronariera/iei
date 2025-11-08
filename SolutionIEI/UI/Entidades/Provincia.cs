@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UI.Entidades
 {
-    internal class Provincia
+    public class Provincia
     {
         public int codigo { get; set; }
 

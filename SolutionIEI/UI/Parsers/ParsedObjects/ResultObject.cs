@@ -11,5 +11,8 @@ namespace UI.Parsers.ParsedObjects
     /// </summary>
     public struct ResultObject
     {
+        public UI.Entidades.Estacion Estacion { get; set; }
+        public UI.Entidades.Localidad Localidad { get; set; }
+        public UI.Entidades.Provincia Provincia { get; set; }
     }
 }
