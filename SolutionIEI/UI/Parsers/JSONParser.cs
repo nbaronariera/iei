@@ -10,9 +10,10 @@ namespace UI.Parsers
 {
     internal class JSONParser : Parser<JSONData>
     {
-        protected override List<ResultObject> FromParsedToUsefull(List<JSONData> parsed)
+        public String toJSON(List<CSVData> data)
         {
-            throw new NotImplementedException();
+            var test =  JsonSerializer.Serialize<List<CSVData>>(data).ToString();
+            return test;
         }
 
         protected override List<JSONData> ExecuteParse()

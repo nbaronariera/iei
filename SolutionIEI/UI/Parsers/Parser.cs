@@ -27,8 +27,6 @@ namespace UI.Parsers
             return ExecuteParse();
         }
 
-        protected abstract List<ResultObject> FromParsedToUsefull(List<T> parsed);
-
         protected abstract List<T> ExecuteParse();
     }
 }

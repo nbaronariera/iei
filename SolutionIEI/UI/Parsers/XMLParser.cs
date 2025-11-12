@@ -11,11 +11,6 @@ namespace UI.Parsers
 {
     internal class XMLParser : Parser<XMLData>
     {
-        protected override List<ResultObject> FromParsedToUsefull(List<XMLData> parsed)
-        {
-            throw new NotImplementedException();
-        }
-
         protected override List<XMLData> ExecuteParse()
         {
             XmlSerializer serializer = new(typeof(XMLData));

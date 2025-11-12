@@ -9,15 +9,20 @@ namespace UI.Parsers.ParsedObjects
 {
     public class GALData
     {
-        [JsonPropertyName("NOME DA ESTACI�N")] public string NombreEstacion { get; set; } = "";
-        [JsonPropertyName("ENDEREZO")] public string Direccion { get; set; } = "";
-        [JsonPropertyName("CONCELLO")] public string Municipio { get; set; } = "";
-        [JsonPropertyName("C�DIGO POSTAL")] public string CodigoPostal { get; set; } = "";
-        [JsonPropertyName("PROVINCIA")] public string Provincia { get; set; } = "";
-        [JsonPropertyName("TEL�FONO")] public string Telefono { get; set; } = "";
-        [JsonPropertyName("HORARIO")] public string HorarioRaw { get; set; } = "";
-        [JsonPropertyName("SOLICITUDE DE CITA PREVIA")] public string UrlCita { get; set; } = "";
-        [JsonPropertyName("CORREO ELECTR�NICO")] public string Correo { get; set; } = "";
-        [JsonPropertyName("COORDENADAS GMAPS")] public string Coordenadas { get; set; } = "";
+        public string NombreEstacion { get; set; } = "";
+        public string Direccion { get; set; } = "";
+        public string Municipio { get; set; } = "";
+        public string CodigoPostal { get; set; } = "";
+        public string Provincia { get; set; } = "";
+        public string Telefono { get; set; } = "";
+        public string HorarioRaw { get; set; } = "";
+        public string UrlCita { get; set; } = "";
+        public string Correo { get; set; } = "";
+        public string Coordenadas { get; set; } = "";
+
+        public String toString()
+        {
+            return NombreEstacion + "\n" + Direccion + "\n" + Municipio + "\n" + CodigoPostal + "\n" + Provincia + "\n" + Telefono + "\n" + HorarioRaw + "\n" + UrlCita + "\n" + Correo + "\n" + Coordenadas;
+        }
     }
 }

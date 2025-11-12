@@ -11,7 +11,6 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
 {
-   
         public class GALParser : Parser<GALData>
         {
             // Diccionario de correcciones específicas
@@ -38,11 +37,11 @@ namespace UI.Parsers
                     PropertyNameCaseInsensitive = true
                 };
 
-                string contenido = new StreamReader(file).ReadToEnd();
+                string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
                 return JsonSerializer.Deserialize<List<GALData>>(contenido, opciones) ?? new List<GALData>();
             }
 
-            protected override List<ResultObject> FromParsedToUsefull(List<GALData> datosParseados)
+            protected List<ResultObject> FromParsedToUsefull(List<GALData> datosParseados)
             {
                 var resultados = new List<ResultObject>();
                 using var contexto = new AppDbContext();

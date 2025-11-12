@@ -21,15 +21,21 @@ namespace UI
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());
 
-            JSONParser parser = new JSONParser();
-            parser.Load("W:\\iei\\SolutionIEI\\UI\\estaciones.json");
+            JSONParser Jsonparser = new JSONParser();
+            CSVParser Csvparser = new CSVParser();
+            GALParser Galparser = new GALParser();
+            Csvparser.Load("W:\\iei\\SolutionIEI\\UI\\Fuentes\\Estacions_ITV.csv");
 
-            var list = parser.ParseList();
+            var list = Csvparser.ParseList();
+            var json = Jsonparser.toJSON(list);
 
-            System.Diagnostics.Debug.WriteLine(list.Count);
-            foreach (var l in list)
-            {
-                System.Diagnostics.Debug.WriteLine(l.ToString());
+            File.WriteAllText("W:\\iei\\SolutionIEI\\UI\\obj\\test.json", json, System.Text.Encoding.UTF8);
+            Galparser.Load("W:\\iei\\SolutionIEI\\UI\\obj\\test.json");
+
+            var lists = Galparser.ParseList();
+
+            foreach (var e in lists){
+                System.Console.WriteLine(e.ToString());
             }
         }
     }
