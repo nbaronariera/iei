@@ -1,28 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "W:\\iei\\SolutionIEI\\UI\\UI.csproj": {}
+    "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj": {}
   },
   "projects": {
-    "W:\\iei\\SolutionIEI\\UI\\UI.csproj": {
+    "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "W:\\iei\\SolutionIEI\\UI\\UI.csproj",
+        "projectUniqueName": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj",
         "projectName": "UI",
-        "projectPath": "W:\\iei\\SolutionIEI\\UI\\UI.csproj",
-        "packagesPath": "C:\\Users\\NBARRIE\\.nuget\\packages\\",
-        "outputPath": "W:\\iei\\SolutionIEI\\UI\\obj\\",
+        "projectPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj",
+        "packagesPath": "C:\\Users\\Nacheitor8\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\NBARRIE\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Nacheitor8\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net6.0-windows7.0"
+          "net6.0-windows"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -38,6 +34,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -89,10 +90,29 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[6.0.33, 6.0.33]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[6.0.33, 6.0.33]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[6.0.33, 6.0.33]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[6.0.33, 6.0.33]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
@@ -101,7 +121,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }
