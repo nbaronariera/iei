@@ -20,29 +20,6 @@ namespace UI
         [STAThread]
         static void Main()
         {
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
-
-            /*
-            JSONParser Jsonparser = new JSONParser();
-            CSVParser Csvparser = new CSVParser();
-            GALParser Galparser = new GALParser();
-            Csvparser.Load("W:\\iei\\SolutionIEI\\UI\\Fuentes\\Estacions_ITV.csv");
-
-            var list = Csvparser.ParseList();
-            var json = Jsonparser.toJSON(list);
-
-            File.WriteAllText("W:\\iei\\SolutionIEI\\UI\\obj\\test.json", json, System.Text.Encoding.UTF8);
-            Galparser.Load("W:\\iei\\SolutionIEI\\UI\\obj\\test.json");
-            
-
-            var lists = Galparser.ParseList();
-
-            foreach (var e in lists){
-                System.Console.WriteLine(e.ToString());
-            }
-            */
 
             try
             {
@@ -59,7 +36,9 @@ namespace UI
                 }
 
                 // 1) Generar JSON desde CSV
-                string archivoJSON = Wrapper_CSV_A_JSON.Ejecutar();
+                //string _ = JSONConversor.Ejecutar();
+                string __ = XMLaJSONConversor.Ejecutar();
+                string archivoJSON = ""; //CSVaJSONConversor.Ejecutar();
 
                 // 2) Cargar JSON usando GALParser
                 var galParser = new GALParser();

@@ -13,9 +13,10 @@ namespace UI.Parsers
     {
         protected override List<XMLData> ExecuteParse()
         {
-            XmlSerializer serializer = new(typeof(XMLData));
-            if (serializer.Deserialize(file!) is not List<XMLData> res) { return new List<XMLData>(); }
-            return res;
+            XmlSerializer serializer = new(typeof(XMLResponse));
+            var v = serializer.Deserialize(file!);
+
+            return (v as XMLResponse).Wrapper.Rows;
         }
     }
 }
