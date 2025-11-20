@@ -12,42 +12,84 @@ using WebDriverManager;
 
 namespace UI.Helpers
 {
-    internal class CoordenadasSelenium
+    internal class CoordenadasSelenium : IDisposable
     {
+        private IWebDriver driver;
+        private Random rnd = new Random();
+
+        public CoordenadasSelenium()
+        {
+            // Inicializar el driver UNA SOLA VEZ en el constructor
+            new DriverManager().SetUpDriver(new ChromeConfig());
+            var driverService = ChromeDriverService.CreateDefaultService();
+            driverService.HideCommandPromptWindow = true;
+            driver = new ChromeDriver(driverService);
+        }
+
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
         {
-            IWebDriver driver = null;
-
             try
             {
-                // 1. Configura ChromeDriver automáticamente
-                new DriverManager().SetUpDriver(new ChromeConfig());
-
-                // Ocultar la ventana de la consola de ChromeDriver
-                var driverService = ChromeDriverService.CreateDefaultService();
-                driverService.HideCommandPromptWindow = true;
-
-                driver = new ChromeDriver(driverService);
-
-                // 2. Ir a la página
                 driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
 
-                // 3. Esperar y manejar el banner de Cookies
-                // Le damos 2 segundos para que aparezca el banner
-                Thread.Sleep(2000);
+                // Espera aleatoria para parecer humano (2 a 3.5 segundos)
+                Thread.Sleep(rnd.Next(2000, 4000));
+
                 try
                 {
-                    // El script de cookies muestra que el texto es "OK!"
-                    var cookieButton = driver.FindElement(By.LinkText("OK!"));
-                    if (cookieButton != null)
+                    // 1. Definimos qué buscamos (Texto flexible para "Consentir", "Aceptar", "Agree")
+                    // Usamos un XPath que busca texto independientemente de mayúsculas/minúsculas o espacios
+                    string xpathCookies = "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'consentir') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'aceptar') or contains(text(), 'Agree')]";
+
+                    // 2. Función local para intentar clicar
+                    bool ClickarBanner()
                     {
-                        cookieButton.Click();
-                        Thread.Sleep(500); // Pequeña pausa para que se cierre
+                        try
+                        {
+                            var btn = driver.FindElement(By.XPath(xpathCookies));
+                            if (btn.Displayed && btn.Enabled)
+                            {
+                                Console.WriteLine("Botón de cookies encontrado. Intentando pulsar...");
+                                btn.Click();
+                                return true;
+                            }
+                        }
+                        catch (NoSuchElementException) { }
+                        return false;
+                    }
+
+                    // 3. INTENTO 1: Buscar en la página principal
+                    // Esperamos un poco a que cargue el banner
+                    Thread.Sleep(2000);
+                    if (!ClickarBanner())
+                    {
+                        // 4. INTENTO 2: Si no está en el principal, buscamos dentro de los IFRAMES
+                        var iframes = driver.FindElements(By.TagName("iframe"));
+                        Console.WriteLine($"Buscando cookies en {iframes.Count} iframes...");
+
+                        foreach (var frame in iframes)
+                        {
+                            try
+                            {
+                                driver.SwitchTo().Frame(frame);
+                                if (ClickarBanner())
+                                {
+                                    Console.WriteLine("¡Cookies aceptadas dentro de un iframe!");
+                                    driver.SwitchTo().DefaultContent(); // Volver a la página principal
+                                    break;
+                                }
+                                driver.SwitchTo().DefaultContent();
+                            }
+                            catch
+                            {
+                                driver.SwitchTo().DefaultContent(); // Asegurar que volvemos si falla
+                            }
+                        }
                     }
                 }
-                catch (NoSuchElementException)
+                catch (Exception ex)
                 {
-                    // No se encontró el banner de cookies, no hacemos nada
+                    Console.WriteLine($"Aviso: No se pudo gestionar el banner de cookies: {ex.Message}");
                 }
 
                 // 4. Combinar dirección y rellenar el formulario
@@ -82,19 +124,23 @@ namespace UI.Helpers
                 double lat = double.Parse(latStr, CultureInfo.InvariantCulture);
                 double lng = double.Parse(lngStr, CultureInfo.InvariantCulture);
 
+                // Espera antes de devolver el resultado (simula tiempo de lectura)
+                Thread.Sleep(rnd.Next(1000, 2000));
+
                 return (lat, lng);
             }
             catch (Exception ex)
             {
-                // Manejar cualquier error (ej. no se encontró la dirección)
-                Console.WriteLine($"Error en Selenium: {ex.Message}");
-                return (0.0, 0.0); // Devolver 0,0 en caso de error
+                Console.WriteLine($"Error: {ex.Message}");
+                return (0.0, 0.0);
             }
-            finally
-            {
-                // 9. Asegurarse de cerrar el navegador siempre
-                driver?.Quit();
-            }
+            // NO cerramos el driver aquí (quitamos el finally)
+        }
+
+        public void Dispose()
+        {
+            // Método para cerrar el navegador al terminar todo el proceso
+            driver?.Quit();
         }
     }
 }
