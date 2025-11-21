@@ -59,10 +59,10 @@ namespace UI
                 }
 
                 // 1) Generar JSON desde CSV
-                string archivoJSON = Wrapper_CSV_A_JSON.Ejecutar();
+                string archivoJSON = CSVaJSONConversor.Ejecutar();
                 //string _ = JSONConversor.Ejecutar();
                 string __ = XMLaJSONConversor.Ejecutar();
-                string archivoJSON = ""; //CSVaJSONConversor.Ejecutar();
+                //string archivoJSON = ""; //CSVaJSONConversor.Ejecutar();
 
                 // 2) Cargar JSON usando GALParser
                 var galParser = new GALParser();

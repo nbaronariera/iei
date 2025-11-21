@@ -12,13 +12,13 @@
     "long_coord": "2163486",
     "geocoded_column": "POINT (2163486 41399458)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.399458+2.163486"
+      "url": "http://maps.google.com/maps?t=k&q=41.399458+2.163486"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h",
     "correu_electr_nic": "b16@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -34,13 +34,13 @@
     "long_coord": "2237464",
     "geocoded_column": "POINT (2237464 41435358)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.435358+2.237464"
+      "url": "http://maps.google.com/maps?t=k&q=41.435358+2.237464"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7 a 21h i dissabtes de 8 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h.)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -56,13 +56,13 @@
     "long_coord": "2019474",
     "geocoded_column": "POINT (2019474 413028)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.3028+2.019474"
+      "url": "http://maps.google.com/maps?t=k&q=41.3028+2.019474"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23, 29 i 30 desemb.: Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -78,13 +78,13 @@
     "long_coord": "1635399",
     "geocoded_column": "POINT (1635399 41591438)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.591438+1.635399"
+      "url": "http://maps.google.com/maps?t=k&q=41.591438+1.635399"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7 a 21h i dissabtes de 8 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h.)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -100,7 +100,7 @@
     "long_coord": "848644",
     "geocoded_column": "POINT (848644 41507973)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.507973+0.848644"
+      "url": "http://maps.google.com/maps?t=k&q=41.507973+0.848644"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "Dill. a div. de 8:30 a 13:30 i de 15:30 a 18:30: Dissab. 8:30 a 13:30",
@@ -120,13 +120,13 @@
     "long_coord": "2504893",
     "geocoded_column": "POINT (2504893 41695043)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.695043+2.504893"
+      "url": "http://maps.google.com/maps?t=k&q=41.695043+2.504893"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "DLL-DV: 06:00-21:00 , DS:07:00-14:00",
     "correu_electr_nic": "itv-stceloni@tuv-sud.es",
     "web": {
-      "Url": "http://www.tuvsud.com/itv"
+      "url": "http://www.tuvsud.com/itv"
     }
   },
   {
@@ -142,13 +142,13 @@
     "long_coord": "154423",
     "geocoded_column": "POINT (154423 41990997)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.990997+1.54423"
+      "url": "http://maps.google.com/maps?t=k&q=41.990997+1.54423"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 8h a 14h i de 15h a 17h",
     "correu_electr_nic": "l06@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -164,13 +164,13 @@
     "long_coord": "2890031",
     "geocoded_column": "POINT (2890031 42032915)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.032915+2.890031"
+      "url": "http://maps.google.com/maps?t=k&q=42.032915+2.890031"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: de dl a dv de 7 a 19. Agost, (4 al 29) de dl a dv de 7 a 14:15. Desembre: 22, 23, 29 i 30 de 8 a 14 i de 15 a 17.",
     "correu_electr_nic": "https://www.controlautoitv.com/",
     "web": {
-      "Url": "https://www.controlautoitv.com/"
+      "url": "https://www.controlautoitv.com/"
     }
   },
   {
@@ -186,13 +186,13 @@
     "long_coord": "206332",
     "geocoded_column": "POINT (206332 41480016)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.480016+2.06332"
+      "url": "http://maps.google.com/maps?t=k&q=41.480016+2.06332"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21. Dissabte de 8h a 14h",
     "correu_electr_nic": "b22@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -208,13 +208,13 @@
     "long_coord": "1163645",
     "geocoded_column": "POINT (1163645 41364214)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.364214+1.163645"
+      "url": "http://maps.google.com/maps?t=k&q=41.364214+1.163645"
     },
     "serveis_territorials": "Tarragona",
     "horari_de_servei": "De dilluns a divendres de 7 a 21'30h i dissabtes de 8 a 13h. (Els dies:2 i 3 gener.17 abril.2 maig.23,25,26 i 27 juny.De 4 agost a 14 setembre.31 octubre.5,22,23,29 i 30 desembre:Oberta de 7-14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -230,13 +230,13 @@
     "long_coord": "3131805",
     "geocoded_column": "POINT (3131805 41860148)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.860148+3.131805"
+      "url": "http://maps.google.com/maps?t=k&q=41.860148+3.131805"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: de dilluns a divendres de 7 a 21. Dissabtes de 8 a 14. Gener: 2 i 3 de 8 a 18. Agost: del 4 al 29 de dilluns a divendres de 7 a 20:15. Desembre: 22, 23, 29 i 30 de de 8 a 18.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -252,13 +252,13 @@
     "long_coord": "1977865",
     "geocoded_column": "POINT (1977865 41560908)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.560908+1.977865"
+      "url": "http://maps.google.com/maps?t=k&q=41.560908+1.977865"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabte de 8h a 14h",
     "correu_electr_nic": "b03@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -274,13 +274,13 @@
     "long_coord": "2416264",
     "geocoded_column": "POINT (2416264 41536412)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.536412+2.416264"
+      "url": "http://maps.google.com/maps?t=k&q=41.536412+2.416264"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 6¿30 a 21h i dissabtes de 8 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h.)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -296,13 +296,13 @@
     "long_coord": "1926391",
     "geocoded_column": "POINT (1926391 42426348)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.426348+1.926391"
+      "url": "http://maps.google.com/maps?t=k&q=42.426348+1.926391"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dimarts a dissabte, matins 8-14h i tardes 15-17h,i dilluns tancat. (Agost: de dimarts a divendres,matins 8-14h i tardes 15-17h,i dissabtes 8-14h)(Els dies: 2,9,23 i 30 agost : oberta de 8 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -318,13 +318,13 @@
     "long_coord": "1059282",
     "geocoded_column": "POINT (1059282 4189709)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.89709+1.059282"
+      "url": "http://maps.google.com/maps?t=k&q=41.89709+1.059282"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dill a div de 8-14h i 15-17h, i diss tancat. (D'1 a 31 agost: Oberta de dill a dij de 7-14'15h i div de 7-14h) (Els dies: 22,23,29 i 30 desembre: Oberta de 7-15h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -340,13 +340,13 @@
     "long_coord": "2203403",
     "geocoded_column": "POINT (2203403 41441284)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.441284+2.203403"
+      "url": "http://maps.google.com/maps?t=k&q=41.441284+2.203403"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabte de 8h a 14h",
     "correu_electr_nic": "b23@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -362,13 +362,13 @@
     "long_coord": "66082",
     "geocoded_column": "POINT (66082 41624654)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.624654+0.66082"
+      "url": "http://maps.google.com/maps?t=k&q=41.624654+0.66082"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "(Gen-maig i ago-des:dill-div 7-21h)(Juny-jul:dill-div 6-21h)(Dissab. 8-13¿30h)(Els dies:14,15,16,17 i 22 abril.2 i 13 maig.23 juny.De 4 agost a 12 set.30 set. 31 oct.22,23,29 i 30 des.:Oberta 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -384,13 +384,13 @@
     "long_coord": "2095921",
     "geocoded_column": "POINT (2095921 41357138)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.357138+2.095921"
+      "url": "http://maps.google.com/maps?t=k&q=41.357138+2.095921"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23,29 i 30 desemb.: Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -406,13 +406,13 @@
     "long_coord": "214644",
     "geocoded_column": "POINT (214644 41351142)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.351142+2.14644"
+      "url": "http://maps.google.com/maps?t=k&q=41.351142+2.14644"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23,29 i 30 desemb. : Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -428,13 +428,13 @@
     "long_coord": "736002",
     "geocoded_column": "POINT (736002 42422029)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.422029+0.736002"
+      "url": "http://maps.google.com/maps?t=k&q=42.422029+0.736002"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dilluns a divendres de 8h a 14h i de 15h a 17h.",
     "correu_electr_nic": "itv.elpontdesuert@itevelesa.com",
     "web": {
-      "Url": "http://www.itevelesa.cat"
+      "url": "http://www.itevelesa.cat"
     }
   },
   {
@@ -450,13 +450,13 @@
     "long_coord": "2280243",
     "geocoded_column": "POINT (2280243 41949148)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.949148+2.280243"
+      "url": "http://maps.google.com/maps?t=k&q=41.949148+2.280243"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "General 2025: de dilluns a divendres de 7 a 21. Dissabtes de 8 a 14. Gener: 2 i 3 de 8 a 18. Agost: del 4 al 29 de dilluns a divendres de 7 a 15. Desembre: 22, 23, 29 i 30 de de 8 a 18.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -472,13 +472,13 @@
     "long_coord": "2804696",
     "geocoded_column": "POINT (2804696 41963441)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.963441+2.804696"
+      "url": "http://maps.google.com/maps?t=k&q=41.963441+2.804696"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: de dilluns a divendres de 7 a 21. Dissabtes de 8 a 14. Gener: 2 i 3 de 8 a 18. Agost: del 4 al 29 de dilluns a divendres de 7 a 15. Desembre: 22, 23, 29 i 30 de de 8 a 18.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -494,13 +494,13 @@
     "long_coord": "90961",
     "geocoded_column": "POINT (90961 421622)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.1622+0.90961"
+      "url": "http://maps.google.com/maps?t=k&q=42.1622+0.90961"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dilluns a divendres, matins 8-14h i tardes 15-17h, i dissabtes tancat. (D'1 a 31 d'agost: Oberta de dilluns a dij de 7 a 14'15h i div de 7 a 14h) (Els dies 22,23,29 i 30 desemb: Oberta de 8 a 15h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -516,13 +516,13 @@
     "long_coord": "645727",
     "geocoded_column": "POINT (645727 41105076)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.105076+0.645727"
+      "url": "http://maps.google.com/maps?t=k&q=41.105076+0.645727"
     },
     "serveis_territorials": "Terres de l'Ebre",
     "horari_de_servei": "De dill a div de 8'30-14h i 16-18'30h, diss tancat. (Dies:De 14 a 17 abril.2 maig.23,25,26 i 27 juny.23 i 31 oct.9,10,11,12 i 19 desem:Oberta 7-15h)(De 5 agost a 14 setemb:Oberta de 7-14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -538,13 +538,13 @@
     "long_coord": "2191192",
     "geocoded_column": "POINT (2191192 41400287)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.400287+2.191192"
+      "url": "http://maps.google.com/maps?t=k&q=41.400287+2.191192"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21. Dissabte de 8h a 14h",
     "correu_electr_nic": "b19@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -560,13 +560,13 @@
     "long_coord": "2132535",
     "geocoded_column": "POINT (2132535 41534279)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.534279+2.132535"
+      "url": "http://maps.google.com/maps?t=k&q=41.534279+2.132535"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7 a 21h i dissabtes de 8 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h.)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -582,13 +582,13 @@
     "long_coord": "55414",
     "geocoded_column": "POINT (55414 40765372)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=40.765372+0.55414"
+      "url": "http://maps.google.com/maps?t=k&q=40.765372+0.55414"
     },
     "serveis_territorials": "Terres de l'Ebre",
     "horari_de_servei": "De dilluns a divendres de 6'30 a 21'30h i dissab de 8 a 13h (Els dies: 2 i 3 gener. De 14 a 17 abril.2 maig. 23,25,26,27 i 30 juny.De 4 agost al 14 setemb.31 oct.22,23,29 i 30 desemb.: Oberta 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -604,13 +604,13 @@
     "long_coord": "2479758",
     "geocoded_column": "POINT (2479758 4218958)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.18958+2.479758"
+      "url": "http://maps.google.com/maps?t=k&q=42.18958+2.479758"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: dl a dv de 8 a 14 i de 15 a 19. Gener: 2 i 3: 8 a 14 i 15 a 17. Agost: del 4 al 29 de dl a dv de 7 a 14:15. Desembre: 22, 23, 29 i 30: 8 a 14 i de 15 a 17.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -626,13 +626,13 @@
     "long_coord": "2158162",
     "geocoded_column": "POINT (2158162 41383509)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.383509+2.158162"
+      "url": "http://maps.google.com/maps?t=k&q=41.383509+2.158162"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23,29 i 30 desemb.: Oberta de  7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -648,7 +648,7 @@
     "long_coord": "579809",
     "geocoded_column": "POINT (579809 40688064)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=40.688064+0.579809"
+      "url": "http://maps.google.com/maps?t=k&q=40.688064+0.579809"
     },
     "serveis_territorials": "Terres de l'Ebre",
     "horari_de_servei": "Dill. a div. de 8:30 a 13:30 i de 15:30 a 18:30: Dissab. 8:30 a 13:30",
@@ -668,13 +668,13 @@
     "long_coord": "173028",
     "geocoded_column": "POINT (173028 41357229)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.357229+1.73028"
+      "url": "http://maps.google.com/maps?t=k&q=41.357229+1.73028"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23,29 i 30 desemb. : Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -690,13 +690,13 @@
     "long_coord": "797632",
     "geocoded_column": "POINT (797632 42712861)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.712861+0.797632"
+      "url": "http://maps.google.com/maps?t=k&q=42.712861+0.797632"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dill a div de 8-13'30h i 14'30-17~h, i diss tancat. (D'1 a 31 agost: Oberta de dill a dij de 7-14'15h i div de 7-14h) (Els dies: 22,23,29 i 30 desembre: Oberta de 8-15h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -712,13 +712,13 @@
     "long_coord": "20618",
     "geocoded_column": "POINT (20618 41384595)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.384595+2.061800"
+      "url": "http://maps.google.com/maps?t=k&q=41.384595+2.061800"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:De 14 a 17 abril.2 maig.23 juny.De 4 agost al 12 setemb.31 octub.22, 23, 29 i 30 desembre. : Oberta de 7 a  14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -734,13 +734,13 @@
     "long_coord": "1429275",
     "geocoded_column": "POINT (1429275 42346625)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.346625+1.429275"
+      "url": "http://maps.google.com/maps?t=k&q=42.346625+1.429275"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dilluns a divendres de 8h a 14h i de 15h a 17h",
     "correu_electr_nic": "l04@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -756,13 +756,13 @@
     "long_coord": "1553195",
     "geocoded_column": "POINT (1553195 41229744)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.229744+1.553195"
+      "url": "http://maps.google.com/maps?t=k&q=41.229744+1.553195"
     },
     "serveis_territorials": "Tarragona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabtes de 8:30h a 13:30h",
     "correu_electr_nic": "itv.bellvei@itevelesa.com",
     "web": {
-      "Url": "http://www.itevelesa.cat"
+      "url": "http://www.itevelesa.cat"
     }
   },
   {
@@ -778,13 +778,13 @@
     "long_coord": "2189371",
     "geocoded_column": "POINT (2189371 41537387)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.537387+2.189371"
+      "url": "http://maps.google.com/maps?t=k&q=41.537387+2.189371"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabtes de 8h a 14h",
     "correu_electr_nic": "b20@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -800,13 +800,13 @@
     "long_coord": "2273602",
     "geocoded_column": "POINT (2273602 4157743)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.57743+2.273602"
+      "url": "http://maps.google.com/maps?t=k&q=41.57743+2.273602"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 6¿30 a 21h i dissabtes de 8 a 14h. (Els dies:De 14 a 17 abril. 2 maig. De 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -822,13 +822,13 @@
     "long_coord": "2186197",
     "geocoded_column": "POINT (2186197 42200316)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.200316+2.186197"
+      "url": "http://maps.google.com/maps?t=k&q=42.200316+2.186197"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025, dl a dv de 8 a 14 i de 15 a 17. Agost:(4 al 29) de dl a dv de 7 a 14:15.",
     "correu_electr_nic": "https://www.citaprevia.cat/",
     "web": {
-      "Url": "https://www.citaprevia.cat/"
+      "url": "https://www.citaprevia.cat/"
     }
   },
   {
@@ -844,13 +844,13 @@
     "long_coord": "1828489",
     "geocoded_column": "POINT (1828489 42089542)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.089542+1.828489"
+      "url": "http://maps.google.com/maps?t=k&q=42.089542+1.828489"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 8h a 14h i de 15h a 17h",
     "correu_electr_nic": "b13@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -866,13 +866,13 @@
     "long_coord": "1164596",
     "geocoded_column": "POINT (1164596 41114431)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.114431+1.164596"
+      "url": "http://maps.google.com/maps?t=k&q=41.114431+1.164596"
     },
     "serveis_territorials": "Tarragona",
     "horari_de_servei": "De dill. a div. de 6 a 14h i 14'30 a 21'30h i dissab. de 8 a 13h (Els dies:2 i 5 gener.16,17 i 30 abril.2 maig.23,25,26 i 27 juny.De 4 agost al 12 set.26 set.31 oct.22,23,29 i 30 des.:Oberta 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -888,13 +888,13 @@
     "long_coord": "1111185",
     "geocoded_column": "POINT (1111185 4238009)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.38009+1.111185"
+      "url": "http://maps.google.com/maps?t=k&q=42.38009+1.111185"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "De dill a div de 8-13'30h i 14'30-17h, i diss tancat. (D'1 a 31 agost: Oberta de dill a dij de 7-14'15h i div de 7-14h) (Els dies: 22,23,29 i 30 desembre: Oberta de 8-15h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -910,13 +910,13 @@
     "long_coord": "2983268",
     "geocoded_column": "POINT (2983268 42225825)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=42.225825+2.983268"
+      "url": "http://maps.google.com/maps?t=k&q=42.225825+2.983268"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: dl a dv de 7 a 21. Dissabtes de 8 a 14. Gener: 2 i 3: 8 a 18. Agost: del 4 al 29 de dl a dv de 7 a 15:00. Desembre: 22, 23, 29 i 30: 8 a 18.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -932,13 +932,13 @@
     "long_coord": "1858494",
     "geocoded_column": "POINT (1858494 417404)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.7404+1.858494"
+      "url": "http://maps.google.com/maps?t=k&q=41.7404+1.858494"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabtes de 8:30h a 13:30h",
     "correu_electr_nic": "itv.santfruitos@itevelesa.com",
     "web": {
-      "Url": "http://www.itevelesa.cat"
+      "url": "http://www.itevelesa.cat"
     }
   },
   {
@@ -954,13 +954,13 @@
     "long_coord": "218495",
     "geocoded_column": "POINT (218495 41411428)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.411428+2.18495"
+      "url": "http://maps.google.com/maps?t=k&q=41.411428+2.18495"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7 a 21h i dissabtes de 8 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setembre. 31 octubre. 22, 23, 29 i 30 desembre. : Oberta de 7 a 14h.)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -976,13 +976,13 @@
     "long_coord": "1201793",
     "geocoded_column": "POINT (1201793 41661686)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.661686+1.201793"
+      "url": "http://maps.google.com/maps?t=k&q=41.661686+1.201793"
     },
     "serveis_territorials": "Lleida",
     "horari_de_servei": "(Gen-maig i ago-des:dill-div 7-21h)(Juny-jul:dill-div 6-21h)(Dissabtes 8-13¿30h)(Els dies: 16,17,22 i 23 abril. 2 maig. 23 juny. De 4 agost al 12 setem. 22,23,29 i 30 desemb.: Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -998,13 +998,13 @@
     "long_coord": "2777621",
     "geocoded_column": "POINT (2777621 41675735)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.675735+2.777621"
+      "url": "http://maps.google.com/maps?t=k&q=41.675735+2.777621"
     },
     "serveis_territorials": "Girona",
     "horari_de_servei": "General 2025: de dilluns a divendres de 7 a 21. Dissabtes de 8 a 14. Gener: 2 i 3 de 8 a 18. Agost: del 4 al 29 de dilluns a divendres de 7 a 15. Desembre: 22, 23, 29 i 30 de de 8 a 18.",
     "correu_electr_nic": "https://controlautoitv.com/",
     "web": {
-      "Url": "https://controlautoitv.com/"
+      "url": "https://controlautoitv.com/"
     }
   },
   {
@@ -1020,13 +1020,13 @@
     "long_coord": "1958902",
     "geocoded_column": "POINT (1958902 41461042)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.461042+1.958902"
+      "url": "http://maps.google.com/maps?t=k&q=41.461042+1.958902"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies: De 14 a 17 abril. 2 maig. 23 juny. Del 4 agost al 12 setemb. 31 octub. 22,23,29 i 30 desemb.: Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -1042,13 +1042,13 @@
     "long_coord": "1844852",
     "geocoded_column": "POINT (1844852 41714116)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.714116+1.844852"
+      "url": "http://maps.google.com/maps?t=k&q=41.714116+1.844852"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a divendres de 7h a 21h. Dissabte de 8h a 14h",
     "correu_electr_nic": "b06@certio.com",
     "web": {
-      "Url": "http://www.itv-tuvrheinland.es"
+      "url": "http://www.itv-tuvrheinland.es"
     }
   },
   {
@@ -1064,13 +1064,13 @@
     "long_coord": "1274854",
     "geocoded_column": "POINT (1274854 41124588)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.124588+1.274854"
+      "url": "http://maps.google.com/maps?t=k&q=41.124588+1.274854"
     },
     "serveis_territorials": "Tarragona",
     "horari_de_servei": "De dilluns a divendres 6-14h i 14'30-21'30h i dissabt 8'30-13'30h. (Dies:2 i 3 gener.De 14 a 17 abril.2 maig.23 juny.De 4 agost a 14 setemb.22 setemb.9,10,11,12,22,23,29 i 30 desemb:Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   },
   {
@@ -1086,13 +1086,13 @@
     "long_coord": "1739638",
     "geocoded_column": "POINT (1739638 4122158)",
     "localitzador_a_google_maps": {
-      "Url": "http://maps.google.com/maps?t=k&q=41.22158+1.739638"
+      "url": "http://maps.google.com/maps?t=k&q=41.22158+1.739638"
     },
     "serveis_territorials": "Barcelona",
     "horari_de_servei": "De dilluns a dijous de 7 a 22h, divendres de 7 a 21h i dissabtes de 9 a 14h. (Els dies:7 febrer. De 14 a 17 abril. 2 maig.23 juny.De 4 agost al 12 set. 31 oct. 22,23,29 i 30 desemb.:Oberta de 7 a 14h)",
     "correu_electr_nic": "www.applusiteuve.com",
     "web": {
-      "Url": "http://www.applusiteuve.com"
+      "url": "http://www.applusiteuve.com"
     }
   }
 ]

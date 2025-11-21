@@ -31,6 +31,8 @@ namespace UI.Parsers
             {"Pontevedra", 36}
         };
 
+        List<string> provincias = new List<string> { "A Coruña", "Pontevedra", "Lugo", "Ourense"};
+
         private int codigoPostal;
 
         protected override List<GALData> ExecuteParse()
@@ -61,6 +63,9 @@ namespace UI.Parsers
                     Motivos = new List<string>()
                 };
 
+                
+
+
                 // Validaciones básicas
                 if (string.IsNullOrWhiteSpace(dato.Provincia))
                     resultadoDebug.Motivos.Add("Provincia vacía o nula.");
@@ -69,11 +74,27 @@ namespace UI.Parsers
 
                 if (!int.TryParse(dato.CodigoPostal, out codigoPostal) || codigoPostal < 10000 || codigoPostal > 99999)
                     resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.CodigoPostal}').");
+
+                if (!provincias.Contains(dato.Provincia.Trim()))
+                {
+                    resultadoDebug.Motivos.Add("Provincia no válida.");
+                }
+
                 else if (!CodigoPostalValido(codigoPostal, dato.Provincia))
                     resultadoDebug.Motivos.Add($"Código postal {codigoPostal} no coincide con provincia '{dato.Provincia}'.");
 
                 double lat = ExtraerLatitud(dato.Coordenadas);
                 double lon = ExtraerLongitud(dato.Coordenadas);
+
+                if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
+                {
+                    resultadoDebug.Motivos.Add("Estación duplicada.");
+                    resultadoDebug.Añadida = false;
+                    debugResultados.Add(resultadoDebug);
+                    continue;
+                }
+
+
                 if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
                     resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
 
@@ -313,6 +334,23 @@ namespace UI.Parsers
 
             return h;
         }
+
+        private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
+        {
+            string nombreNorm = nombre.Trim().ToLower();
+            double latNorm = Math.Round(lat, 6);
+            double lonNorm = Math.Round(lon, 6);
+
+            return ctx.Estaciones.Any(e =>
+                // Coincide el nombre
+                e.nombre.Trim().ToLower() == nombreNorm ||
+
+                // Coinciden las coordenadas
+                (Math.Round(e.latitud, 6) == latNorm &&
+                 Math.Round(e.longitud, 6) == lonNorm)
+            );
+        }
+
 
 
         private string FormatearContacto(string correo, string telefono) => $"Correo electrónico: {correo} Teléfono: {telefono}";
