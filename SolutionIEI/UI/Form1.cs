@@ -7,6 +7,8 @@ using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using GMap.NET.MapProviders;
 using System.Linq;
+using UI.Wrappers;
+using UI.Parsers;
 
 namespace UI.UI_Gestor
 {
@@ -110,5 +112,33 @@ namespace UI.UI_Gestor
             // Posicionar en la esquina superior derecha
             gMapControl1.Location = new Point(this.ClientSize.Width - mapWidth - margin, margin);
         }
+
+        private void btnCargarDatos_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string pathJsonGAL = CSVaJSONConversor.Ejecutar();
+                string pathJsonCAT = XMLaJSONConversor.Ejecutar();
+
+                var galParser = new GALParser();
+                galParser.Load(pathJsonGAL);
+                var datosGal = galParser.ParseList();
+                galParser.FromParsedToUsefull(datosGal);
+                galParser.Unload();
+
+                var catParser = new CATParser();
+                catParser.Load(pathJsonCAT);
+                var datosCat = catParser.ParseList();
+                catParser.FromParsedToUsefull(datosCat);
+                catParser.Unload();
+
+                MessageBox.Show("¡Carga de datos completada correctamente!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error durante la carga: {ex.Message}");
+            }
+        }
+
     }
 }
