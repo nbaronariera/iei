@@ -280,3 +280,4 @@ C:\Users\bayro\Source\Repos\iei\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.pdb
 C:\Users\bayro\Source\Repos\iei\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.genruntimeconfig.cache
 C:\Users\bayro\Source\Repos\iei\SolutionIEI\UI\obj\Debug\net6.0-windows\ref\UI.dll
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\bin\Debug\net6.0-windows\Fuentes\Estacions_ITVEntrega.csv
+C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\bin\Debug\net6.0-windows\Fuentes\ITV-CATEntrega.xml
