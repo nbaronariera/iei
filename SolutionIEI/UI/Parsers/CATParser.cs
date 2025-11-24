@@ -165,7 +165,7 @@ namespace UI.Parsers
                         nombre = dato.denominaci,
                         tipo = TipoEstacion.Estacion_fija, // Valor fijo según PDF
                         direccion = dato.adre_a ?? "",
-                        codigoPostal = ParsearInt(dato.cp),
+                        codigoPostal = dato.cp,
                         latitud = lat,
                         longitud = lon,
                         descripcion = "",

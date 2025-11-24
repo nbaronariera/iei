@@ -60,7 +60,7 @@ namespace UI.Parsers
                         nombre = $"ITV {localidad.nombre} ({item.Nº_ESTACION})",
                         tipo = tipoEnum,
                         direccion = item.DIRECCION,
-                        codigoPostal = int.TryParse(item.C_POSTAL, out int cp) ? cp : 0,
+                        codigoPostal = item.C_POSTAL,
                         horario = item.HORARIOS,
                         contacto = item.CORREOS,
                         URL = "https://www.sitval.com/",

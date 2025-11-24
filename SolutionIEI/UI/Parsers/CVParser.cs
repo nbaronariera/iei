@@ -56,7 +56,7 @@ namespace UI.Parsers
                         nombre = string.IsNullOrWhiteSpace(dato.MUNICIPIO) ? dato.DIRECCION : dato.MUNICIPIO,
                         tipo = tipo,
                         direccion = dato.DIRECCION,
-                        codigoPostal = int.TryParse(dato.C_POSTAL, out int cp) ? cp : 0,
+                        codigoPostal = dato.C_POSTAL,
                         latitud = lat,
                         longitud = lon,
                         descripcion = "",

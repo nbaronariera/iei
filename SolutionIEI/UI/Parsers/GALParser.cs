@@ -119,7 +119,7 @@ namespace UI.Parsers
                     nombre = dato.NombreEstacion,
                     tipo = TipoEstacion.Estacion_fija,
                     direccion = dato.Direccion,
-                    codigoPostal = codigoPostal,
+                    codigoPostal = dato.CodigoPostal,
                     latitud = lat,
                     longitud = lon,
                     descripcion = "",
