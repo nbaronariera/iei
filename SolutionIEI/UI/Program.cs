@@ -20,33 +20,9 @@ namespace UI
         [STAThread]
         static void Main()
         {
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
-
-            /*
-            JSONParser Jsonparser = new JSONParser();
-            CSVParser Csvparser = new CSVParser();
-            GALParser Galparser = new GALParser();
-            Csvparser.Load("W:\\iei\\SolutionIEI\\UI\\Fuentes\\Estacions_ITV.csv");
-
-            var list = Csvparser.ParseList();
-            var json = Jsonparser.toJSON(list);
-
-            File.WriteAllText("W:\\iei\\SolutionIEI\\UI\\obj\\test.json", json, System.Text.Encoding.UTF8);
-            Galparser.Load("W:\\iei\\SolutionIEI\\UI\\obj\\test.json");
-            
-
-            var lists = Galparser.ParseList();
-
-            foreach (var e in lists){
-                System.Console.WriteLine(e.ToString());
-            }
-            */
-
             try
             {
-                Debug.WriteLine("=== INICIANDO CONVERSIÓN CSV → JSON ===");
+                Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
 
                 // Borrar y recrear la base de datos al inicio
                 using (var db = new AppDbContext())
@@ -58,24 +34,24 @@ namespace UI
                     db.Database.EnsureCreated();
                 }
 
-                // 1) Generar JSON desde CSV
-                /*
-                string archivoJSON = CSVaJSONConversor.Ejecutar();
-                */
-                //string _ = JSONConversor.Ejecutar();
-                string __ = XMLaJSONConversor.Ejecutar();
-                //string archivoJSON = ""; //CSVaJSONConversor.Ejecutar();
+                string JsonCV = JSONConversor.Ejecutar();
+                string JsonCAT = XMLaJSONConversor.Ejecutar();
+                string JsonGAL = CSVaJSONConversor.Ejecutar();
 
                 // 2) Cargar JSON usando GALParser
-                /*
-                var galParser = new GALParser();
-                galParser.Load(archivoJSON);
-                */
-                var catParser = new CATParser();
-                catParser.Load(__);
+                
+                var galParser = new GALExtractor();
+                galParser.Load(JsonGAL);
+                
+                var catParser = new CATExtractor();
+                catParser.Load(JsonCAT);
 
-                // 3) Convertir GALData → ResultObject (Provincia + Localidad + Estacion)
-                var resultados = catParser.FromParsedToUsefull(catParser.ParseList());
+                var cvParser = new CVExtractor();
+                cvParser.Load(JsonCV);
+
+                var resultados = catParser.FromParsedToUsefull(catParser.ParseList())
+                    .Concat(galParser.FromParsedToUsefull(galParser.ParseList()))
+                    .Concat(cvParser.FromParsedToUsefull(cvParser.ParseList())).ToList();
 
                 Debug.WriteLine($"[OK] {resultados.Count} estaciones parseadas correctamente.");
 

@@ -29,6 +29,5 @@ namespace UI.Parsers.ParsedObjects
                 $"Contacto: {Estacion.contacto} | " +
                 $"URL: {Estacion.URL}";
         }
-
     }
 }

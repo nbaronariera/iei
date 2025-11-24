@@ -49,7 +49,6 @@ namespace UI.Parsers
 
             foreach (var dato in datosParseados)
             {
-
                 var resultadoDebug = new ResultadoDebug
                 {
                     Nombre = dato.denominaci?.Trim() ?? "(sin nombre)",

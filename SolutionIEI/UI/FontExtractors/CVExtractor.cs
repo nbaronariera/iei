@@ -12,6 +12,8 @@ namespace UI.Parsers
 {
     public class CVExtractor : Parser<JSONData>
     {
+        public
+
         protected override List<JSONData> ExecuteParse()
         {
             if (file == null) return new List<JSONData>();
