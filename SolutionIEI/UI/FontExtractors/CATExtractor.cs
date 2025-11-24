@@ -60,10 +60,7 @@ namespace UI.Parsers
                 {
                     if (string.IsNullOrWhiteSpace(dato.denominaci))
                     {
-
                         resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
-
-
                     }
 
                     if (string.IsNullOrWhiteSpace(dato.serveis_territorials))
@@ -76,9 +73,7 @@ namespace UI.Parsers
                     if (!Regex.IsMatch(cpRaw, @"^\d{5}$"))
                     {
                         resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.cp}'), al no tener 5 caracteres.");
-
                     }
-
 
                     // Determinar provincia usando la nueva lógica
                     string provinciaNombre = ObtenerProvinciaPorCodigoPostal(cpRaw, resultadoDebug.Motivos);
@@ -112,7 +107,6 @@ namespace UI.Parsers
                         lat = ParsearCoordenada(dato.lat);
                         lon = ParsearCoordenada(dato.long_coord);
                     }
-
 
                     if (EstacionYaExiste(contexto, dato.denominaci, lat, lon))
                     {
@@ -240,23 +234,13 @@ namespace UI.Parsers
 
             if (!long.TryParse(s, out long n)) return 0.0;
 
-            // LATITUD: 8 dígitos -> siempre dividir entre 1e6
-
             if (s.Length == 8) return n / 1_000_000.0;
-
-            // LONGITUD: 6 o 7 dígitos -> también dividir entre 1e6
 
             if (s.Length == 6 || s.Length == 7) return n / 1_000_000.0;
 
             // fallback
 
             return n / 1_000_000.0;
-        }
-
-        private int ParsearInt(string valor)
-        {
-            if (int.TryParse(valor, out int res)) return res;
-            return 0;
         }
 
         private bool EsUrl(string texto)
