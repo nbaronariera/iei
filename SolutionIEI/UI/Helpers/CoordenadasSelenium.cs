@@ -1,14 +1,10 @@
 ﻿using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WebDriverManager.DriverConfigs.Impl;
 using WebDriverManager;
+using System.Text.RegularExpressions;
 
 namespace UI.Helpers
 {
@@ -30,6 +26,30 @@ namespace UI.Helpers
         {
             try
             {
+                // FILTROS DE LIMPIEZA DE DIRECCIÓN
+                if (!string.IsNullOrEmpty(direccion))
+                {
+                    // CORRECCIONES MANUALES
+                    if (direccion.Contains("Plá De Rascanya", StringComparison.OrdinalIgnoreCase))
+                    {
+                        direccion = "Calle Plá De Rascanya";
+                    }
+
+                    if (direccion.Contains("Azagador de Lliria", StringComparison.OrdinalIgnoreCase))
+                    {
+                        direccion = "ITV Massalfassar";
+                    }
+
+                    // Quitar "s/n", "s/ nº"
+                    direccion = Regex.Replace(direccion, @"\s*[,]?\s*s/\s*nº?", "", RegexOptions.IgnoreCase);
+
+                    // Quitar puntos kilométricos (Ej: "Km. 8,3", "km 55")
+                    direccion = Regex.Replace(direccion, @"\s*[,]?\s*km\.?\s*\d+([.,]\d+)?", "", RegexOptions.IgnoreCase);
+
+                    // Limpieza final de espacios o comas sueltas
+                    direccion = direccion.Trim().TrimEnd(',');
+                }
+
                 driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
 
                 // Espera aleatoria para parecer humano (2 a 3.5 segundos)
@@ -93,14 +113,12 @@ namespace UI.Helpers
                 }
 
                 // 4. Combinar dirección y rellenar el formulario
-                // Confirmado por HTML: <input id="address" ...>
                 string direccionCompleta = $"{direccion}, {municipio}";
                 var addressInput = driver.FindElement(By.Id("address"));
                 addressInput.Clear(); // Limpiamos el valor por defecto ("New York, NY")
                 addressInput.SendKeys(direccionCompleta);
 
                 // 5. Hacer clic en el botón de búsqueda
-                // Confirmado por HTML: <button ...>Obtener Coordenadas GPS</button>
                 var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
                 submitButton.Click();
 
@@ -108,13 +126,10 @@ namespace UI.Helpers
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
                 // Esperamos hasta que el campo de latitud NO esté vacío
-                // Confirmado por HTML: <input id="latitude" ...>
                 wait.Until(d => !string.IsNullOrEmpty(d.FindElement(By.Id("latitude")).GetAttribute("value")));
 
                 // 7. Leer los valores de los campos
-                // Confirmado por HTML: <input id="latitude" ...>
                 var latInput = driver.FindElement(By.Id("latitude"));
-                // Confirmado por HTML: <input id="longitude" ...>
                 var lngInput = driver.FindElement(By.Id("longitude"));
 
                 string latStr = latInput.GetAttribute("value");
@@ -134,7 +149,6 @@ namespace UI.Helpers
                 Console.WriteLine($"Error: {ex.Message}");
                 return (0.0, 0.0);
             }
-            // NO cerramos el driver aquí (quitamos el finally)
         }
 
         public void Dispose()

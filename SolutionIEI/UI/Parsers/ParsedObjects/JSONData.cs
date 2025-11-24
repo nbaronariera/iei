@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace UI.Parsers.ParsedObjects
 {
@@ -37,6 +32,12 @@ namespace UI.Parsers.ParsedObjects
 
         [JsonPropertyName("CORREO")]
         public string CORREOS { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public double? Latitud { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public double? Longitud { get; set; }
 
         public override string ToString()
         {
