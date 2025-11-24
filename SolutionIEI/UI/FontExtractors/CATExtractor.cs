@@ -12,7 +12,7 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
 {
-    public class CATParser : Parser<XMLData>
+    public class CATExtractor : Parser<XMLData>
     {
         private int codigoPostal;
 
