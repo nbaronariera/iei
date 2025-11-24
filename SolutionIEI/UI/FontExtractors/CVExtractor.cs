@@ -10,7 +10,7 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
 {
-    public class CVParser : Parser<JSONData>
+    public class CVExtractor : Parser<JSONData>
     {
         protected override List<JSONData> ExecuteParse()
         {

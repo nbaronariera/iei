@@ -21,7 +21,7 @@ namespace UI.Parsers
         public List<string> Motivos { get; set; } = new();
     }
 
-    public class GALParser : Parser<GALData>
+    public class GALExtactor : Parser<GALData>
     {
         private static readonly Dictionary<string, int> provinciasGallegas = new(StringComparer.OrdinalIgnoreCase)
         {
