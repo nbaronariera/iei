@@ -12,12 +12,8 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
 {
-
-  
-
     public class CATParser : Parser<XMLData>
     {
-
         private int codigoPostal;
 
         private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
@@ -43,9 +39,6 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<XMLData>>(contenido, opciones) ?? new List<XMLData>();
         }
 
-      
-
-
         public List<ResultObject> FromParsedToUsefull(List<XMLData> datosParseados)
         {
             var resultados = new List<ResultObject>();
@@ -53,8 +46,6 @@ namespace UI.Parsers
             var debugResultados = new List<ResultadoDebug>();
 
             Debug.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
-
-         
 
             foreach (var dato in datosParseados)
             {
@@ -68,11 +59,8 @@ namespace UI.Parsers
                     Motivos = new List<string>()
                 };
 
-              
-
                 try
                 {
-
                     if (string.IsNullOrWhiteSpace(dato.denominaci)) {
 
                         resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
@@ -102,11 +90,7 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia conocida.");
                     }
 
-                    resultadoDebug.Provincia = provinciaNombre;
-
-
-
-
+                    resultadoDebug.Provincia = provinciaNombre
 
                     double lat = 0.0;
                     double lon = 0.0;
@@ -156,8 +140,6 @@ namespace UI.Parsers
                     // Obtener o crear provincia y localidad de forma segura
                     var provincia = ObtenerOCrearProvincia(contexto, provinciaNombre);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.municipi, provincia);
-
-                  
 
                     // Creación de la entidad
                     var estacion = new Estacion
@@ -304,10 +286,6 @@ namespace UI.Parsers
             return raw;
         }
 
-       
-
-
-
         private void MostrarResumen(List<ResultadoDebug> resultados)
         {
             var añadidas = resultados.Where(r => r.Añadida).ToList();
@@ -329,7 +307,5 @@ namespace UI.Parsers
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
-
-
     }
 }

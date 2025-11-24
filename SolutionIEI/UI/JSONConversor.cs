@@ -22,12 +22,9 @@ namespace UI.Wrappers
             // 1️ Leer JSON
             var csvParser = new JSONParser();
             csvParser.Load(csvPath);
-            var listaObjetos = csvParser.ParseList(); // lista de objetos
+            var listaObjetos = csvParser.ParseList();
 
-            // TODO: Obtener coordenadas de Selenium y añadir lat y lon
-
-
-            // 3 Guardar con UTF-8 sin BOM
+            // 2 Guardar con UTF-8 sin BOM
             var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
             string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
             Directory.CreateDirectory(outputDir);
@@ -37,7 +34,7 @@ namespace UI.Wrappers
 
             Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
 
-            // 4 Abrir carpeta automáticamente
+            // 3 Abrir carpeta automáticamente
             #if DEBUG
             try
             {

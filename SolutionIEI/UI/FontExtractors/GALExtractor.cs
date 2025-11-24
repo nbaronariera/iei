@@ -68,7 +68,6 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add("Nombre de estación vacío o nulo.");
                 }
 
-
                 // Validaciones básicas
                 if (string.IsNullOrWhiteSpace(dato.Provincia))
                     resultadoDebug.Motivos.Add("Provincia vacía o nula.");
@@ -96,7 +95,6 @@ namespace UI.Parsers
                     debugResultados.Add(resultadoDebug);
                     continue;
                 }
-
 
                 if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
                     resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
@@ -251,7 +249,6 @@ namespace UI.Parsers
             return 0;
         }
 
-
         private bool CodigoPostalValido(int codigo, string provincia)
         {
             if (string.IsNullOrWhiteSpace(provincia)) return false;
@@ -292,7 +289,6 @@ namespace UI.Parsers
                                })
                                .ToList();
 
-
             if (!bloques.Any())
                 return "";
 
@@ -324,7 +320,6 @@ namespace UI.Parsers
             return string.Join(" ", resultadoFinal);
         }
 
-
         private string NormalizarHora(string h)
         {
             h = h.Replace(".", ":");
@@ -353,8 +348,6 @@ namespace UI.Parsers
                  Math.Round(e.longitud, 6) == lonNorm)
             );
         }
-
-
 
         private string FormatearContacto(string correo, string telefono) => $"Correo electrónico: {correo} Teléfono: {telefono}";
 

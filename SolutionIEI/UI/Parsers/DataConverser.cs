@@ -10,7 +10,6 @@ namespace UI.Parsers
         {
             var listaResultado = new List<ResultObject>();
 
-            // 1. Instanciamos Selenium UNA SOLA VEZ fuera del bucle (Optimización clave)
             var selenium = new CoordenadasSelenium();
 
             try
@@ -33,7 +32,6 @@ namespace UI.Parsers
                         (lat, lng) = selenium.ObtenerCoordenadas(item.DIRECCION, item.MUNICIPIO);
                     }
 
-                    // 2. Traducir el Enum de TipoEstacion
                     TipoEstacion tipoEnum;
                     string tipoTexto = item.TIPO_ESTACION?.ToLower() ?? "";
 
@@ -64,13 +62,10 @@ namespace UI.Parsers
                         horario = item.HORARIOS,
                         contacto = item.CORREOS,
                         URL = "https://www.sitval.com/",
-
-                        // Asignamos las coordenadas
                         latitud = lat,
                         longitud = lng
                     };
 
-                    // 4. Empaquetar
                     var result = new ResultObject
                     {
                         Provincia = provincia,
@@ -80,7 +75,6 @@ namespace UI.Parsers
 
                     listaResultado.Add(result);
 
-                    // Debug para ver progreso
                     System.Diagnostics.Debug.WriteLine($"[Procesada] {estacion.nombre} -> Coords: {lat}, {lng}");
                 }
             }
