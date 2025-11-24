@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 using GMap.NET;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
-using GMap.NET.MapProviders;
-using System.Linq;
-using UI.Wrappers;
-using UI.Parsers;
 using UI.Entidades;
-using System.IO;
+using UI.Parsers;
+using UI.Wrappers;
 
 namespace UI.UI_Gestor
 {
@@ -96,17 +89,17 @@ namespace UI.UI_Gestor
                 string pathJsonCAT = XMLaJSONConversor.Ejecutar();
                 string pathJsonCV = Path.Combine(baseDir, "Fuentes", "estaciones.json");
 
-                var galParser = new GALParser();
+                var galParser = new GALExtractor();
                 galParser.Load(pathJsonGAL);
                 galParser.FromParsedToUsefull(galParser.ParseList());
                 galParser.Unload();
 
-                var catParser = new CATParser();
+                var catParser = new CATExtractor();
                 catParser.Load(pathJsonCAT);
                 catParser.FromParsedToUsefull(catParser.ParseList());
                 catParser.Unload();
 
-                var cvParser = new CVParser();
+                var cvParser = new CVExtractor();
                 cvParser.Load(pathJsonCV);
                 cvParser.FromParsedToUsefull(cvParser.ParseList());
                 cvParser.Unload();

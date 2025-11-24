@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -39,11 +35,13 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<XMLData>>(contenido, opciones) ?? new List<XMLData>();
         }
 
-        public List<ResultObject> FromParsedToUsefull(List<XMLData> datosParseados)
+        public (List<ResultObject>, int, int) FromParsedToUsefull(List<XMLData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
+            int noValidas = datosParseados.Count;
+            int validas = 0;
 
             Debug.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
 
@@ -60,11 +58,12 @@ namespace UI.Parsers
 
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(dato.denominaci)) {
+                    if (string.IsNullOrWhiteSpace(dato.denominaci))
+                    {
 
                         resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
-                       
-                       
+
+
                     }
 
                     if (string.IsNullOrWhiteSpace(dato.serveis_territorials))
@@ -77,7 +76,7 @@ namespace UI.Parsers
                     if (!Regex.IsMatch(cpRaw, @"^\d{5}$"))
                     {
                         resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.cp}'), al no tener 5 caracteres.");
-                        
+
                     }
 
 
@@ -89,7 +88,7 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia conocida.");
                     }
 
-                    resultadoDebug.Provincia = provinciaNombre
+                    resultadoDebug.Provincia = provinciaNombre;
 
                     double lat = 0.0;
                     double lon = 0.0;
@@ -135,6 +134,8 @@ namespace UI.Parsers
                     }
 
                     resultadoDebug.Añadida = true;
+                    validas++;
+                    noValidas--;
 
                     // Obtener o crear provincia y localidad de forma segura
                     var provincia = ObtenerOCrearProvincia(contexto, provinciaNombre);
@@ -176,7 +177,7 @@ namespace UI.Parsers
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
             Debug.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
-            return resultados;
+            return (resultados, validas, noValidas);
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)
@@ -234,25 +235,25 @@ namespace UI.Parsers
 
         private double ParsearCoordenada(string coord)
         {
-            if (string.IsNullOrWhiteSpace(coord)) return 0.0; 
-            string s = Regex.Replace(coord, @"[^\d]", ""); 
+            if (string.IsNullOrWhiteSpace(coord)) return 0.0;
+            string s = Regex.Replace(coord, @"[^\d]", "");
 
-            if (!long.TryParse(s, out long n)) return 0.0; 
-            
+            if (!long.TryParse(s, out long n)) return 0.0;
+
             // LATITUD: 8 dígitos -> siempre dividir entre 1e6
 
-            if (s.Length == 8) return n / 1_000_000.0; 
-            
+            if (s.Length == 8) return n / 1_000_000.0;
+
             // LONGITUD: 6 o 7 dígitos -> también dividir entre 1e6
 
-            if (s.Length == 6 || s.Length == 7) return n / 1_000_000.0; 
-            
+            if (s.Length == 6 || s.Length == 7) return n / 1_000_000.0;
+
             // fallback
-            
-            return n / 1_000_000.0; 
+
+            return n / 1_000_000.0;
         }
 
-            private int ParsearInt(string valor)
+        private int ParsearInt(string valor)
         {
             if (int.TryParse(valor, out int res)) return res;
             return 0;

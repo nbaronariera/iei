@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
@@ -12,7 +7,7 @@ namespace UI.Parsers
     {
         public String toJSON(List<CSVData> data)
         {
-            var test =  JsonSerializer.Serialize<List<CSVData>>(data).ToString();
+            var test = JsonSerializer.Serialize<List<CSVData>>(data).ToString();
             return test;
         }
 

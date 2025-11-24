@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using UI.Entidades;
 using UI.Helpers;
@@ -12,8 +8,6 @@ namespace UI.Parsers
 {
     public class CVExtractor : Parser<JSONData>
     {
-        public
-
         protected override List<JSONData> ExecuteParse()
         {
             if (file == null) return new List<JSONData>();
@@ -22,11 +16,13 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<JSONData>>(contenido, opciones) ?? new List<JSONData>();
         }
 
-        public List<ResultObject> FromParsedToUsefull(List<JSONData> datosParseados)
+        public (List<ResultObject>, int, int) FromParsedToUsefull(List<JSONData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             using var seleniumHelper = new CoordenadasSelenium();
+            int noValidas = datosParseados.Count;
+            int validas = 0;
 
             foreach (var dato in datosParseados)
             {
@@ -71,11 +67,13 @@ namespace UI.Parsers
 
                     contexto.Estaciones.Add(estacion);
                     resultados.Add(new ResultObject { Estacion = estacion, Localidad = localidad, Provincia = provincia });
+                    validas++;
+                    noValidas--;
                 }
                 catch { }
             }
             contexto.SaveChanges();
-            return resultados;
+            return (resultados, validas, noValidas);
         }
 
         private Provincia ObtenerOCrearProvincia(AppDbContext ctx, string nombre)

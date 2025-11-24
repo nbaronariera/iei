@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UI.Entidades
+﻿namespace UI.Entidades
 {
     public class Estacion
     {
@@ -13,7 +7,7 @@ namespace UI.Entidades
         public TipoEstacion tipo { get; set; }
         public String direccion { get; set; } = "";
         public string codigoPostal { get; set; } = "";
-        public double longitud  { get; set; }
+        public double longitud { get; set; }
         public double latitud { get; set; }
         public String descripcion { get; set; } = "";
         public String horario { get; set; } = "";
@@ -49,5 +43,5 @@ namespace UI.Entidades
         Otros
     }
 
-    
+
 }

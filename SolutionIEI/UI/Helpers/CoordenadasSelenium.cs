@@ -1,10 +1,10 @@
-﻿using OpenQA.Selenium.Chrome;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium;
 using System.Globalization;
-using WebDriverManager.DriverConfigs.Impl;
-using WebDriverManager;
 using System.Text.RegularExpressions;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace UI.Helpers
 {

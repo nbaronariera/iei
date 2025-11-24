@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using UI.Entidades;
 using UI.Parsers;
-using UI.UI_Gestor;
 using UI.Wrappers;
 
 
@@ -39,29 +33,31 @@ namespace UI
                 string JsonGAL = CSVaJSONConversor.Ejecutar();
 
                 // 2) Cargar JSON usando GALParser
-                
+
                 var galParser = new GALExtractor();
                 galParser.Load(JsonGAL);
-                
+
                 var catParser = new CATExtractor();
                 catParser.Load(JsonCAT);
 
                 var cvParser = new CVExtractor();
                 cvParser.Load(JsonCV);
 
-                var resultados = catParser.FromParsedToUsefull(catParser.ParseList())
-                    .Concat(galParser.FromParsedToUsefull(galParser.ParseList()))
-                    .Concat(cvParser.FromParsedToUsefull(cvParser.ParseList())).ToList();
+                var resultadosCat = catParser.FromParsedToUsefull(catParser.ParseList());
+                var resultadosGal = galParser.FromParsedToUsefull(galParser.ParseList());
+                var resultadosCv = cvParser.FromParsedToUsefull(cvParser.ParseList());
 
-                Debug.WriteLine($"[OK] {resultados.Count} estaciones parseadas correctamente.");
+                var resultados = (
+                    resultadosCat.Item1.Concat(resultadosGal.Item1).Concat(resultadosCv.Item1).ToList(),
+                    resultadosCat.Item2 + resultadosCv.Item2 + resultadosGal.Item2,
+                    resultadosCat.Item3 + resultadosCv.Item3 + resultadosGal.Item3
+                );
+
+                Debug.WriteLine($"[OK] {resultados.Item1.Count} estaciones parseadas.");
+                Debug.WriteLine($"[OK] {resultados.Item2} estaciones parseadas correctamente.");
+                Debug.WriteLine($"[OK] {resultados.Item3} estaciones omitidas.");
 
                 Debug.WriteLine("=== ESTACIONES LISTAS PARA INSERTAR EN BASE DE DATOS ===");
-
-                // 4) Mostrar cada ResultObject con ToString completo
-                foreach (var r in resultados)
-                {
-                    Debug.WriteLine(r.ToString());
-                }
 
                 Debug.WriteLine("=== FIN ===");
             }

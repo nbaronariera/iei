@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UI.Entidades
+﻿namespace UI.Entidades
 {
     public class Localidad
     {
@@ -15,7 +9,8 @@ namespace UI.Entidades
         public Provincia Provincia { get; set; } = null!;
         public int codigoProvincia { get; set; }
 
-        public Localidad(String nombre) {
+        public Localidad(String nombre)
+        {
 
             this.nombre = nombre;
 

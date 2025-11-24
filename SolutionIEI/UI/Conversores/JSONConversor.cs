@@ -1,10 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Collections.Generic;
 using UI.Parsers;
 
 namespace UI.Wrappers
@@ -35,7 +30,7 @@ namespace UI.Wrappers
             Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
 
             // 3 Abrir carpeta automáticamente
-            #if DEBUG
+#if DEBUG
             try
             {
                 Process.Start(new ProcessStartInfo
@@ -46,7 +41,7 @@ namespace UI.Wrappers
                 });
             }
             catch { }
-            #endif
+#endif
 
             return jsonPath;
         }

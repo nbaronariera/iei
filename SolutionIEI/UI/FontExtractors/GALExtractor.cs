@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -44,11 +41,13 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<GALData>>(contenido, opciones) ?? new List<GALData>();
         }
 
-        public List<ResultObject> FromParsedToUsefull(List<GALData> datosParseados)
+        public (List<ResultObject>, int, int) FromParsedToUsefull(List<GALData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
+            int noValidas = datosParseados.Count;
+            int validas = 0;
 
             Debug.WriteLine($" Iniciando parseo de {datosParseados.Count} registros GAL.");
 
@@ -107,6 +106,8 @@ namespace UI.Parsers
                 }
 
                 resultadoDebug.Añadida = true;
+                validas++;
+                noValidas--;
 
                 // Obtener o crear provincia y localidad de forma segura
                 var provincia = ObtenerOCrearProvincia(contexto, dato.Provincia);
@@ -139,11 +140,10 @@ namespace UI.Parsers
                 debugResultados.Add(resultadoDebug);
             }
 
-
             contexto.SaveChanges();
 
             MostrarResumen(debugResultados);
-            return resultados;
+            return (resultados, validas, noValidas);
         }
 
         private Provincia ObtenerOCrearProvincia(AppDbContext ctx, string nombre)
