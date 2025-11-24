@@ -29,8 +29,8 @@ namespace UI.Migrations
                     b.Property<int>("codigoLocalidad")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("codigoPostal")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("codigoPostal")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("contacto")
                         .IsRequired()

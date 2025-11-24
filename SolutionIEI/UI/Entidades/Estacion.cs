@@ -12,7 +12,7 @@ namespace UI.Entidades
         public String nombre { get; set; } = "";
         public TipoEstacion tipo { get; set; }
         public String direccion { get; set; } = "";
-        public int codigoPostal { get; set; }
+        public string codigoPostal { get; set; } = "";
         public double longitud  { get; set; }
         public double latitud { get; set; }
         public String descripcion { get; set; } = "";
@@ -24,7 +24,7 @@ namespace UI.Entidades
         public int codigoLocalidad { get; set; }
 
 
-        public Estacion(String nombre, TipoEstacion tipo, String direccion, int codigoPostal, double longitud, double latitud,
+        public Estacion(String nombre, TipoEstacion tipo, String direccion, string codigoPostal, double longitud, double latitud,
         String horario, String contacto, String URL)
         {
 

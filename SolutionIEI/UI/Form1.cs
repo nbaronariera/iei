@@ -7,6 +7,10 @@ using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using GMap.NET.MapProviders;
 using System.Linq;
+using UI.Wrappers;
+using UI.Parsers;
+using UI.Entidades;
+using System.IO;
 
 namespace UI.UI_Gestor
 {
@@ -15,53 +19,26 @@ namespace UI.UI_Gestor
         private GMapOverlay markersOverlay;
         private GMapOverlay routeOverlay;
 
-        private Dictionary<string, PointLatLng> Coordinates = new Dictionary<string, PointLatLng>()
-        {
-            { "Prueba", new PointLatLng(39.4702393, -0.3768049) },
-            { "Prueba2", new PointLatLng(39.4762777, -0.4191981) },
-            { "Prueba3", new PointLatLng(39.4038783, -0.4034584) },
-            { "Prueba4", new PointLatLng(39.42429, -0.38285) }
-        };
-
         public Form1()
         {
             InitializeComponent();
 
-
             gMapControl1.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             gMapControl1.ShowCenter = false;
-
 
             markersOverlay = new GMapOverlay("markers");
             routeOverlay = new GMapOverlay("route");
             gMapControl1.Overlays.Add(markersOverlay);
             gMapControl1.Overlays.Add(routeOverlay);
 
-
             gMapControl1.MinZoom = 2;
             gMapControl1.MaxZoom = 18;
-            gMapControl1.Zoom = 12;
-
+            gMapControl1.Zoom = 6;
+            gMapControl1.Position = new PointLatLng(40.416775, -3.703790);
 
             gMapControl1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-
-
             UpdateMapSize();
-
-
-            if (Coordinates.Any())
-            {
-                var avgLat = Coordinates.Values.Average(p => p.Lat);
-                var avgLng = Coordinates.Values.Average(p => p.Lng);
-                gMapControl1.Position = new PointLatLng(avgLat, avgLng);
-            }
-            else
-            {
-                gMapControl1.Position = new PointLatLng(39.4699, -0.3763);
-            }
-
-
             this.Resize += new EventHandler(Form1_Resize);
         }
 
@@ -79,11 +56,17 @@ namespace UI.UI_Gestor
 
         private void CargarMarcadores()
         {
-            foreach (var coordenada in Coordinates)
+            markersOverlay.Markers.Clear();
+            using (var db = new AppDbContext())
             {
-                var marcador = new GMarkerGoogle(coordenada.Value, GMarkerGoogleType.red_small);
-                marcador.ToolTipText = coordenada.Key;
-                markersOverlay.Markers.Add(marcador);
+                var estaciones = db.Estaciones.Where(e => e.latitud != 0 && e.longitud != 0).ToList();
+                foreach (var est in estaciones)
+                {
+                    var punto = new PointLatLng(est.latitud, est.longitud);
+                    var marcador = new GMarkerGoogle(punto, GMarkerGoogleType.red_small);
+                    marcador.ToolTipText = $"{est.nombre}\n{est.direccion}";
+                    markersOverlay.Markers.Add(marcador);
+                }
             }
             gMapControl1.Refresh();
         }
@@ -95,20 +78,46 @@ namespace UI.UI_Gestor
 
         private void UpdateMapSize()
         {
-
             int margin = 20;
             int mapWidth = (int)(this.ClientSize.Width * 0.5);
             int mapHeight = (int)(this.ClientSize.Height * 0.5);
-
-
             mapWidth = Math.Max(mapWidth, 300);
             mapHeight = Math.Max(mapHeight, 300);
-
-            // Establecer tamaño
             gMapControl1.Size = new Size(mapWidth, mapHeight);
-
-            // Posicionar en la esquina superior derecha
             gMapControl1.Location = new Point(this.ClientSize.Width - mapWidth - margin, margin);
+        }
+
+        private void btnCargarDatos_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string pathJsonGAL = CSVaJSONConversor.Ejecutar();
+                string pathJsonCAT = XMLaJSONConversor.Ejecutar();
+                string pathJsonCV = Path.Combine(baseDir, "Fuentes", "estaciones.json");
+
+                var galParser = new GALParser();
+                galParser.Load(pathJsonGAL);
+                galParser.FromParsedToUsefull(galParser.ParseList());
+                galParser.Unload();
+
+                var catParser = new CATParser();
+                catParser.Load(pathJsonCAT);
+                catParser.FromParsedToUsefull(catParser.ParseList());
+                catParser.Unload();
+
+                var cvParser = new CVParser();
+                cvParser.Load(pathJsonCV);
+                cvParser.FromParsedToUsefull(cvParser.ParseList());
+                cvParser.Unload();
+
+                CargarMarcadores();
+                MessageBox.Show("¡Carga de datos completada correctamente!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error durante la carga: {ex.Message}");
+            }
         }
     }
 }
