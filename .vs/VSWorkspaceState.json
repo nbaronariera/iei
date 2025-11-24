@@ -1,12 +1,6 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\SolutionIEI",
-    "\\SolutionIEI\\UI",
-    "\\SolutionIEI\\UI\\Parsers",
-    "\\SolutionIEI\\UI\\SeleniumTasks",
-    "\\SolutionIEI\\UI\\Wrappers"
+    ""
   ],
-  "SelectedNode": "\\SolutionIEI\\UI\\Form1.cs",
   "PreviewInSolutionExplorer": false
 }
