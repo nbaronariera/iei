@@ -55,9 +55,7 @@ namespace UI.Parsers.ParsedObjects
                 ? Longitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
                 : "null";
 
-            // 2. Construimos el JSON. 
-            // IMPORTANTE: He quitado las comillas (\") en Latitud y Longitud 
-            // para que se guarden como NÚMEROS reales en el JSON (ej: 39.45) y no texto.
+            // 2. Construimos el JSON.
             string res =
                 "\"TIPO ESTACIÓN\" : \"" + TIPO_ESTACION + "\",\n" +
                 "\"PROVINCIA\" : \"" + PROVINCIA + "\",\n" +
@@ -67,8 +65,8 @@ namespace UI.Parsers.ParsedObjects
                 "\"Nº ESTACIÓN\" : \"" + Nº_ESTACION + "\",\n" +
                 "\"HORARIOS\" : \"" + HORARIOS + "\",\n" +
                 "\"CORREO\" : \"" + CORREOS + "\",\n" +
-                "\"Latitud\" : " + latStr + ",\n" +   // Sin comillas, con punto
-                "\"Longitud\" : " + lonStr + "\n";    // Sin comillas, con punto
+                "\"Latitud\" : " + latStr + ",\n" +
+                "\"Longitud\" : " + lonStr + "\n";
 
             return res;
         }

@@ -116,22 +116,40 @@ namespace UI.Helpers
                 // 4. Combinar dirección y rellenar el formulario
                 string direccionCompleta = $"{direccion}, {municipio}";
                 var addressInput = driver.FindElement(By.Id("address"));
-                addressInput.Clear(); // Limpiamos el valor por defecto ("New York, NY")
+                addressInput.Clear();
                 addressInput.SendKeys(direccionCompleta);
 
+                var latInput = driver.FindElement(By.Id("latitude"));
+                var lngInput = driver.FindElement(By.Id("longitude"));
+                latInput.Clear();
+                lngInput.Clear();
+
                 // 5. Hacer clic en el botón de búsqueda
-                var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
-                submitButton.Click();
+                //var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
+                //submitButton.Click();
 
                 // 6. Esperar a que aparezcan los resultados (¡Importante!)
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
                 // Esperamos hasta que el campo de latitud NO esté vacío
-                wait.Until(d => !string.IsNullOrEmpty(d.FindElement(By.Id("latitude")).GetAttribute("value")));
+                try
+                {
+                    var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
+                    submitButton.Click(); // Si la alerta salta aquí, el catch la atrapa
 
-                // 7. Leer los valores de los campos
-                var latInput = driver.FindElement(By.Id("latitude"));
-                var lngInput = driver.FindElement(By.Id("longitude"));
+                    // Esperar resultado
+                    wait.Until(d => !string.IsNullOrEmpty(d.FindElement(By.Id("latitude")).GetAttribute("value")));
+                }
+                catch (UnhandledAlertException)
+                {
+                    // Capturamos la alerta "Error de geolocalización" y la aceptamos
+                    try { driver.SwitchTo().Alert().Accept(); } catch { }
+                    return (0.0, 0.0);
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    return (0.0, 0.0);
+                }
 
                 string latStr = latInput.GetAttribute("value");
                 string lngStr = lngInput.GetAttribute("value");
