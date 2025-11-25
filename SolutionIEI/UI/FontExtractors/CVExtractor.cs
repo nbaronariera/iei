@@ -41,6 +41,17 @@ namespace UI.Parsers
 
             foreach (var dato in datosParseados)
             {
+
+                var resultadoDebug = new ResultadoDebug
+                {
+                    Nombre = dato.MUNICIPIO,
+                    Provincia = dato.PROVINCIA,
+                    Municipio = dato.MUNICIPIO,
+                    CodigoPostal = dato.C_POSTAL,
+                    Motivos = new List<string>()
+                };
+
+
                 // ---------------------------------------------------------
                 // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (Sanitización)
                 // ---------------------------------------------------------
@@ -59,10 +70,14 @@ namespace UI.Parsers
                     dato.MUNICIPIO = "Itinerante";
                 }
 
-                // B. Si la provincia viene vacía, ponemos "Desconocida" para evitar errores nulos
+                //Cambiamos nombre para el debug
+                resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
+
+
+                // B. Si la provincia viene vacía no lo incluimos
                 if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
                 {
-                    dato.PROVINCIA = "Desconocida";
+                    resultadoDebug.Motivos.Add("Provincia vacía."); 
                 }
 
                 // Normalizar variantes ortográficas comunes (València -> Valencia)
@@ -117,14 +132,7 @@ namespace UI.Parsers
 
                 // ---------------------------------------------------------
 
-                var resultadoDebug = new ResultadoDebug
-                {
-                    Nombre = dato.MUNICIPIO,
-                    Provincia = dato.PROVINCIA,
-                    Municipio = dato.MUNICIPIO,
-                    CodigoPostal = dato.C_POSTAL,
-                    Motivos = new List<string>()
-                };
+                
 
                 try
                 {
