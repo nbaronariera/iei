@@ -140,10 +140,11 @@ namespace UI.Parsers
                 }
 
                 dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
+                resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
                 // ---------------------------------------------------------
 
-                
+
 
                 try
                 {
