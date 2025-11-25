@@ -116,9 +116,10 @@ namespace UI.Parsers
                 // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
                 string cpRaw = dato.C_POSTAL?.Trim() ?? "";
 
-                if (string.IsNullOrWhiteSpace(cpRaw))
+                if (string.IsNullOrWhiteSpace(cpRaw) || dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) || 
+                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
                 {
-                    // CASO 1: No tiene CP (Estaciones Móviles) -> Asignamos el genérico de la provincia
+                    // CASO 1: No tiene CP  o es estacion movil u agricola -> Asignamos el genérico de la provincia
                     // Buscamos si la provincia está en tu diccionario (ej: Valencia -> 46)
                     var claveProvincia = prefijosCpPorTerritorio.Keys
                         .FirstOrDefault(k => k.Equals(dato.PROVINCIA, StringComparison.OrdinalIgnoreCase));
@@ -164,16 +165,7 @@ namespace UI.Parsers
 
 
 
-                    // Gestión de Base de Datos (Provincias y Localidades)
-                    var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
-                    var localidad = ObtenerOCrearLocalidad(contexto, dato.MUNICIPIO, provincia);
-
-                    if (provincia.nombre == "Desconocida" && dato.PROVINCIA != "Desconocida")
-                    {
-                        // Si quieres loguear algo aquí, puedes hacerlo
-                    }
-
-                    resultadoDebug.Provincia = provincia.nombre;
+                  
 
                     // Coordenadas y Tipo
                     double? lat = dato.Latitud, lon = dato.Longitud;
@@ -211,6 +203,14 @@ namespace UI.Parsers
                         catch { /* Si falla el formato, dejamos el original */ }
                     }
 
+                    // Gestión de Base de Datos (Provincias y Localidades)
+                    var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
+                    var localidad = ObtenerOCrearLocalidad(contexto, dato.MUNICIPIO, provincia);
+
+
+
+                    resultadoDebug.Provincia = provincia.nombre;
+
                     // Creación del objeto Estacion
                     var estacion = new Estacion
                     {
@@ -222,7 +222,7 @@ namespace UI.Parsers
                         longitud = lon ?? 0,
                         descripcion = dato.TIPO_ESTACION ?? "",
                         horario = horario,
-                        contacto = $"Email: {dato.CORREOS}",
+                        contacto = $"Correo electrónico: {dato.CORREOS}",
                         URL = "https://www.sitval.com/",
                         localidad = localidad,
                         codigoLocalidad = localidad.codigo
