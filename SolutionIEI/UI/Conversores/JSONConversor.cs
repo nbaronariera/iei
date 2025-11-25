@@ -53,17 +53,41 @@ namespace UI.Wrappers
         {
             string res = "[";
 
-            foreach(var elemento in elementos){
-                string direccionBusqueda = elemento.DIRECCION;
-                if (direccionBusqueda.Contains("I.T.V. Móvil") || direccionBusqueda.Contains("I.T.V. Agrícola"))
+            for (int i = 0; i < elementos.Count; i++)
+            {
+                var elemento = elementos[i];
+
+                // --- LÓGICA DE FILTRADO ---
+                bool esEstacionFija = elemento.TIPO_ESTACION != null &&
+                                      elemento.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase);
+
+                if (esEstacionFija)
                 {
-                    direccionBusqueda = elemento.MUNICIPIO;
+                    // CASO A: Es Fija -> Usamos Selenium
+                    // Buscamos por Dirección + Municipio
+                    var coords = seleniumHelper.ObtenerCoordenadas(elemento.DIRECCION, elemento.MUNICIPIO);
+                    elemento.Latitud = coords.Lat;
+                    elemento.Longitud = coords.Lng;
+                }
+                else
+                {
+                    // CASO B: Es Móvil o Agrícola -> Ponemos 0 y NO usamos Selenium
+                    elemento.Latitud = 0.0;
+                    elemento.Longitud = 0.0;
                 }
 
-                var coords = seleniumHelper.ObtenerCoordenadas(direccionBusqueda, elemento.MUNICIPIO);
-                elemento.Latitud = coords.Lat;
-                elemento.Longitud = coords.Lng;
-                res += "{" + elemento.ToJSON() + "},\n"; 
+                // Añadimos al string JSON
+                res += "{" + elemento.ToJSON() + "}";
+
+                // Añadimos coma si no es el último elemento
+                if (i < elementos.Count - 1)
+                {
+                    res += ",\n";
+                }
+                else
+                {
+                    res += "\n";
+                }
             }
 
             res += "]";

@@ -6,8 +6,8 @@
 "Nº ESTACIÓN" : "1202",
 "HORARIOS" : "L.V. 7:00-22:00",
 "CORREO" : "itv1202@sitval.com",
-"Latitud" : 39.4708793,
-"Longitud" : -0.3503132
+"Latitud" : 39.9335875,
+"Longitud" : -0.1382337
 },
 {"TIPO ESTACIÓN" : "Estación Fija",
 "PROVINCIA" : "Castellón",
@@ -129,5 +129,5 @@
 "CORREO" : "itv0352@sitval.com",
 "Latitud" : 0,
 "Longitud" : 0
-},
+}
 ]
