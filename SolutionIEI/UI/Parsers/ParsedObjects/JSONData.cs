@@ -46,6 +46,18 @@ namespace UI.Parsers.ParsedObjects
 
         public string ToJSON()
         {
+            // 1. Convertimos los números usando InvariantCulture para asegurar el PUNTO (.)
+            string latStr = Latitud.HasValue
+                ? Latitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : "null";
+
+            string lonStr = Longitud.HasValue
+                ? Longitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : "null";
+
+            // 2. Construimos el JSON. 
+            // IMPORTANTE: He quitado las comillas (\") en Latitud y Longitud 
+            // para que se guarden como NÚMEROS reales en el JSON (ej: 39.45) y no texto.
             string res =
                 "\"TIPO ESTACIÓN\" : \"" + TIPO_ESTACION + "\",\n" +
                 "\"PROVINCIA\" : \"" + PROVINCIA + "\",\n" +
@@ -53,10 +65,10 @@ namespace UI.Parsers.ParsedObjects
                 "\"C.POSTAL\" : \"" + C_POSTAL + "\",\n" +
                 "\"DIRECCIÓN\" : \"" + DIRECCION + "\",\n" +
                 "\"Nº ESTACIÓN\" : \"" + Nº_ESTACION + "\",\n" +
-                "\"HORARIOS\" : \"" +  HORARIOS + "\",\n" +
+                "\"HORARIOS\" : \"" + HORARIOS + "\",\n" +
                 "\"CORREO\" : \"" + CORREOS + "\",\n" +
-                "\"Latitud\" : \"" + Latitud + "\",\n" +
-                "\"Longitud\" : \"" + Longitud + "\"\n";
+                "\"Latitud\" : " + latStr + ",\n" +   // Sin comillas, con punto
+                "\"Longitud\" : " + lonStr + "\n";    // Sin comillas, con punto
 
             return res;
         }
