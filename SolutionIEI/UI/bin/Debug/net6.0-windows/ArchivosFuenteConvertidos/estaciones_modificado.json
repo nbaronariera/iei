@@ -6,8 +6,8 @@
 "Nº ESTACIÓN" : "1202",
 "HORARIOS" : "L.V. 7:00-22:00",
 "CORREO" : "itv1202@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 39.4708793,
+"Longitud" : -0.3503132
 },
 {"TIPO ESTACIÓN" : "Estación Fija",
 "PROVINCIA" : "Castellón",
@@ -17,8 +17,8 @@
 "Nº ESTACIÓN" : "1203",
 "HORARIOS" : "L.V. 7:00-22:00",
 "CORREO" : "itv1203@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 40.4709904,
+"Longitud" : 0.4592906
 },
 {"TIPO ESTACIÓN" : "Estación Móvil",
 "PROVINCIA" : "Castellón",
@@ -50,8 +50,8 @@
 "Nº ESTACIÓN" : "4601",
 "HORARIOS" : "L.V. 7:00-22:00 / S. 8:00-13:30",
 "CORREO" : "itv4601@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 39.5543494,
+"Longitud" : -0.3078228
 },
 {"TIPO ESTACIÓN" : "Estación Fija",
 "PROVINCIA" : "Valencia",
@@ -61,8 +61,8 @@
 "Nº ESTACIÓN" : "4611",
 "HORARIOS" : "L.V. 7:00-22:00 / S. 9:00-14:00",
 "CORREO" : "itv4611@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 39.6365747,
+"Longitud" : -0.5883197
 },
 {"TIPO ESTACIÓN" : "Estación Móvil",
 "PROVINCIA" : "Valencia",
@@ -105,8 +105,8 @@
 "Nº ESTACIÓN" : "0303",
 "HORARIOS" : "L.V. 8:00-22:00 / S. 8:00-13:00",
 "CORREO" : "itv0303@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 38.0901433,
+"Longitud" : -0.8676023
 },
 {"TIPO ESTACIÓN" : "Estación Fija",
 "PROVINCIA" : "Aligante",
@@ -116,8 +116,8 @@
 "Nº ESTACIÓN" : "0304",
 "HORARIOS" : "L.V. 7:00-22:00 / S. 8:00-14:00",
 "CORREO" : "itv0304@sitval.com",
-"Latitud" : 0,
-"Longitud" : 0
+"Latitud" : 38.6717131,
+"Longitud" : -0.5022708
 },
 {"TIPO ESTACIÓN" : "Estación Móvil",
 "PROVINCIA" : "Alicante",
