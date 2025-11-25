@@ -41,59 +41,138 @@ namespace UI.Parsers
 
             foreach (var dato in datosParseados)
             {
+                // ---------------------------------------------------------
+                // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (Sanitización)
+                // ---------------------------------------------------------
+
+                // A. Si el municipio viene vacío (común en móviles), le asignamos "Itinerante"
+                if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.MUNICIPIO = "Agrícola";
+                }
+                else if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.MUNICIPIO = "Móvil";
+                }
+                else if(string.IsNullOrWhiteSpace(dato.MUNICIPIO))
+                {
+                    dato.MUNICIPIO = "Itinerante";
+                }
+
+                // B. Si la provincia viene vacía, ponemos "Desconocida" para evitar errores nulos
+                if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
+                {
+                    dato.PROVINCIA = "Desconocida";
+                }
+
+                // Normalizar variantes ortográficas comunes (València -> Valencia)
+                if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) &&
+                    dato.PROVINCIA.Trim().Equals("València", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.PROVINCIA = "Valencia";
+                }
+
+                // Normalizar variantes ortográficas comunes (Alacant -> Alicante)
+                if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) &&
+                    dato.PROVINCIA.Trim().Equals("Alacant", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.PROVINCIA = "Alicante";
+                }
+
+                // Normalizar variantes ortográficas comunes (Castelló -> Castellón)
+                if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) &&
+                    dato.PROVINCIA.Trim().Equals("Castelló", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.PROVINCIA = "Castellón";
+                }
+
+
+                // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
+                string cpRaw = dato.C_POSTAL?.Trim() ?? "";
+
+                if (string.IsNullOrWhiteSpace(cpRaw))
+                {
+                    // CASO 1: No tiene CP (Estaciones Móviles) -> Asignamos el genérico de la provincia
+                    // Buscamos si la provincia está en tu diccionario (ej: Valencia -> 46)
+                    var claveProvincia = prefijosCpPorTerritorio.Keys
+                        .FirstOrDefault(k => k.Equals(dato.PROVINCIA, StringComparison.OrdinalIgnoreCase));
+
+                    if (claveProvincia != null)
+                    {
+                        cpRaw = prefijosCpPorTerritorio[claveProvincia] + "000"; // Ej: "46" + "000" = "46000"
+                    }
+                    else
+                    {
+                        cpRaw = "00000"; // Fallback total si no encontramos la provincia
+                    }
+                }
+                else 
+                {
+                    cpRaw = Regex.Replace(cpRaw, @"[^\d]", ""); // quitar cualquier carácter no numérico
+                    if (cpRaw.Length < 5)
+                        cpRaw = cpRaw.PadLeft(5, '0');
+                }
+
+                dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
+
+                // ---------------------------------------------------------
+
                 var resultadoDebug = new ResultadoDebug
                 {
-                    Nombre = dato.MUNICIPIO?.Trim() ?? "(sin nombre)",
-                    Provincia = dato.PROVINCIA?.Trim() ?? "",
-                    Municipio = dato.MUNICIPIO?.Trim() ?? "",
-                    CodigoPostal = dato.C_POSTAL?.Trim() ?? "",
+                    Nombre = dato.MUNICIPIO,
+                    Provincia = dato.PROVINCIA,
+                    Municipio = dato.MUNICIPIO,
+                    CodigoPostal = dato.C_POSTAL,
                     Motivos = new List<string>()
-                }; 
+                };
 
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
-                    {
-                        resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
-                    }
-
+                    // Validaciones (ahora es más difícil que fallen gracias a la corrección anterior)
                     if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
-                        resultadoDebug.Motivos.Add("Provincia vacía o nula.");
+                        resultadoDebug.Motivos.Add("Provincia vacía.");
+
                     if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
-                        resultadoDebug.Motivos.Add("Municipio vacío o nulo.");
+                        resultadoDebug.Motivos.Add("Municipio vacío.");
 
-                    string cpRaw = dato.C_POSTAL?.Trim() ?? "";
-
-                    if (!Regex.IsMatch(cpRaw, @"^\d{5}$"))
+                    if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$"))
                     {
-                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres.");
+                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}').");
                     }
 
+
+
+
+
+                    // Gestión de Base de Datos (Provincias y Localidades)
                     var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.MUNICIPIO, provincia);
 
-                    if (string.IsNullOrWhiteSpace(provincia.nombre))
+                    if (provincia.nombre == "Desconocida" && dato.PROVINCIA != "Desconocida")
                     {
-                        resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia conocida.");
+                        // Si quieres loguear algo aquí, puedes hacerlo
                     }
 
                     resultadoDebug.Provincia = provincia.nombre;
 
+                    // Coordenadas y Tipo
                     double? lat = dato.Latitud, lon = dato.Longitud;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
-                    if (dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Estacion_movil;
-                    else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
-
-
-                    if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat.Value, lon.Value))
+                    if (dato.TIPO_ESTACION != null)
                     {
-                        Debug.WriteLine($"[CAT] Estación duplicada omitida: {dato.Nº_ESTACION}");
+                        if (dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Estacion_movil;
+                        else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
+                    }
+
+                    // Chequeo de duplicados (Nº Estación + Coordenadas)
+                    if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat ?? 0, lon ?? 0))
+                    {
+                        Debug.WriteLine($"[CV] Estación duplicada omitida: {dato.Nº_ESTACION}");
                         continue;
                     }
 
-                    string correoLimpio = EsCorreo(dato.CORREOS) ? dato.CORREOS : "";
-
+                    // Si hay errores graves, no insertamos
                     if (resultadoDebug.Motivos.Count > 0)
                     {
                         resultadoDebug.Añadida = false;
@@ -101,23 +180,29 @@ namespace UI.Parsers
                         continue;
                     }
 
-                    var horario = dato.HORARIOS;
-                    if (dato.TIPO_ESTACION == "Estación Fija")
+                    // Procesamiento de Horario
+                    var horario = dato.HORARIOS ?? "Sin horario";
+                    if (dato.TIPO_ESTACION != null && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
-                        horario = ConvertirFormatoFecha(dato.HORARIOS);
+                        try
+                        {
+                            horario = ConvertirFormatoFecha(dato.HORARIOS);
+                        }
+                        catch { /* Si falla el formato, dejamos el original */ }
                     }
 
+                    // Creación del objeto Estacion
                     var estacion = new Estacion
                     {
-                        nombre = string.IsNullOrWhiteSpace(dato.MUNICIPIO) ? dato.DIRECCION : dato.MUNICIPIO,
+                        nombre = string.IsNullOrWhiteSpace(dato.MUNICIPIO) ? (dato.DIRECCION ?? "Estación") : dato.MUNICIPIO + " " + dato.Nº_ESTACION,
                         tipo = tipo,
-                        direccion = dato.DIRECCION,
+                        direccion = dato.DIRECCION ?? "Sin dirección",
                         codigoPostal = dato.C_POSTAL,
-                        latitud = lat.Value,
-                        longitud = lon.Value,
-                        descripcion = "",
+                        latitud = lat ?? 0,
+                        longitud = lon ?? 0,
+                        descripcion = dato.TIPO_ESTACION ?? "",
                         horario = horario,
-                        contacto = $"Correo electrónico: {dato.CORREOS} Teléfono: ",
+                        contacto = $"Email: {dato.CORREOS}",
                         URL = "https://www.sitval.com/",
                         localidad = localidad,
                         codigoLocalidad = localidad.codigo
@@ -127,13 +212,25 @@ namespace UI.Parsers
                     resultados.Add(new ResultObject { Estacion = estacion, Localidad = localidad, Provincia = provincia });
                     validas++;
                     noValidas--;
+
+                    resultadoDebug.Añadida = true;
+                    debugResultados.Add(resultadoDebug);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error insertando estación CV: {ex.Message}");
+                    resultadoDebug.Motivos.Add($"Excepción: {ex.Message}");
+                    debugResultados.Add(resultadoDebug);
+                }
             }
+
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
             return (resultados, validas, noValidas);
         }
+
+       
+
         private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
         {
             return ctx.Estaciones.Any(e => e.nombre == nombre && e.latitud == lat && e.longitud == lon);
