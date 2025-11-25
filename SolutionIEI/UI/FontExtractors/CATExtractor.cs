@@ -123,6 +123,7 @@ namespace UI.Parsers
                     if (resultadoDebug.Motivos.Count > 0)
                     {
                         resultadoDebug.Añadida = false;
+                        resultadoDebug.Provincia = dato.serveis_territorials?.Trim() ?? "(desconocida)";
                         debugResultados.Add(resultadoDebug);
                         continue;
                     }
