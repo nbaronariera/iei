@@ -17,10 +17,10 @@ namespace UI.Helpers
         public CoordenadasSelenium()
         {
             // Inicializar el driver UNA SOLA VEZ en el constructor
-            new DriverManager().SetUpDriver(new FirefoxConfig());
-            var driverService = FirefoxDriverService.CreateDefaultService();
+            new DriverManager().SetUpDriver(new ChromeConfig());
+            var driverService = ChromeDriverService.CreateDefaultService();
             driverService.HideCommandPromptWindow = true;
-            driver = new FirefoxDriver(driverService);
+            driver = new ChromeDriver(driverService);
         }
 
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
