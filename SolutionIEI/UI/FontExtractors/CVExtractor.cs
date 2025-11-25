@@ -73,12 +73,17 @@ namespace UI.Parsers
                 //Cambiamos nombre para el debug
                 resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
 
+                resultadoDebug.Municipio = dato.MUNICIPIO;
+
 
                 // B. Si la provincia viene vacía no lo incluimos
                 if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
                 {
                     resultadoDebug.Motivos.Add("Provincia vacía."); 
                 }
+
+              
+
 
                 // Normalizar variantes ortográficas comunes (València -> Valencia)
                 if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) &&
@@ -99,6 +104,12 @@ namespace UI.Parsers
                     dato.PROVINCIA.Trim().Equals("Castelló", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.PROVINCIA = "Castellón";
+                }
+
+
+                if(!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
+                {
+                    resultadoDebug.Motivos.Add("Provincia no válida");
                 }
 
 
