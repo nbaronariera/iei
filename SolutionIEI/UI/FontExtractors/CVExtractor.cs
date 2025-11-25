@@ -10,7 +10,6 @@ namespace UI.Parsers
 {
     public class CVExtractor : Parser<JSONData>
     {
-        private int codigoPostal;
 
         private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {

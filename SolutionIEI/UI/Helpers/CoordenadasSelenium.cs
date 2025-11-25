@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -16,10 +17,10 @@ namespace UI.Helpers
         public CoordenadasSelenium()
         {
             // Inicializar el driver UNA SOLA VEZ en el constructor
-            new DriverManager().SetUpDriver(new ChromeConfig());
-            var driverService = ChromeDriverService.CreateDefaultService();
+            new DriverManager().SetUpDriver(new FirefoxConfig());
+            var driverService = FirefoxDriverService.CreateDefaultService();
             driverService.HideCommandPromptWindow = true;
-            driver = new ChromeDriver(driverService);
+            driver = new FirefoxDriver(driverService);
         }
 
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)

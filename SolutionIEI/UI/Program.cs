@@ -14,8 +14,6 @@ namespace UI
         [STAThread]
         static void Main()
         {
-            try
-            {
                 Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
 
                 // Borrar y recrear la base de datos al inicio
@@ -60,12 +58,6 @@ namespace UI
                 Debug.WriteLine("=== ESTACIONES LISTAS PARA INSERTAR EN BASE DE DATOS ===");
 
                 Debug.WriteLine("=== FIN ===");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] {ex.GetType().Name}: {ex.Message}");
-                Debug.WriteLine(ex.StackTrace);
-            }
 
         }
     }
