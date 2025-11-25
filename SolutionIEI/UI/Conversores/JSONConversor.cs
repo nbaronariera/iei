@@ -13,7 +13,7 @@ namespace UI.Wrappers
         public static string Ejecutar()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string csvPath = Path.Combine(baseDirectory, "Fuentes", "estaciones.json");
+            string csvPath = Path.Combine(baseDirectory, "Fuentes", "estacionesEntrega.json");
 
             if (!File.Exists(csvPath))
                 throw new FileNotFoundException($"No se encontró el JSON: {csvPath}");

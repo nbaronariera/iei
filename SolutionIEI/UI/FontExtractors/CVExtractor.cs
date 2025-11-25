@@ -117,7 +117,7 @@ namespace UI.Parsers
                         longitud = lon.Value,
                         descripcion = "",
                         horario = horario,
-                        contacto = $"Correo electrónico: {dato.CORREOS} Teléfono: -",
+                        contacto = $"Correo electrónico: {dato.CORREOS} Teléfono: ",
                         URL = "https://www.sitval.com/",
                         localidad = localidad,
                         codigoLocalidad = localidad.codigo
