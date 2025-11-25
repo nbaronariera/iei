@@ -43,5 +43,22 @@ namespace UI.Parsers.ParsedObjects
         {
             return TIPO_ESTACION + "\n" + PROVINCIA + "\n" + MUNICIPIO + "\n" + C_POSTAL + "\n" + DIRECCION + "\n" + Nº_ESTACION + "\n" + HORARIOS + "\n" + CORREOS;
         }
+
+        public string ToJSON()
+        {
+            string res =
+                "\"TIPO ESTACIÓN\" : \"" + TIPO_ESTACION + "\",\n" +
+                "\"PROVINCIA\" : \"" + PROVINCIA + "\",\n" +
+                "\"MUNICIPIO\" : \"" + MUNICIPIO + "\",\n" +
+                "\"C.POSTAL\" : \"" + C_POSTAL + "\",\n" +
+                "\"DIRECCIÓN\" : \"" + DIRECCION + "\",\n" +
+                "\"Nº ESTACIÓN\" : \"" + Nº_ESTACION + "\",\n" +
+                "\"HORARIOS\" : \"" +  HORARIOS + "\",\n" +
+                "\"CORREO\" : \"" + CORREOS + "\",\n" +
+                "\"Latitud\" : \"" + Latitud + "\",\n" +
+                "\"Longitud\" : \"" + Longitud + "\"\n";
+
+            return res;
+        }
     }
 }

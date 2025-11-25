@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using UI.Helpers;
 using UI.Parsers;
+using UI.Parsers.ParsedObjects;
 
 namespace UI.Wrappers
 {
     public static class JSONConversor
     {
+        
+        static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
         public static string Ejecutar()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -25,7 +29,7 @@ namespace UI.Wrappers
             Directory.CreateDirectory(outputDir);
 
             string jsonPath = Path.Combine(outputDir, "estaciones_modificado.json");
-            File.WriteAllText(jsonPath, listaObjetos.ToString(), utf8NoBom);
+            File.WriteAllText(jsonPath, generateString(listaObjetos), utf8NoBom);
 
             Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
 
@@ -44,6 +48,26 @@ namespace UI.Wrappers
 #endif
 
             return jsonPath;
+        }
+        private static string generateString(List<JSONData> elementos)
+        {
+            string res = "[";
+
+            foreach(var elemento in elementos){
+                string direccionBusqueda = elemento.DIRECCION;
+                if (direccionBusqueda.Contains("I.T.V. Móvil") || direccionBusqueda.Contains("I.T.V. Agrícola"))
+                {
+                    direccionBusqueda = elemento.MUNICIPIO;
+                }
+
+                var coords = seleniumHelper.ObtenerCoordenadas(direccionBusqueda, elemento.MUNICIPIO);
+                elemento.Latitud = coords.Lat;
+                elemento.Longitud = coords.Lng;
+                res += "{" + elemento.ToJSON() + "},\n"; 
+            }
+
+            res += "]";
+            return res;
         }
     }
 }
