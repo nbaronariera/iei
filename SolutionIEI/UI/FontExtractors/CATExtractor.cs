@@ -110,8 +110,7 @@ namespace UI.Parsers
 
                     if (EstacionYaExiste(contexto, dato.denominaci, lat, lon))
                     {
-                        Debug.WriteLine($"[CAT] Estación duplicada omitida: {dato.denominaci}");
-                        continue;
+                        resultadoDebug.Motivos.Add("No se pudieron extraer coordenadas de Google Maps.");
                     }
 
                     if (!EsCoordenadaEnEspañaPeninsular(lat, lon))

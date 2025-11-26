@@ -87,16 +87,16 @@ namespace UI.Parsers
                 double lat = ExtraerLatitud(dato.Coordenadas);
                 double lon = ExtraerLongitud(dato.Coordenadas);
 
+                if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
+                    resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
+
                 if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
                 {
                     resultadoDebug.Motivos.Add("Estación duplicada.");
-                    resultadoDebug.Añadida = false;
-                    debugResultados.Add(resultadoDebug);
-                    continue;
+                    
                 }
 
-                if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
-                    resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
+               
 
                 if (resultadoDebug.Motivos.Count > 0)
                 {
