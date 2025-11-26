@@ -116,6 +116,8 @@ namespace UI.Parsers
                     var claveProvincia = prefijosCpPorTerritorio.Keys
                         .FirstOrDefault(k => k.Equals(dato.PROVINCIA, StringComparison.OrdinalIgnoreCase));
 
+                    dato.DIRECCION = "";
+
                     if (claveProvincia != null)
                     {
                         cpRaw = prefijosCpPorTerritorio[claveProvincia] + "000"; // Ej: "46" + "000" = "46000"
