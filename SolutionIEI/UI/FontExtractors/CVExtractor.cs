@@ -310,28 +310,7 @@ namespace UI.Parsers
 
         private string ConvertirFormatoFecha(string input)
         {
-            // Expresión regular para detectar días de la semana y sus horarios
-            string pattern = @"([A-Z]+)\.\s*(\d{1,2}:\d{2}-\d{1,2}:\d{2})";
-            var matches = Regex.Matches(input, pattern);
-
-            string result = "";
-
-            foreach (Match match in matches)
-            {
-                string dia = match.Groups[1].Value;
-                string horarios = match.Groups[2].Value;
-
-                var diaFormat = dia.Replace(".", "");
-                if (diaFormat.Length == 2)
-                {
-                    diaFormat.Insert(1, "-");
-                }
-
-                result += $"{dia} ({horarios}) ";
-            }
-
-            // Eliminar el último espacio extra
-            return result.Trim();
+            return input;
         }
     }
 }
