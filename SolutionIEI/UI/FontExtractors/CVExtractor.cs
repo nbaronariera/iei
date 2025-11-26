@@ -76,11 +76,7 @@ namespace UI.Parsers
                 resultadoDebug.Municipio = dato.MUNICIPIO;
 
 
-                // B. Si la provincia viene vacía no lo incluimos
-                if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
-                {
-                    resultadoDebug.Motivos.Add("Provincia vacía."); 
-                }
+              
 
               
 
@@ -107,11 +103,7 @@ namespace UI.Parsers
                 }
 
 
-                if(!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
-                {
-                    resultadoDebug.Motivos.Add("Provincia no válida");
-                }
-
+               
 
                 // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
                 string cpRaw = dato.C_POSTAL?.Trim() ?? "";
@@ -162,10 +154,15 @@ namespace UI.Parsers
                     }
 
 
+                    if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
+                    {
+                        resultadoDebug.Motivos.Add("Provincia no válida");
+                    }
+                    else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(codigoPostal, dato.Provincia))
+                        resultadoDebug.Motivos.Add($"Código postal {codigoPostal} no coincide con provincia '{dato.Provincia}'.");
 
 
 
-                  
 
                     // Coordenadas y Tipo
                     double? lat = dato.Latitud, lon = dato.Longitud;
@@ -298,6 +295,13 @@ namespace UI.Parsers
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
+
+        private bool CodigoPostalValido(int codigo, string provincia)
+        {
+            if (string.IsNullOrWhiteSpace(provincia)) return false;
+            return prefijosCpPorTerritorio.TryGetValue(provincia.Trim(), out int cp) && (codigo / 1000) == cp;
+        }
+
         private string ConvertirFormatoFecha(string input)
         {
             // Expresión regular para detectar días de la semana y sus horarios
