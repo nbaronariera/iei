@@ -179,8 +179,8 @@ namespace UI.Parsers
                     // Chequeo de duplicados (Nº Estación + Coordenadas)
                     if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat ?? 0, lon ?? 0))
                     {
-                        Debug.WriteLine($"[CV] Estación duplicada omitida: {dato.Nº_ESTACION}");
-                        continue;
+                        resultadoDebug.Motivos.Add("Estación duplicada.");
+                      
                     }
 
                     // Si hay errores graves, no insertamos
