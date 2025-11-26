@@ -158,8 +158,8 @@ namespace UI.Parsers
                     {
                         resultadoDebug.Motivos.Add("Provincia no válida");
                     }
-                    else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(codigoPostal, dato.Provincia))
-                        resultadoDebug.Motivos.Add($"Código postal {codigoPostal} no coincide con provincia '{dato.Provincia}'.");
+                    else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA))
+                        resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
 
 
 
@@ -296,10 +296,16 @@ namespace UI.Parsers
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
-        private bool CodigoPostalValido(int codigo, string provincia)
+        private bool CodigoPostalValido(string codigoPostal, string provincia)
         {
-            if (string.IsNullOrWhiteSpace(provincia)) return false;
-            return prefijosCpPorTerritorio.TryGetValue(provincia.Trim(), out int cp) && (codigo / 1000) == cp;
+            if (string.IsNullOrWhiteSpace(codigoPostal) || codigoPostal.Length < 2)
+                return false;
+
+            if (!prefijosCpPorTerritorio.TryGetValue(provincia.Trim(), out string prefijo))
+                return false;
+
+            // Compara los dos primeros dígitos del CP con el prefijo de la provincia
+            return codigoPostal.StartsWith(prefijo);
         }
 
         private string ConvertirFormatoFecha(string input)
