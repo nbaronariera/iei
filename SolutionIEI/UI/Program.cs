@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using UI.Entidades;
 using UI.Parsers;
+using UI.UI_Gestor;
 using UI.Wrappers;
 
 
@@ -14,16 +15,27 @@ namespace UI
         [STAThread]
         static void Main()
         {
+            
+            Form1 mainForm = new Form1();   
+            mainForm.ShowDialog();
+            
+
+
+            /*
+            
                 Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
 
                 // Borrar y recrear la base de datos al inicio
                 using (var db = new AppDbContext())
                 {
-                    Debug.WriteLine("[INFO] Eliminando base de datos existente...");
-                    db.Database.EnsureDeleted();
+                    
+                   // Debug.WriteLine("[INFO] Eliminando base de datos existente...");
+                  //  db.Database.EnsureDeleted();
 
-                    Debug.WriteLine("[INFO] Creando base de datos vacía...");
-                    db.Database.EnsureCreated();
+                   // Debug.WriteLine("[INFO] Creando base de datos vacía...");
+                   // db.Database.EnsureCreated();
+                    
+                    
                 }
 
                 string JsonCV = JSONConversor.Ejecutar();
@@ -58,7 +70,9 @@ namespace UI
                 Debug.WriteLine("=== ESTACIONES LISTAS PARA INSERTAR EN BASE DE DATOS ===");
 
                 Debug.WriteLine("=== FIN ===");
-
+            
+            
+            */
         }
     }
 }

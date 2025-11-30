@@ -15,6 +15,6 @@
 
         public Provincia() { }
 
-        public ICollection<Localidad> Localidades { get; set; } = new List<Localidad>();
+        public virtual ICollection<Localidad> Localidades { get; set; } = new List<Localidad>();
     }
 }

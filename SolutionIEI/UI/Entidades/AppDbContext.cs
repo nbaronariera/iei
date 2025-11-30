@@ -50,6 +50,8 @@ namespace UI.Entidades
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+
+
             // Estacion
             modelBuilder.Entity<Estacion>(entity =>
             {

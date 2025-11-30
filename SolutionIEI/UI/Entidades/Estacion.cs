@@ -1,8 +1,12 @@
-﻿namespace UI.Entidades
+﻿using System.ComponentModel;
+
+namespace UI.Entidades
 {
     public class Estacion
     {
         public int cod_estacion { get; set; }
+
+        
         public String nombre { get; set; } = "";
         public TipoEstacion tipo { get; set; }
         public String direccion { get; set; } = "";
@@ -14,7 +18,7 @@
         public String contacto { get; set; } = "";
         public String URL { get; set; } = "";
 
-        public Localidad localidad { get; set; } = null!;
+        public virtual Localidad localidad { get; set; } = null!;
         public int codigoLocalidad { get; set; }
 
 
