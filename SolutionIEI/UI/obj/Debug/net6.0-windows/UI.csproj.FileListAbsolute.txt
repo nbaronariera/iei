@@ -82,7 +82,6 @@ C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\bin\Debug\net6.0-wind
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\bin\Debug\net6.0-windows\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\bin\Debug\net6.0-windows\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.csproj.AssemblyReference.cache
-C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.UI_Gestor.Form1.resources
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.csproj.GenerateResource.cache
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.AssemblyInfoInputs.cache
@@ -95,3 +94,4 @@ C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-wind
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.pdb
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.genruntimeconfig.cache
 C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\ref\UI.dll
+C:\Users\Nacheitor8\source\repos\TrabajoIEI\SolutionIEI\UI\obj\Debug\net6.0-windows\UI.UI_Gestor.FormularioBusqueda.resources

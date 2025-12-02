@@ -38,5 +38,11 @@ namespace UI
 
         [DisplayName("Sitio web")]
         public string URL { get; set; } = "";
+
+        [DisplayName("Latitud")]
+        public double latitud { get; set; }
+
+        [DisplayName("Longitud")]
+        public double longitud { get; set; }
     }
 }

@@ -16,7 +16,7 @@ namespace UI
         static void Main()
         {
             
-            Form1 mainForm = new Form1();   
+            FormularioBusqueda mainForm = new FormularioBusqueda();   
             mainForm.ShowDialog();
             
 
