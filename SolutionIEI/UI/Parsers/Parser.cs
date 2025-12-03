@@ -1,4 +1,6 @@
-﻿namespace UI.Parsers
+﻿using System.IO;
+
+namespace UI.Parsers
 {
     public abstract class Parser<T>
     {
