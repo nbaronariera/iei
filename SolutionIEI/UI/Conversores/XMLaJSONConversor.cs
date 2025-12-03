@@ -57,5 +57,48 @@ namespace UI.Wrappers
 
             return jsonPath;
         }
+
+        public static string Ejecutar(string rutaArchivo)
+        {
+            if (!File.Exists(rutaArchivo))
+                throw new FileNotFoundException($"No se encontró el XML: {rutaArchivo}");
+
+            var csvParser = new XMLParser();
+            csvParser.Load(rutaArchivo);
+            var listaObjetos = csvParser.ParseList();
+
+            var opcionesJson = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            string jsonContent = JsonSerializer.Serialize(listaObjetos, opcionesJson);
+
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
+            Directory.CreateDirectory(outputDir);
+
+            string jsonPath = Path.Combine(outputDir, "ITV-CAT.json");
+            File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
+
+            Debug.WriteLine($"[OK] JSON generado de CAT con acentos y formato:\n    {jsonPath}");
+
+#if DEBUG
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = outputDir,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            catch { }
+#endif
+
+            return jsonPath;
+        }
     }
 }

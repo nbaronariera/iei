@@ -78,5 +78,68 @@ namespace UI.Wrappers
 
             return jsonPath;
         }
+
+        public static string Ejecutar(string rutaArchivo)
+        {
+            if (!File.Exists(rutaArchivo))
+                throw new FileNotFoundException($"No se encontró el CSV: {rutaArchivo}");
+
+            var csvParser = new CSVParser();
+            csvParser.Load(rutaArchivo);
+            var listaObjetos = csvParser.ParseList();
+
+            var listaDiccionarios = new List<Dictionary<string, string>>();
+
+            foreach (var fila in listaObjetos)
+            {
+                var dict = new Dictionary<string, string>
+                {
+                    ["NOME DA ESTACIÓN"] = fila.NombreEstacion,
+                    ["ENDEREZO"] = fila.Direccion,
+                    ["CONCELLO"] = fila.Municipio,
+                    ["CÓDIGO POSTAL"] = fila.CodigoPostal,
+                    ["PROVINCIA"] = fila.Provincia,
+                    ["TELÉFONO"] = fila.Telefono,
+                    ["HORARIO"] = fila.HorarioRaw,
+                    ["SOLICITUDE DE CITA PREVIA"] = fila.UrlCita,
+                    ["CORREO ELECTRÓNICO"] = fila.Correo,
+                    ["COORDENADAS GMAPS"] = fila.Coordenadas
+                };
+                listaDiccionarios.Add(dict);
+            }
+
+            var opcionesJson = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            string jsonContent = JsonSerializer.Serialize(listaDiccionarios, opcionesJson);
+
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
+            Directory.CreateDirectory(outputDir);
+
+            string jsonPath = Path.Combine(outputDir, "Estacions_ITV.json");
+            File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
+
+            Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
+
+#if DEBUG
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = outputDir,
+                    UseShellExecute = true,
+                    Verb = "open"
+                });
+            }
+            catch { }
+#endif
+
+            return jsonPath;
+        }
     }
 }
