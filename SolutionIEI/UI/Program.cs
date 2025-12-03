@@ -22,7 +22,9 @@ namespace UI
         static void Main()
         { 
             Task.Run(() => startServer());
-            FormularioBusqueda mainForm = new FormularioBusqueda();
+
+            FormularioCarga mainForm = new FormularioCarga();
+            //FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
 
             stopServer().GetAwaiter().GetResult();
