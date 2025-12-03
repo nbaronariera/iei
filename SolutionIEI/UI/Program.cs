@@ -13,16 +13,15 @@ namespace UI
 {
     internal static class Program
     {
-        private static IHost _webHost;
+        private static IHost? _webHost;
 
         /// <summary>
         /// Punto de entrada principal para la aplicación.
         /// </summary>
         [STAThread]
         static void Main()
-        {
-
-            startServer();
+        { 
+            Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
 
@@ -94,7 +93,7 @@ namespace UI
             await app.StartAsync();
         }
 
-        private static async void stopServer()
+        private static async Task stopServer()
         {
             if (_webHost != null)
             {
