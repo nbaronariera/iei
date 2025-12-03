@@ -21,11 +21,13 @@ namespace UI
         [STAThread]
         static void Main()
         { 
-            Task.Run(() => startServer());
+            //Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
 
-            stopServer().GetAwaiter().GetResult();
+            
+           // stopServer().GetAwaiter().GetResult();
+            
 
             /*
             

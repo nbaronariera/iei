@@ -1,0 +1,83 @@
+[
+  {
+    "ContainingType": "UI.Controllers.CargaController",
+    "Method": "Cargar",
+    "RelativePath": "api/carga",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APIBusqueda",
+    "Method": "Diagnostico",
+    "RelativePath": "diagnostico",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APIBusqueda",
+    "Method": "GetEstaciones",
+    "RelativePath": "estaciones",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cp",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "provincia",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "localidad",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "tipo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APIBusqueda",
+    "Method": "GetLocalidades",
+    "RelativePath": "localidades",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APIBusqueda",
+    "Method": "Ping",
+    "RelativePath": "ping",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APIBusqueda",
+    "Method": "GetProvincias",
+    "RelativePath": "provincias",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

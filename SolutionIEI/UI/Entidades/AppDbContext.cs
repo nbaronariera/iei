@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace UI.Entidades
 {
-    internal class AppDbContext : DbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<Provincia> Provincias { get; set; } = null!;
         public DbSet<Localidad> Localidades { get; set; } = null!;
@@ -12,13 +13,20 @@ namespace UI.Entidades
         {
             // Asegura que la base de datos y tablas existen (útil en desarrollo).
             // Si prefieres manejar migraciones, elimina esta línea y usa migraciones EF Core.
-            Database.EnsureCreated();
+
+
+            if (!File.Exists("Datos.db"))
+            {
+                Database.EnsureCreated();
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Ruta relativa al ejecutable; puedes cambiar a ruta absoluta si lo prefieres.
-            optionsBuilder.UseSqlite("Data Source=Datos.db");
+            
+            
+                optionsBuilder.UseSqlite("Data Source=Datos.db");
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
