@@ -36,6 +36,7 @@ namespace UI.Parsers
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
+            using var seleniumHelper = new CoordenadasSelenium();
             var debugResultados = new List<ResultadoDebug>();
             int noValidas = datosParseados.Count;
             int validas = 0;
@@ -66,7 +67,7 @@ namespace UI.Parsers
                 {
                     dato.MUNICIPIO = "Móvil";
                 }
-                else if(string.IsNullOrWhiteSpace(dato.MUNICIPIO))
+                else if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
                 {
                     dato.MUNICIPIO = "Itinerante";
                 }
@@ -77,9 +78,9 @@ namespace UI.Parsers
                 resultadoDebug.Municipio = dato.MUNICIPIO;
 
 
-              
 
-              
+
+
 
 
                 // Normalizar variantes ortográficas comunes (València -> Valencia)
@@ -104,12 +105,12 @@ namespace UI.Parsers
                 }
 
 
-               
+
 
                 // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
                 string cpRaw = dato.C_POSTAL?.Trim() ?? "";
 
-                if (string.IsNullOrWhiteSpace(cpRaw) || dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) || 
+                if (string.IsNullOrWhiteSpace(cpRaw) || dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) ||
                     dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
                 {
                     // CASO 1: No tiene CP  o es estacion movil u agricola -> Asignamos el genérico de la provincia
@@ -128,7 +129,7 @@ namespace UI.Parsers
                         cpRaw = "00000"; // Fallback total si no encontramos la provincia
                     }
                 }
-                else 
+                else
                 {
                     cpRaw = Regex.Replace(cpRaw, @"[^\d]", ""); // quitar cualquier carácter no numérico
                     if (cpRaw.Length < 5)
@@ -168,7 +169,8 @@ namespace UI.Parsers
 
 
                     // Coordenadas y Tipo
-                    double? lat = dato.Latitud, lon = dato.Longitud;
+                    var coords = seleniumHelper.ObtenerCoordenadas(dato.DIRECCION, dato.MUNICIPIO);
+                    double? lat = coords.Lat, lon = coords.Lng;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
                     if (dato.TIPO_ESTACION != null)
@@ -181,7 +183,7 @@ namespace UI.Parsers
                     if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat ?? 0, lon ?? 0))
                     {
                         resultadoDebug.Motivos.Add("Estación duplicada.");
-                      
+
                     }
 
                     // Si hay errores graves, no insertamos
@@ -249,7 +251,7 @@ namespace UI.Parsers
             return (resultados, validas, noValidas);
         }
 
-       
+
 
         private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
         {

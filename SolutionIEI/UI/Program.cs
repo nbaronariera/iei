@@ -29,7 +29,7 @@ namespace UI
            // stopServer().GetAwaiter().GetResult();
             
 
-            /*
+            
             
                 Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
 
@@ -80,7 +80,7 @@ namespace UI
                 Debug.WriteLine("=== FIN ===");
             
             
-            */
+            
         }
 
         private static async void startServer()
