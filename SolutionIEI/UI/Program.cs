@@ -30,7 +30,7 @@ namespace UI
             
 
             
-            
+            /*
                 Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
 
                 // Borrar y recrear la base de datos al inicio
@@ -78,7 +78,8 @@ namespace UI
                 Debug.WriteLine("=== ESTACIONES LISTAS PARA INSERTAR EN BASE DE DATOS ===");
 
                 Debug.WriteLine("=== FIN ===");
-            
+
+            */
             
             
         }

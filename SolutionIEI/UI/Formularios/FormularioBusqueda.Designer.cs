@@ -5,7 +5,6 @@
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.SplitContainer splitVertical;
         private System.Windows.Forms.SplitContainer splitHorizontal;
-        private GMap.NET.WindowsForms.GMapControl gMapControl1;
 
         protected override void Dispose(bool disposing)
         {
@@ -29,8 +28,9 @@
             lblLocalidad = new Label();
             lblTitulo = new Label();
             button1 = new Button();
-            gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            btnCargarDatos = new Button();
             dataGridView1 = new DataGridView();
+            lblResultados = new Label();
             colNom = new DataGridViewTextBoxColumn();
             colTipo = new DataGridViewTextBoxColumn();
             colDir = new DataGridViewTextBoxColumn();
@@ -41,8 +41,8 @@
             colURL = new DataGridViewTextBoxColumn();
             colLocalidad = new DataGridViewTextBoxColumn();
             colProvincia = new DataGridViewTextBoxColumn();
-            lblResultados = new Label();
             estacionBindingSource = new BindingSource(components);
+            gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             ((System.ComponentModel.ISupportInitialize)splitVertical).BeginInit();
             splitVertical.Panel1.SuspendLayout();
             splitVertical.Panel2.SuspendLayout();
@@ -94,6 +94,7 @@
             splitHorizontal.Panel1.Controls.Add(lblLocalidad);
             splitHorizontal.Panel1.Controls.Add(lblTitulo);
             splitHorizontal.Panel1.Controls.Add(button1);
+            splitHorizontal.Panel1.Controls.Add(btnCargarDatos);
             splitHorizontal.Panel1MinSize = 200;
             // 
             // splitHorizontal.Panel2
@@ -102,96 +103,96 @@
             splitHorizontal.Panel2.Controls.Add(gMapControl1);
             splitHorizontal.Panel2MinSize = 300;
             splitHorizontal.Size = new Size(1100, 593);
-            splitHorizontal.SplitterDistance = 795;
+            splitHorizontal.SplitterDistance = 350;
             splitHorizontal.TabIndex = 0;
             // 
             // comboTipo
             // 
+            comboTipo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboTipo.FormattingEnabled = true;
-            comboTipo.Location = new Point(96, 257);
+            comboTipo.Location = new Point(114, 257);
             comboTipo.Name = "comboTipo";
-            comboTipo.Size = new Size(277, 23);
+            comboTipo.Size = new Size(200, 28);
             comboTipo.TabIndex = 10;
             // 
             // comboProvincia
             // 
+            comboProvincia.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboProvincia.FormattingEnabled = true;
-            comboProvincia.Location = new Point(96, 207);
+            comboProvincia.Location = new Point(114, 207);
             comboProvincia.Name = "comboProvincia";
-            comboProvincia.Size = new Size(277, 23);
+            comboProvincia.Size = new Size(200, 28);
             comboProvincia.TabIndex = 9;
             comboProvincia.SelectedIndexChanged += comboProvincia_SelectedIndexChanged;
             // 
             // comboLocalidad
             // 
+            comboLocalidad.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboLocalidad.FormattingEnabled = true;
-            comboLocalidad.Location = new Point(96, 107);
+            comboLocalidad.Location = new Point(114, 110);
             comboLocalidad.Name = "comboLocalidad";
-            comboLocalidad.Size = new Size(277, 23);
+            comboLocalidad.Size = new Size(200, 28);
             comboLocalidad.TabIndex = 8;
             comboLocalidad.SelectedIndexChanged += comboLocalidad_SelectedIndexChanged;
             // 
             // txtBoxCodPostal
             // 
-            txtBoxCodPostal.Location = new Point(96, 157);
+            txtBoxCodPostal.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtBoxCodPostal.Location = new Point(114, 160);
             txtBoxCodPostal.Name = "txtBoxCodPostal";
-            txtBoxCodPostal.Size = new Size(277, 23);
+            txtBoxCodPostal.Size = new Size(200, 27);
             txtBoxCodPostal.TabIndex = 7;
             // 
             // lblTipo
             // 
-            lblTipo.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblTipo.AutoSize = true;
             lblTipo.Location = new Point(57, 260);
             lblTipo.Name = "lblTipo";
-            lblTipo.Size = new Size(33, 15);
+            lblTipo.Size = new Size(42, 20);
             lblTipo.TabIndex = 5;
             lblTipo.Text = "Tipo:";
             // 
             // lblProvincia
             // 
-            lblProvincia.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblProvincia.AutoSize = true;
             lblProvincia.Location = new Point(32, 210);
             lblProvincia.Name = "lblProvincia";
-            lblProvincia.Size = new Size(59, 15);
+            lblProvincia.Size = new Size(72, 20);
             lblProvincia.TabIndex = 4;
             lblProvincia.Text = "Provincia:";
             // 
             // lblCodPostal
             // 
-            lblCodPostal.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblCodPostal.AutoSize = true;
-            lblCodPostal.Location = new Point(26, 160);
+            lblCodPostal.Location = new Point(22, 163);
             lblCodPostal.Name = "lblCodPostal";
-            lblCodPostal.Size = new Size(67, 15);
+            lblCodPostal.Size = new Size(82, 20);
             lblCodPostal.TabIndex = 3;
             lblCodPostal.Text = "Cód Postal:";
             // 
             // lblLocalidad
             // 
-            lblLocalidad.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblLocalidad.AutoSize = true;
             lblLocalidad.Location = new Point(31, 110);
             lblLocalidad.Name = "lblLocalidad";
-            lblLocalidad.Size = new Size(61, 15);
+            lblLocalidad.Size = new Size(77, 20);
             lblLocalidad.TabIndex = 2;
             lblLocalidad.Text = "Localidad:";
             // 
             // lblTitulo
             // 
-            lblTitulo.Anchor = AnchorStyles.Top;
+            lblTitulo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Regular, GraphicsUnit.Point);
-            lblTitulo.Location = new Point(243, 9);
+            lblTitulo.Location = new Point(20, 10);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(304, 32);
+            lblTitulo.Size = new Size(380, 41);
             lblTitulo.TabIndex = 1;
             lblTitulo.Text = "Buscador de Estaciones ITV";
             // 
             // button1
             // 
-            button1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             button1.Location = new Point(96, 475);
             button1.MaximumSize = new Size(75, 23);
             button1.MinimumSize = new Size(75, 23);
@@ -201,6 +202,109 @@
             button1.Text = "Buscar";
             button1.UseVisualStyleBackColor = true;
             button1.Click += btnBuscar_Click;
+            // 
+            // btnCargarDatos
+            // 
+            btnCargarDatos.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnCargarDatos.BackColor = Color.LightGray;
+            btnCargarDatos.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            btnCargarDatos.Location = new Point(220, 21);
+            btnCargarDatos.Name = "btnCargarDatos";
+            btnCargarDatos.Size = new Size(120, 30);
+            btnCargarDatos.TabIndex = 11;
+            btnCargarDatos.Text = "Gestionar Datos";
+            btnCargarDatos.UseVisualStyleBackColor = false;
+            btnCargarDatos.Click += btnCargarDatos_Click;
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(0, 41);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 51;
+            dataGridView1.RowTemplate.Height = 25;
+            dataGridView1.Size = new Size(1100, 198);
+            dataGridView1.TabIndex = 1;
+            // 
+            // lblResultados
+            // 
+            lblResultados.Anchor = AnchorStyles.Top;
+            lblResultados.AutoSize = true;
+            lblResultados.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            lblResultados.Location = new Point(454, 10);
+            lblResultados.Name = "lblResultados";
+            lblResultados.RightToLeft = RightToLeft.Yes;
+            lblResultados.Size = new Size(244, 28);
+            lblResultados.TabIndex = 0;
+            lblResultados.Text = "Resultados de la búsqueda";
+            // 
+            // colNom
+            // 
+            colNom.MinimumWidth = 6;
+            colNom.Name = "colNom";
+            colNom.Width = 125;
+            // 
+            // colTipo
+            // 
+            colTipo.MinimumWidth = 6;
+            colTipo.Name = "colTipo";
+            colTipo.Width = 125;
+            // 
+            // colDir
+            // 
+            colDir.MinimumWidth = 6;
+            colDir.Name = "colDir";
+            colDir.Width = 125;
+            // 
+            // colCodPostal
+            // 
+            colCodPostal.MinimumWidth = 6;
+            colCodPostal.Name = "colCodPostal";
+            colCodPostal.Width = 125;
+            // 
+            // colDesc
+            // 
+            colDesc.MinimumWidth = 6;
+            colDesc.Name = "colDesc";
+            colDesc.Width = 125;
+            // 
+            // colHor
+            // 
+            colHor.MinimumWidth = 6;
+            colHor.Name = "colHor";
+            colHor.Width = 125;
+            // 
+            // colCont
+            // 
+            colCont.MinimumWidth = 6;
+            colCont.Name = "colCont";
+            colCont.Width = 125;
+            // 
+            // colURL
+            // 
+            colURL.MinimumWidth = 6;
+            colURL.Name = "colURL";
+            colURL.Width = 125;
+            // 
+            // colLocalidad
+            // 
+            colLocalidad.MinimumWidth = 6;
+            colLocalidad.Name = "colLocalidad";
+            colLocalidad.Width = 125;
+            // 
+            // colProvincia
+            // 
+            colProvincia.MinimumWidth = 6;
+            colProvincia.Name = "colProvincia";
+            colProvincia.Width = 125;
+            // 
+            // estacionBindingSource
+            // 
+            estacionBindingSource.DataSource = typeof(Entidades.Estacion);
             // 
             // gMapControl1
             // 
@@ -225,96 +329,17 @@
             gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             gMapControl1.SelectedAreaFillColor = Color.FromArgb(33, 65, 105, 225);
             gMapControl1.ShowTileGridLines = false;
-            gMapControl1.Size = new Size(301, 593);
+            gMapControl1.Size = new Size(746, 593);
             gMapControl1.TabIndex = 0;
             gMapControl1.Zoom = 0D;
+            gMapControl1.Load += gMapControl1_Load;
             // 
-            // dataGridView1
-            // 
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            //dataGridView1.Columns.AddRange(new DataGridViewColumn[] { colNom, colTipo, colDir, colCodPostal, colDesc, colHor, colCont, colURL, colLocalidad, colProvincia });
-            dataGridView1.Location = new Point(0, 34);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(1100, 205);
-            dataGridView1.TabIndex = 1;
-            // 
-            // colNom
-            // 
-            colNom.HeaderText = "Nombre";
-            colNom.Name = "colNom";
-            // 
-            // colTipo
-            // 
-            colTipo.HeaderText = "Tipo ";
-            colTipo.Name = "colTipo";
-            // 
-            // colDir
-            // 
-            colDir.HeaderText = "Dirección";
-            colDir.Name = "colDir";
-            // 
-            // colCodPostal
-            // 
-            colCodPostal.HeaderText = "Código Postal";
-            colCodPostal.Name = "colCodPostal";
-            // 
-            // colDesc
-            // 
-            colDesc.HeaderText = "Descripción";
-            colDesc.Name = "colDesc";
-            // 
-            // colHor
-            // 
-            colHor.HeaderText = "Horario";
-            colHor.Name = "colHor";
-            // 
-            // colCont
-            // 
-            colCont.HeaderText = "Contacto";
-            colCont.Name = "colCont";
-            // 
-            // colURL
-            // 
-            colURL.HeaderText = "URL";
-            colURL.Name = "colURL";
-            // 
-            // colLocalidad
-            // 
-            colLocalidad.HeaderText = "Localidad";
-            colLocalidad.Name = "colLocalidad";
-            // 
-            // colProvincia
-            // 
-            colProvincia.HeaderText = "Provincia";
-            colProvincia.Name = "colProvincia";
-            // 
-            // lblResultados
-            // 
-            lblResultados.Anchor = AnchorStyles.Top;
-            lblResultados.AutoSize = true;
-            lblResultados.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            lblResultados.Location = new Point(454, 10);
-            lblResultados.Name = "lblResultados";
-            lblResultados.RightToLeft = RightToLeft.Yes;
-            lblResultados.Size = new Size(195, 21);
-            lblResultados.TabIndex = 0;
-            lblResultados.Text = "Resultados de la búsqueda";
-            // 
-            // estacionBindingSource
-            // 
-            estacionBindingSource.DataSource = typeof(Entidades.Estacion);
-            // 
-            // Form1
+            // FormularioBusqueda
             // 
             ClientSize = new Size(1100, 836);
             Controls.Add(splitVertical);
-            Name = "Form1";
-            Text = "Form1";
+            Name = "FormularioBusqueda";
+            Text = "Buscador ITV";
             Load += Form1_Load;
             splitVertical.Panel1.ResumeLayout(false);
             splitVertical.Panel2.ResumeLayout(false);
@@ -332,6 +357,7 @@
         }
 
         private Button button1;
+        private Button btnCargarDatos;
         private Label lblTitulo;
         private Label lblResultados;
         private Label lblTipo;
@@ -354,5 +380,6 @@
         private DataGridViewTextBoxColumn colURL;
         private DataGridViewTextBoxColumn colLocalidad;
         private DataGridViewTextBoxColumn colProvincia;
+        private GMap.NET.WindowsForms.GMapControl gMapControl1;
     }
 }

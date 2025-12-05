@@ -1,21 +1,24 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GMap.NET;
 using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
+using GMap.NET.MapProviders;
 using Microsoft.EntityFrameworkCore;
 using UI.Entidades;
 using UI.Formularios;
 using UI.Logica;
 using UI.Parsers;
 using UI.Wrappers;
-using Newtonsoft.Json; // ← Necesario para JsonConvert
+using UI;
 
 namespace UI.UI_Gestor
 {
@@ -23,11 +26,9 @@ namespace UI.UI_Gestor
     {
         private GMapOverlay markersOverlay;
         private GMapOverlay routeOverlay;
-        private readonly LogicaBusqueda _logica;
         private readonly HttpClient _http;
         private List<Localidad> _cacheLocalidades;
 
-        // ← NUEVOS CAMPOS: para evitar el error "Cualquiera no es Provincia"
         private List<Provincia> _provinciasCompletas = new();
         private List<Localidad> _localidadesCompletas = new();
 
@@ -38,10 +39,15 @@ namespace UI.UI_Gestor
             InitializeComponent();
             _http = new HttpClient { BaseAddress = new Uri("http://localhost:5001") };
 
-            // Configuración inicial del mapa
+            // FIJAR EL PANEL IZQUIERDO: Esto evita que el mapa lo mueva
+            splitHorizontal.FixedPanel = FixedPanel.Panel1;
+            splitHorizontal.IsSplitterFixed = true; // Bloquea el movimiento manual también si quieres máxima rigidez
+
             gMapControl1.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             gMapControl1.ShowCenter = false;
+            gMapControl1.Dock = DockStyle.Fill;
+
             markersOverlay = new GMapOverlay("markers");
             routeOverlay = new GMapOverlay("route");
             gMapControl1.Overlays.Add(markersOverlay);
@@ -57,21 +63,18 @@ namespace UI.UI_Gestor
         {
             try
             {
-                this.MinimumSize = new Size(800, 600);
+                this.MinimumSize = new Size(900, 600);
                 this.WindowState = FormWindowState.Normal;
                 this.StartPosition = FormStartPosition.CenterScreen;
 
-                splitHorizontal.Panel1MinSize = 200;
-                splitHorizontal.Panel2MinSize = 300;
-                splitHorizontal.SplitterDistance = 350;
+                // Definir tamaño fijo inicial del panel izquierdo
+                splitHorizontal.SplitterDistance = 320;
 
                 dataGridView1.AutoGenerateColumns = true;
                 dataGridView1.Columns.Clear();
 
                 await PrepararCombos();
                 await AplicarFiltros();
-
-                splitHorizontal.SplitterDistance = this.Width / 2;
             }
             catch (Exception ex)
             {
@@ -82,6 +85,23 @@ namespace UI.UI_Gestor
         private void btnBuscar_Click(object sender, EventArgs e)
         {
             _ = AplicarFiltros();
+        }
+
+        private void btnCargarDatos_Click(object sender, EventArgs e)
+        {
+            FormularioCarga frmCarga = new FormularioCarga();
+
+            if (frmCarga.ShowDialog() == DialogResult.OK)
+            {
+                _ = PrepararCombos();
+                _ = AplicarFiltros();
+                MessageBox.Show("Datos actualizados correctamente.");
+            }
+        }
+
+        private void gMapControl1_Load(object sender, EventArgs e)
+        {
+            // Método requerido por el diseñador
         }
 
         private async Task PrepararCombos()
@@ -103,7 +123,7 @@ namespace UI.UI_Gestor
 
         private async Task CargarProvincias()
         {
-            cargando = true; // ← evita SelectedIndexChanged prematuro
+            cargando = true;
 
             try
             {
@@ -117,11 +137,11 @@ namespace UI.UI_Gestor
                     return;
                 }
 
-               
                 var json = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[CLIENTE] JSON provincias ({json.Length} caracteres): {json.Substring(0, Math.Min(500, json.Length))}...");
 
-                var provincias = JsonConvert.DeserializeObject<List<Provincia>>(json) ?? new List<Provincia>();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var provincias = JsonSerializer.Deserialize<List<Provincia>>(json, options) ?? new List<Provincia>();
                 Debug.WriteLine($"[CLIENTE] Provincias deserializadas: {provincias.Count}");
 
                 _provinciasCompletas = provincias;
@@ -135,12 +155,11 @@ namespace UI.UI_Gestor
                 Debug.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}\n{ex.StackTrace}");
                 comboProvincia.DataSource = new List<string> { "Cualquiera" };
             }
-            cargando = false; // ← ahora sí se permitirá detectar selección real
+            cargando = false;
         }
 
         private async Task CargarLocalidades()
         {
-
             cargando = true;
 
             try
@@ -156,19 +175,16 @@ namespace UI.UI_Gestor
                     return;
                 }
 
-
-                
-
                 var json = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[CLIENTE] JSON localidades ({json.Length} caracteres): {(json.Length > 500 ? json.Substring(0, 500) + "..." : json)}");
 
-                var localidades = JsonConvert.DeserializeObject<List<Localidad>>(json) ?? new List<Localidad>();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var localidades = JsonSerializer.Deserialize<List<Localidad>>(json, options) ?? new List<Localidad>();
                 Debug.WriteLine($"[CLIENTE] Localidades deserializadas: {localidades.Count} elementos");
 
                 _localidadesCompletas = localidades;
-                _cacheLocalidades = localidades; // sigue funcionando como antes
+                _cacheLocalidades = localidades;
 
-                // Carga todas las localidades al inicio
                 var nombres = localidades
                     .Select(l => $"{l.nombre} ({l.Provincia?.nombre ?? "Desconocida"})")
                     .Prepend("Cualquiera")
@@ -176,7 +192,7 @@ namespace UI.UI_Gestor
 
                 comboLocalidad.DataSource = nombres;
                 Debug.WriteLine($"[CLIENTE] comboLocalidad rellenado con {nombres.Count} elementos (incluye 'Cualquiera')");
-            
+
             }
             catch (Exception ex)
             {
@@ -195,7 +211,6 @@ namespace UI.UI_Gestor
 
             if (seleccion == "Cualquiera")
             {
-                // Mostrar todas las localidades
                 var nombres = _localidadesCompletas
                     .Select(l => $"{l.nombre} ({l.Provincia?.nombre ?? "Desconocida"})")
                     .Prepend("Cualquiera")
@@ -204,7 +219,6 @@ namespace UI.UI_Gestor
             }
             else
             {
-                // Filtrar por provincia seleccionada
                 var localidadesFiltradas = _localidadesCompletas
                     .Where(l => l.Provincia?.nombre == seleccion)
                     .Select(l => $"{l.nombre} ({l.Provincia?.nombre})")
@@ -217,27 +231,22 @@ namespace UI.UI_Gestor
 
         private void comboLocalidad_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Si estamos en modo carga o no hay selección válida, salir.
             if (cargando) return;
 
             var seleccion = comboLocalidad.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(seleccion) || seleccion == "Cualquiera") return;
 
-            // Normaliza: quita " (Provincia)" si está presente
-            string localidad = UtilidadesFormularioBusqueda.NormalizarLocalidadCombo(seleccion);
+            string localidad = seleccion.Contains("(") ? seleccion.Substring(0, seleccion.LastIndexOf("(")).Trim() : seleccion;
 
-            // Resuelve la provincia usando la cache del cliente (lista completa)
-            string provincia = UtilidadesFormularioBusqueda.ResolverProvinciaDesdeLocalidad(localidad, _cacheLocalidades);
+            string provincia = _cacheLocalidades.FirstOrDefault(l => l.nombre == localidad)?.Provincia?.nombre ?? "";
 
             if (string.IsNullOrEmpty(provincia)) return;
 
             try
             {
-                // Evitar que el SelectedIndexChanged del comboProvincia reaccione durante la asignación.
                 cargando = true;
                 comboProvincia.BeginUpdate();
 
-                // Buscamos la cadena exactamente (sin trim/extra spaces)
                 int idx = comboProvincia.FindStringExact(provincia);
 
                 Debug.WriteLine($"[DEBUG] Intentando seleccionar provincia '{provincia}' - FindStringExact -> idx={idx}");
@@ -248,7 +257,6 @@ namespace UI.UI_Gestor
                 }
                 else
                 {
-                    // Intento de fallback: comparar por Trim + IgnoreCase
                     var items = comboProvincia.Items.Cast<object>()
                                    .Select(x => x?.ToString()?.Trim())
                                    .ToList();
@@ -259,9 +267,7 @@ namespace UI.UI_Gestor
                         comboProvincia.SelectedIndex = idx2;
                     else
                     {
-                        // Log para diagnosticar porqué no lo encontró (útil en desarrollo)
                         Debug.WriteLine($"[DEBUG] Provincia '{provincia}' NO encontrada entre items: {string.Join(", ", items.Take(20))}...");
-                        // No hacemos nada más (dejará "Cualquiera")
                     }
                 }
             }
@@ -269,11 +275,9 @@ namespace UI.UI_Gestor
             {
                 comboProvincia.EndUpdate();
                 cargando = false;
-                // Forzar repintado visual por si acaso
                 comboProvincia.Refresh();
             }
         }
-
 
         private async Task AplicarFiltros()
         {
@@ -283,11 +287,13 @@ namespace UI.UI_Gestor
             string loc = comboLocalidad.SelectedItem?.ToString() ?? "Cualquiera";
             string tipo = comboTipo.SelectedItem?.ToString() ?? "Cualquiera";
 
-            // ← CLAVE: convertir "Cualquiera" a cadena vacía para que la API lo entienda
             string provinciaParam = prov == "Cualquiera" ? "" : prov;
-            string localidadParam = loc == "Cualquiera" || loc.Contains("(")
-                ? UtilidadesFormularioBusqueda.NormalizarLocalidadCombo(loc)  // quita " (Madrid)"
-                : loc;
+
+            string localidadParam = loc;
+            if (loc != "Cualquiera" && loc.Contains("("))
+            {
+                localidadParam = loc.Substring(0, loc.LastIndexOf("(")).Trim();
+            }
             localidadParam = localidadParam == "Cualquiera" ? "" : localidadParam;
 
             string tipoParam = tipo == "Cualquiera" ? "" : tipo;
@@ -310,10 +316,12 @@ namespace UI.UI_Gestor
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var resultado = JsonConvert.DeserializeObject<List<EstacionParaMostrar>>(json) ?? new List<EstacionParaMostrar>();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var resultado = JsonSerializer.Deserialize<List<EstacionParaMostrar>>(json, options) ?? new List<EstacionParaMostrar>();
                 Debug.WriteLine($"[CLIENTE] Estaciones recibidas: {resultado.Count}");
 
-                var paraMapa = UtilidadesFormularioBusqueda.FiltrarParaMapa(resultado);
+                var paraMapa = resultado.Where(e => e.latitud != 0 && e.longitud != 0).ToList();
+
                 ActualizarGrid(resultado);
                 ActualizarMapa(paraMapa);
             }
@@ -350,7 +358,6 @@ namespace UI.UI_Gestor
                 markersOverlay.Markers.Add(marker);
             }
 
-            // Forzar refresco del mapa
             gMapControl1.Zoom += 0.000001;
             gMapControl1.Zoom -= 0.000001;
         }
