@@ -145,7 +145,7 @@ namespace UI.Parsers
                 dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
                 resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
-                // ---------------------------------------------------------
+                
 
 
 
@@ -166,7 +166,7 @@ namespace UI.Parsers
 
                     if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$"))
                     {
-                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}').");
+                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres");
                         resultadoDebug.Añadida = false;
                     }
 
@@ -181,6 +181,18 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
                         resultadoDebug.Añadida = false;
                     }
+
+                    if (dato.C_POSTAL.Length >= 2)
+                    {
+                        var cpPrefijo = dato.C_POSTAL.Substring(0, 2);
+                        var prefijosValidos = prefijosCpPorTerritorio.Values.ToHashSet();
+
+                        if (!prefijosValidos.Contains(cpPrefijo))
+                        {
+                            resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante");
+                        }
+                    }
+
 
                     double? lat = dato.Latitud, lon = dato.Longitud;
 

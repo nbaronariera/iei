@@ -90,8 +90,23 @@ namespace UI.Parsers
 
                 if (!int.TryParse(dato.CodigoPostal, out codigoPostal) || codigoPostal < 10000 || codigoPostal > 99999)
                 {
-                    resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.CodigoPostal}').");
+                    resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.CodigoPostal}'), al no tener 5 caracteres");
                     resultadoDebug.Añadida = false;
+                }
+
+                if (dato.CodigoPostal.Length >= 2)
+                {
+                    var cpPrefijo = dato.CodigoPostal.Substring(0, 2);
+                    var prefijosValidos = provinciasGallegas.Values
+                                            .Select(v => v.ToString("D2")) // convierte 15 → "15"
+                                            .ToHashSet();
+
+                    if (!prefijosValidos.Contains(cpPrefijo))
+                    {
+                        resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con ninguna provincia gallega");
+                        resultadoDebug.Añadida = false;
+                    }
+
                 }
 
                 if (!provincias.Contains(dato.Provincia.Trim()))
@@ -105,6 +120,8 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add($"Código postal {codigoPostal} no coincide con provincia '{dato.Provincia}'.");
                     resultadoDebug.Añadida = false;
                 }
+
+                
 
                 double lat = ExtraerLatitud(dato.Coordenadas);
                 double lon = ExtraerLongitud(dato.Coordenadas);
