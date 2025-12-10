@@ -77,12 +77,6 @@ namespace UI.Parsers
 
                 resultadoDebug.Municipio = dato.MUNICIPIO;
 
-
-
-
-
-
-
                 // Normalizar variantes ortográficas comunes (València -> Valencia)
                 if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) &&
                     dato.PROVINCIA.Trim().Equals("València", StringComparison.OrdinalIgnoreCase))
@@ -165,8 +159,6 @@ namespace UI.Parsers
                     else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA))
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
 
-
-                    // Coordenadas y Tipoç
                     double? lat = dato.Latitud, lon = dato.Longitud;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;

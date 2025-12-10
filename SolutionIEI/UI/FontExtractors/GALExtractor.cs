@@ -98,7 +98,7 @@ namespace UI.Parsers
                 if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
                 {
                     resultadoDebug.Motivos.Add("Estación duplicada.");
-                    
+
                 }
 
                 if (resultadoDebug.Motivos.Count > 0)
@@ -220,7 +220,7 @@ namespace UI.Parsers
             // Normalizar símbolos
             dms = dms
                 .Replace("º", "°")
-                .Replace("�", "°")
+                .Replace("", "°")
                 .Replace("’", "'")
                 .Replace("′", "'")
                 .Replace("“", "\"")
