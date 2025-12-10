@@ -83,7 +83,7 @@ namespace UI
                         parser.Load(jsonPath);
 
                         var listaCruda = parser.ParseList();
-                        var (resultados, insertados, descartados) = parser.FromParsedToUsefull(listaCruda);
+                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
 
                         parser.Unload();
                         log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
@@ -132,7 +132,7 @@ namespace UI
                         parser.Load(jsonPath);
 
                         var listaCruda = parser.ParseList();
-                        var (resultados, insertados, descartados) = parser.FromParsedToUsefull(listaCruda);
+                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
 
                         parser.Unload();
                         log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
