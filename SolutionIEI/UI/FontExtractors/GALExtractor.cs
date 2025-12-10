@@ -43,7 +43,7 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<GALData>>(contenido, opciones) ?? new List<GALData>();
         }
 
-        public (List<ResultObject>, int, int) FromParsedToUsefull(List<GALData> datosParseados)
+        public (List<ResultObject>, int, int, String) FromParsedToUsefull(List<GALData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
@@ -157,7 +157,7 @@ namespace UI.Parsers
             contexto.SaveChanges();
 
             MostrarResumen(debugResultados);
-            return (resultados, validas, noValidas);
+            return (resultados, validas, noValidas, "Aqui la informacion de debug");
         }
 
         private Provincia ObtenerOCrearProvincia(AppDbContext ctx, string nombre)

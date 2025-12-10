@@ -21,6 +21,7 @@ namespace UI
         [STAThread]
         static void Main()
         { 
+<<<<<<< HEAD
             Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
@@ -103,6 +104,10 @@ namespace UI
                 await _webHost.StopAsync();
                 _webHost.Dispose();
             }
+=======
+            FormularioBusqueda mainForm = new FormularioBusqueda();
+            mainForm.ShowDialog();
+>>>>>>> 0ea666d328d7b4cbe0093ee91d46a9aed2d841ee
         }
     }
 }

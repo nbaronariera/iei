@@ -32,7 +32,7 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<JSONData>>(contenido, opciones) ?? new List<JSONData>();
         }
 
-        public (List<ResultObject>, int, int) FromParsedToUsefull(List<JSONData> datosParseados)
+        public (List<ResultObject>, int, int, String) FromParsedToUsefull(List<JSONData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
@@ -249,7 +249,7 @@ namespace UI.Parsers
 
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
-            return (resultados, validas, noValidas);
+            return (resultados, validas, noValidas, "Aqui va el debug de los resultados");
         }
 
 
