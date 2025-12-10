@@ -21,12 +21,12 @@ namespace UI
         [STAThread]
         static void Main()
         { 
-            //Task.Run(() => startServer());
+            Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
 
             
-           // stopServer().GetAwaiter().GetResult();
+           stopServer().GetAwaiter().GetResult();
             
 
             
@@ -89,7 +89,7 @@ namespace UI
             var builder = WebApplication.CreateBuilder();
             builder.Services.AddControllers();
 
-            builder.WebHost.UseUrls("http://localhost:8080");
+            builder.WebHost.UseUrls("http://localhost:5001");
             var app = builder.Build();
             app.MapControllers();
             _webHost = app;

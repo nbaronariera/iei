@@ -170,7 +170,8 @@ namespace UI.Parsers
 
                     // Coordenadas y Tipo
                     var coords = seleniumHelper.ObtenerCoordenadas(dato.DIRECCION, dato.MUNICIPIO);
-                    double? lat = coords.Lat, lon = coords.Lng;
+                    double? lat = coords.Lat;
+                    double? lon = coords.Lng;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
                     if (dato.TIPO_ESTACION != null)

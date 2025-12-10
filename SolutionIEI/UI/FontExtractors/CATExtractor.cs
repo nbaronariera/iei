@@ -36,7 +36,7 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<XMLData>>(contenido, opciones) ?? new List<XMLData>();
         }
 
-        public (List<ResultObject>, int, int) FromParsedToUsefull(List<XMLData> datosParseados)
+        public (List<ResultObject>, int, int, String) FromParsedToUsefull(List<XMLData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
@@ -172,7 +172,7 @@ namespace UI.Parsers
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
             Debug.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
-            return (resultados, validas, noValidas);
+            return (resultados, validas, noValidas, "Aqui la informacion de debug");
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)

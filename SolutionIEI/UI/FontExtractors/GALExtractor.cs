@@ -47,8 +47,8 @@ namespace UI.Parsers
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
-            var debugResultados = new List<ResultadoDebug>();
             using var seleniumHelper = new CoordenadasSelenium();
+            var debugResultados = new List<ResultadoDebug>();
             int noValidas = datosParseados.Count;
             int validas = 0;
 
@@ -93,7 +93,6 @@ namespace UI.Parsers
                 if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
                 {
                     var nuevas = seleniumHelper.ObtenerCoordenadas(dato.Direccion, dato.Municipio);
-
                     if (EsCoordenadaEnEspañaPeninsular(nuevas.Lat, nuevas.Lng))
                     {
                         lat = nuevas.Lat;
@@ -108,10 +107,10 @@ namespace UI.Parsers
                 if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
                 {
                     resultadoDebug.Motivos.Add("Estación duplicada.");
-                    
+
                 }
 
-               
+
 
                 if (resultadoDebug.Motivos.Count > 0)
                 {
@@ -232,7 +231,7 @@ namespace UI.Parsers
             // Normalizar símbolos
             dms = dms
                 .Replace("º", "°")
-                .Replace("�", "°")
+                .Replace("", "°")
                 .Replace("’", "'")
                 .Replace("′", "'")
                 .Replace("“", "\"")

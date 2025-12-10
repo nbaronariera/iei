@@ -75,19 +75,20 @@ namespace UI
                     if (ruta != null)
                     {
                         log.AppendLine($"> Cargando Galicia desde: {Path.GetFileName(ruta)}");
+
                         string jsonPath = CSVaJSONConversor.Ejecutar(ruta);
 
-                        /*var parser = new GALParser();
+                        var parser = new GALExtractor();
+
                         parser.Load(jsonPath);
-                        var lista = parser.ParseList();
 
-                        // Usando la lógica nueva con Selenium integrada en GALParser
-                        var resultados = parser.FromParsedToUsefull(lista);
+                        var listaCruda = parser.ParseList();
+                        var (resultados, insertados, descartados) = parser.FromParsedToUsefull(listaCruda);
+
                         parser.Unload();
+                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
 
-                        log.AppendLine($"Insertados: {resultados.Count}");
                         huboCarga = true;
-                        */
                     }
                     else log.AppendLine("  ⚠️ Carga Galicia cancelada (archivo no encontrado).");
                 }
@@ -100,14 +101,17 @@ namespace UI
                         log.AppendLine($"> Cargando Cataluña desde: {Path.GetFileName(ruta)}");
                         string jsonPath = XMLaJSONConversor.Ejecutar(ruta);
 
-                        /*
-                        var parser = new CATParser();
+                        var parser = new CATExtractor();
+
                         parser.Load(jsonPath);
-                        var resultados = parser.FromParsedToUsefull(parser.ParseList());
+
+                        var listaCruda = parser.ParseList();
+                        // CORRECCIÓN: Añadido el descarte '_' para el 4º elemento (String debug) que devuelve CATExtractor
+                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
+
                         parser.Unload();
-                        log.AppendLine($"Insertados: {resultados.Count}");
-                        */
-                        log.AppendLine("  [CATALUÑA] Falta implementar CATParser (Código comentado).");
+                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
+
                         huboCarga = true;
                     }
                     else log.AppendLine("  ⚠️ Carga Cataluña cancelada.");
@@ -121,14 +125,18 @@ namespace UI
                         log.AppendLine($"> Cargando Valencia desde: {Path.GetFileName(ruta)}");
 
 
-                        /*
-                        var parser = new CVParser();
-                        parser.Load(ruta);
-                        var resultados = parser.FromParsedToUsefull(parser.ParseList());
+                        string jsonPath = CSVaJSONConversor.Ejecutar(ruta);
+
+                        var parser = new CVExtractor();
+
+                        parser.Load(jsonPath);
+
+                        var listaCruda = parser.ParseList();
+                        var (resultados, insertados, descartados) = parser.FromParsedToUsefull(listaCruda);
+
                         parser.Unload();
-                        log.AppendLine($"Insertados: {resultados.Count}");
-                        */
-                        log.AppendLine("  [VALENCIA] Falta implementar CVParser (Código comentado).");
+                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
+
                         huboCarga = true;
                     }
                     else log.AppendLine("  ⚠️ Carga Valencia cancelada.");
@@ -137,7 +145,7 @@ namespace UI
                 if (huboCarga)
                 {
                     log.AppendLine("\n--- CARGA FINALIZADA ---");
-                    this.DialogResult = DialogResult.OK;
+                    //this.DialogResult = DialogResult.OK;
                 }
                 else
                 {
