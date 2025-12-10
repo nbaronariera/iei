@@ -29,6 +29,7 @@
             lblTitulo = new Label();
             button1 = new Button();
             btnCargarDatos = new Button();
+            gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             dataGridView1 = new DataGridView();
             lblResultados = new Label();
             colNom = new DataGridViewTextBoxColumn();
@@ -42,7 +43,6 @@
             colLocalidad = new DataGridViewTextBoxColumn();
             colProvincia = new DataGridViewTextBoxColumn();
             estacionBindingSource = new BindingSource(components);
-            gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             ((System.ComponentModel.ISupportInitialize)splitVertical).BeginInit();
             splitVertical.Panel1.SuspendLayout();
             splitVertical.Panel2.SuspendLayout();
@@ -112,7 +112,7 @@
             comboTipo.FormattingEnabled = true;
             comboTipo.Location = new Point(114, 257);
             comboTipo.Name = "comboTipo";
-            comboTipo.Size = new Size(200, 28);
+            comboTipo.Size = new Size(200, 23);
             comboTipo.TabIndex = 10;
             // 
             // comboProvincia
@@ -121,7 +121,7 @@
             comboProvincia.FormattingEnabled = true;
             comboProvincia.Location = new Point(114, 207);
             comboProvincia.Name = "comboProvincia";
-            comboProvincia.Size = new Size(200, 28);
+            comboProvincia.Size = new Size(200, 23);
             comboProvincia.TabIndex = 9;
             comboProvincia.SelectedIndexChanged += comboProvincia_SelectedIndexChanged;
             // 
@@ -131,7 +131,7 @@
             comboLocalidad.FormattingEnabled = true;
             comboLocalidad.Location = new Point(114, 110);
             comboLocalidad.Name = "comboLocalidad";
-            comboLocalidad.Size = new Size(200, 28);
+            comboLocalidad.Size = new Size(200, 23);
             comboLocalidad.TabIndex = 8;
             comboLocalidad.SelectedIndexChanged += comboLocalidad_SelectedIndexChanged;
             // 
@@ -140,7 +140,7 @@
             txtBoxCodPostal.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtBoxCodPostal.Location = new Point(114, 160);
             txtBoxCodPostal.Name = "txtBoxCodPostal";
-            txtBoxCodPostal.Size = new Size(200, 27);
+            txtBoxCodPostal.Size = new Size(200, 23);
             txtBoxCodPostal.TabIndex = 7;
             // 
             // lblTipo
@@ -148,7 +148,7 @@
             lblTipo.AutoSize = true;
             lblTipo.Location = new Point(57, 260);
             lblTipo.Name = "lblTipo";
-            lblTipo.Size = new Size(42, 20);
+            lblTipo.Size = new Size(34, 15);
             lblTipo.TabIndex = 5;
             lblTipo.Text = "Tipo:";
             // 
@@ -157,7 +157,7 @@
             lblProvincia.AutoSize = true;
             lblProvincia.Location = new Point(32, 210);
             lblProvincia.Name = "lblProvincia";
-            lblProvincia.Size = new Size(72, 20);
+            lblProvincia.Size = new Size(59, 15);
             lblProvincia.TabIndex = 4;
             lblProvincia.Text = "Provincia:";
             // 
@@ -166,7 +166,7 @@
             lblCodPostal.AutoSize = true;
             lblCodPostal.Location = new Point(22, 163);
             lblCodPostal.Name = "lblCodPostal";
-            lblCodPostal.Size = new Size(82, 20);
+            lblCodPostal.Size = new Size(67, 15);
             lblCodPostal.TabIndex = 3;
             lblCodPostal.Text = "Cód Postal:";
             // 
@@ -175,7 +175,7 @@
             lblLocalidad.AutoSize = true;
             lblLocalidad.Location = new Point(31, 110);
             lblLocalidad.Name = "lblLocalidad";
-            lblLocalidad.Size = new Size(77, 20);
+            lblLocalidad.Size = new Size(61, 15);
             lblLocalidad.TabIndex = 2;
             lblLocalidad.Text = "Localidad:";
             // 
@@ -186,18 +186,17 @@
             lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Regular, GraphicsUnit.Point);
             lblTitulo.Location = new Point(20, 10);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(380, 41);
+            lblTitulo.Size = new Size(304, 32);
             lblTitulo.TabIndex = 1;
             lblTitulo.Text = "Buscador de Estaciones ITV";
             // 
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            button1.Location = new Point(96, 475);
-            button1.MaximumSize = new Size(75, 23);
+            button1.Location = new Point(204, 476);
             button1.MinimumSize = new Size(75, 23);
             button1.Name = "button1";
-            button1.Size = new Size(75, 23);
+            button1.Size = new Size(120, 27);
             button1.TabIndex = 0;
             button1.Text = "Buscar";
             button1.UseVisualStyleBackColor = true;
@@ -205,16 +204,43 @@
             // 
             // btnCargarDatos
             // 
-            btnCargarDatos.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             btnCargarDatos.BackColor = Color.LightGray;
             btnCargarDatos.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            btnCargarDatos.Location = new Point(220, 21);
+            btnCargarDatos.Location = new Point(20, 476);
             btnCargarDatos.Name = "btnCargarDatos";
-            btnCargarDatos.Size = new Size(120, 30);
+            btnCargarDatos.Size = new Size(120, 27);
             btnCargarDatos.TabIndex = 11;
             btnCargarDatos.Text = "Gestionar Datos";
             btnCargarDatos.UseVisualStyleBackColor = false;
             btnCargarDatos.Click += btnCargarDatos_Click;
+            // 
+            // gMapControl1
+            // 
+            gMapControl1.Bearing = 0F;
+            gMapControl1.CanDragMap = true;
+            gMapControl1.Dock = DockStyle.Fill;
+            gMapControl1.EmptyTileColor = Color.Navy;
+            gMapControl1.GrayScaleMode = false;
+            gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
+            gMapControl1.LevelsKeepInMemory = 5;
+            gMapControl1.Location = new Point(0, 0);
+            gMapControl1.MarkersEnabled = true;
+            gMapControl1.MaxZoom = 2;
+            gMapControl1.MinZoom = 2;
+            gMapControl1.MouseWheelZoomEnabled = true;
+            gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter;
+            gMapControl1.Name = "gMapControl1";
+            gMapControl1.NegativeMode = false;
+            gMapControl1.PolygonsEnabled = true;
+            gMapControl1.RetryLoadTile = 0;
+            gMapControl1.RoutesEnabled = true;
+            gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
+            gMapControl1.SelectedAreaFillColor = Color.FromArgb(33, 65, 105, 225);
+            gMapControl1.ShowTileGridLines = false;
+            gMapControl1.Size = new Size(746, 593);
+            gMapControl1.TabIndex = 0;
+            gMapControl1.Zoom = 0D;
+            gMapControl1.Load += gMapControl1_Load;
             // 
             // dataGridView1
             // 
@@ -238,7 +264,7 @@
             lblResultados.Location = new Point(454, 10);
             lblResultados.Name = "lblResultados";
             lblResultados.RightToLeft = RightToLeft.Yes;
-            lblResultados.Size = new Size(244, 28);
+            lblResultados.Size = new Size(195, 21);
             lblResultados.TabIndex = 0;
             lblResultados.Text = "Resultados de la búsqueda";
             // 
@@ -305,34 +331,6 @@
             // estacionBindingSource
             // 
             estacionBindingSource.DataSource = typeof(Entidades.Estacion);
-            // 
-            // gMapControl1
-            // 
-            gMapControl1.Bearing = 0F;
-            gMapControl1.CanDragMap = true;
-            gMapControl1.Dock = DockStyle.Fill;
-            gMapControl1.EmptyTileColor = Color.Navy;
-            gMapControl1.GrayScaleMode = false;
-            gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
-            gMapControl1.LevelsKeepInMemory = 5;
-            gMapControl1.Location = new Point(0, 0);
-            gMapControl1.MarkersEnabled = true;
-            gMapControl1.MaxZoom = 2;
-            gMapControl1.MinZoom = 2;
-            gMapControl1.MouseWheelZoomEnabled = true;
-            gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter;
-            gMapControl1.Name = "gMapControl1";
-            gMapControl1.NegativeMode = false;
-            gMapControl1.PolygonsEnabled = true;
-            gMapControl1.RetryLoadTile = 0;
-            gMapControl1.RoutesEnabled = true;
-            gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
-            gMapControl1.SelectedAreaFillColor = Color.FromArgb(33, 65, 105, 225);
-            gMapControl1.ShowTileGridLines = false;
-            gMapControl1.Size = new Size(746, 593);
-            gMapControl1.TabIndex = 0;
-            gMapControl1.Zoom = 0D;
-            gMapControl1.Load += gMapControl1_Load;
             // 
             // FormularioBusqueda
             // 

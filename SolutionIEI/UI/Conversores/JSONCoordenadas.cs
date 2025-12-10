@@ -7,9 +7,8 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Wrappers
 {
-    public static class JSONConversor
+    public static class JSONCoordenadas
     {
-        
         static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
         public static string Ejecutar()
         {
@@ -33,20 +32,6 @@ namespace UI.Wrappers
             File.WriteAllText(jsonPath, generateString(listaObjetos), utf8NoBom);
 
             Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
-
-            // 3 Abrir carpeta automáticamente
-#if DEBUG
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = outputDir,
-                    UseShellExecute = true,
-                    Verb = "open"
-                });
-            }
-            catch { }
-#endif
 
             return jsonPath;
         }

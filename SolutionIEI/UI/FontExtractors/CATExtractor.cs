@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using UI.Entidades;
 using UI.Parsers.ParsedObjects;
+using UI.Wrappers;
 
 namespace UI.Parsers
 {
@@ -249,8 +250,6 @@ namespace UI.Parsers
             if (string.IsNullOrWhiteSpace(texto)) return false;
             return texto.ToLower().StartsWith("http") || texto.ToLower().StartsWith("www");
         }
-
-
         private string ConvertirHorarioCAT(string raw)
         {
             /*
@@ -291,6 +290,13 @@ namespace UI.Parsers
                 Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
+        }
+        public String LoadData()
+        {
+            string JsonCAT = XMLaJSONConversor.Ejecutar();
+            this.Load(JsonCAT);
+            var resultadosCat = this.FromParsedToUsefull(this.ParseList());
+            return resultadosCat.Item4;
         }
     }
 }

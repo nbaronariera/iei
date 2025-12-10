@@ -23,30 +23,20 @@ namespace UI.Logica
 
         public string ObtenerCV()
         {
-            string JsonCV = JSONConversor.Ejecutar();
             var cvExtractor = new CVExtractor();
-            cvExtractor.Load(JsonCV);
-            var resultadosCv = cvExtractor.FromParsedToUsefull(cvExtractor.ParseList());
-            return resultadosCv.Item4;
+            return cvExtractor.LoadData();
         }
 
         public string ObtenerCat()
         {
-            string JsonCAT = XMLaJSONConversor.Ejecutar();
-
             var catExtractor = new CATExtractor();
-            catExtractor.Load(JsonCAT);
-            var resultadosCat = catExtractor.FromParsedToUsefull(catExtractor.ParseList());
-            return resultadosCat.Item4;
+            return catExtractor.LoadData();
         }
 
         public string ObtenerGal()
         {
-            string JsonGAL = CSVaJSONConversor.Ejecutar();
             var galExtractor = new GALExtractor();
-            galExtractor.Load(JsonGAL);
-            var resultadosGal = galExtractor.FromParsedToUsefull(galExtractor.ParseList());
-            return resultadosGal.Item4;
+            return galExtractor.LoadData();
         }
 
         public bool Clean()

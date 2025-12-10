@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using UI.Entidades;
 using UI.Helpers;
 using UI.Parsers.ParsedObjects;
+using UI.Wrappers;
 
 namespace UI.Parsers
 {
@@ -36,7 +37,6 @@ namespace UI.Parsers
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
-            using var seleniumHelper = new CoordenadasSelenium();
             var debugResultados = new List<ResultadoDebug>();
             int noValidas = datosParseados.Count;
             int validas = 0;
@@ -166,11 +166,8 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
 
 
-
-
-                    // Coordenadas y Tipo
-                    var coords = seleniumHelper.ObtenerCoordenadas(dato.DIRECCION, dato.MUNICIPIO);
-                    double? lat = coords.Lat, lon = coords.Lng;
+                    // Coordenadas y Tipoç
+                    double? lat = dato.Latitud, lon = dato.Longitud;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
                     if (dato.TIPO_ESTACION != null)
@@ -316,6 +313,14 @@ namespace UI.Parsers
         private string ConvertirFormatoFecha(string input)
         {
             return input;
+        }
+
+        public String LoadData()
+        {
+            string JsonCV = JSONCoordenadas.Ejecutar();
+            this.Load(JsonCV);
+            var resultadosCv = this.FromParsedToUsefull(this.ParseList());
+            return resultadosCv.Item4;
         }
     }
 }

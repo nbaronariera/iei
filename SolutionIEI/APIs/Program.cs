@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------------
 var puertoForzado = Environment.GetEnvironmentVariable("PUERTO_API") is { } p && int.TryParse(p, out var port)
     ? port
-    : 5002;
+    : 5001;
 
 builder.WebHost.UseUrls($"http://localhost:{puertoForzado}");
 builder.WebHost.ConfigureKestrel(options => options.ListenLocalhost(puertoForzado));

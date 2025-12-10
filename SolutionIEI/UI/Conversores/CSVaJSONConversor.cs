@@ -62,20 +62,6 @@ namespace UI.Wrappers
 
             Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
 
-            // 5️ Abrir carpeta automáticamente
-#if DEBUG
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = outputDir,
-                    UseShellExecute = true,
-                    Verb = "open"
-                });
-            }
-            catch { }
-#endif
-
             return jsonPath;
         }
 

@@ -5,8 +5,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using UI.Entidades;
-using UI.Parsers.ParsedObjects;
 using UI.Helpers;
+using UI.Parsers.ParsedObjects;
+using UI.Wrappers;
 
 namespace UI.Parsers
 {
@@ -48,7 +49,6 @@ namespace UI.Parsers
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
-            using var seleniumHelper = new CoordenadasSelenium();
             int noValidas = datosParseados.Count;
             int validas = 0;
 
@@ -92,17 +92,7 @@ namespace UI.Parsers
 
                 if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
                 {
-                    var nuevas = seleniumHelper.ObtenerCoordenadas(dato.Direccion, dato.Municipio);
-
-                    if (EsCoordenadaEnEspañaPeninsular(nuevas.Lat, nuevas.Lng))
-                    {
-                        lat = nuevas.Lat;
-                        lon = nuevas.Lng;
-                    }
-                    else
-                    {
-                        resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
-                    }
+                    resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
                 }
 
                 if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
@@ -110,8 +100,6 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add("Estación duplicada.");
                     
                 }
-
-               
 
                 if (resultadoDebug.Motivos.Count > 0)
                 {
@@ -386,6 +374,13 @@ namespace UI.Parsers
                 Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
+        }
+        public String LoadData()
+        {
+            string JsonGAL = CSVaJSONConversor.Ejecutar();
+            this.Load(JsonGAL);
+            var resultadosGal = this.FromParsedToUsefull(this.ParseList());
+            return resultadosGal.Item4;
         }
     }
 }
