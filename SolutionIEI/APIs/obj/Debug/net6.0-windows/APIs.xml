@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>APIs</name>
+    </assembly>
+    <members>
+        <member name="M:APIs.Controllers.APIBusqueda.GetProvincias">
+            <summary>
+            Devuelve todas las provincias disponibles.
+            </summary>
+            <returns>Lista de provincias.</returns>
+        </member>
+        <member name="M:APIs.Controllers.APIBusqueda.GetLocalidades">
+            <summary>
+            Devuelve todas las localidades disponibles.
+            </summary>
+            <returns>Lista de localidades.</returns>
+        </member>
+        <member name="M:APIs.Controllers.APIBusqueda.GetEstaciones(System.String,System.String,System.String,System.String)">
+            <summary>
+            Obtiene estaciones filtradas por CP, provincia, localidad y tipo.
+            </summary>
+        </member>
+        <member name="M:APIs.Controllers.APIBusqueda.Ping">
+            <summary>
+            Prueba de diagnóstico para confirmar que la API está funcionando.
+            </summary>
+        </member>
+    </members>
+</doc>

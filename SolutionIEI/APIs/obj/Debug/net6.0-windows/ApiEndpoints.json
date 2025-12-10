@@ -1,18 +1,38 @@
 [
   {
-    "ContainingType": "UI.Controllers.CargaController",
-    "Method": "Cargar",
-    "RelativePath": "api/carga",
-    "HttpMethod": "POST",
+    "ContainingType": "APIs.Controllers.APICarga",
+    "Method": "GetCat",
+    "RelativePath": "carga/cat",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "APIs.Controllers.APIBusqueda",
-    "Method": "Diagnostico",
-    "RelativePath": "diagnostico",
+    "ContainingType": "APIs.Controllers.APICarga",
+    "Method": "Clean",
+    "RelativePath": "carga/clean",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APICarga",
+    "Method": "GetCV",
+    "RelativePath": "carga/cv",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "APIs.Controllers.APICarga",
+    "Method": "GetGal",
+    "RelativePath": "carga/gal",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -48,7 +68,13 @@
         "IsRequired": false
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "APIs.Controllers.APIBusqueda",
@@ -58,7 +84,18 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
   },
   {
     "ContainingType": "APIs.Controllers.APIBusqueda",
@@ -78,6 +115,17 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      },
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 500
+      }
+    ]
   }
 ]
