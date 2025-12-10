@@ -21,32 +21,8 @@ namespace UI
         [STAThread]
         static void Main()
         { 
-            Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
-
-           stopServer().GetAwaiter().GetResult();
-        }
-
-        private static async void startServer()
-        {
-            var builder = WebApplication.CreateBuilder();
-            builder.Services.AddControllers();
-
-            builder.WebHost.UseUrls("http://localhost:5001");
-            var app = builder.Build();
-            app.MapControllers();
-            _webHost = app;
-            await app.StartAsync();
-        }
-
-        private static async Task stopServer()
-        {
-            if (_webHost != null)
-            {
-                await _webHost.StopAsync();
-                _webHost.Dispose();
-            }
         }
     }
 }
