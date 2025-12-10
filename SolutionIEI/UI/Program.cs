@@ -21,67 +21,11 @@ namespace UI
         [STAThread]
         static void Main()
         { 
-            //Task.Run(() => startServer());
+            Task.Run(() => startServer());
             FormularioBusqueda mainForm = new FormularioBusqueda();
             mainForm.ShowDialog();
 
-            
-           // stopServer().GetAwaiter().GetResult();
-            
-
-            
-            /*
-                Debug.WriteLine("=== INICIANDO CONVERSIÓN ===");
-
-                // Borrar y recrear la base de datos al inicio
-                using (var db = new AppDbContext())
-                {
-                    
-                   // Debug.WriteLine("[INFO] Eliminando base de datos existente...");
-                  //  db.Database.EnsureDeleted();
-
-                   // Debug.WriteLine("[INFO] Creando base de datos vacía...");
-                   // db.Database.EnsureCreated();
-                    
-                    
-                }
-
-                string JsonCV = JSONConversor.Ejecutar();
-                string JsonCAT = XMLaJSONConversor.Ejecutar();
-                string JsonGAL = CSVaJSONConversor.Ejecutar();
-
-                // 2) Cargar JSON usando GALParser
-
-                var galParser = new GALExtractor();
-                galParser.Load(JsonGAL);
-
-                var catParser = new CATExtractor();
-                catParser.Load(JsonCAT);
-
-                var cvParser = new CVExtractor();
-                cvParser.Load(JsonCV);
-
-                var resultadosCat = catParser.FromParsedToUsefull(catParser.ParseList());
-                var resultadosGal = galParser.FromParsedToUsefull(galParser.ParseList());
-                var resultadosCv = cvParser.FromParsedToUsefull(cvParser.ParseList());
-
-                var resultados = (
-                    resultadosCat.Item1.Concat(resultadosGal.Item1).Concat(resultadosCv.Item1).ToList(),
-                    resultadosCat.Item2 + resultadosCv.Item2 + resultadosGal.Item2,
-                    resultadosCat.Item3 + resultadosCv.Item3 + resultadosGal.Item3
-                );
-
-                Debug.WriteLine($"[OK] {resultados.Item1.Count} estaciones parseadas.");
-                Debug.WriteLine($"[OK] {resultados.Item2} estaciones parseadas correctamente.");
-                Debug.WriteLine($"[OK] {resultados.Item3} estaciones omitidas.");
-
-                Debug.WriteLine("=== ESTACIONES LISTAS PARA INSERTAR EN BASE DE DATOS ===");
-
-                Debug.WriteLine("=== FIN ===");
-
-            */
-            
-            
+           stopServer().GetAwaiter().GetResult();
         }
 
         private static async void startServer()
@@ -89,7 +33,7 @@ namespace UI
             var builder = WebApplication.CreateBuilder();
             builder.Services.AddControllers();
 
-            builder.WebHost.UseUrls("http://localhost:8080");
+            builder.WebHost.UseUrls("http://localhost:5001");
             var app = builder.Build();
             app.MapControllers();
             _webHost = app;
