@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("UI")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("APIs")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8109cda7eae7b2759e0e32822a0f7da3cba090a9")]
-[assembly: System.Reflection.AssemblyProductAttribute("UI")]
-[assembly: System.Reflection.AssemblyTitleAttribute("UI")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e3ef69cb036283205b8eff4a6dff14f7d1a9fd44")]
+[assembly: System.Reflection.AssemblyProductAttribute("APIs")]
+[assembly: System.Reflection.AssemblyTitleAttribute("APIs")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]

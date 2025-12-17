@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
 using UI.Entidades;
 using UI.Parsers;
-using UI.Wrappers;
 using UI.Parsers.ParsedObjects;
-using System.Linq;
+using UI.Wrappers;
+using static System.Net.WebRequestMethods;
 
 namespace UI
 {
     public partial class FormularioCarga : Form
     {
+        private readonly HttpClient _http;
         public FormularioCarga()
         {
             InitializeComponent();
+            _http = new HttpClient { BaseAddress = new Uri("http://localhost:5001") };
         }
 
         private void chkTodos_CheckedChanged(object sender, EventArgs e)
@@ -54,7 +58,7 @@ namespace UI
             }
         }
 
-        private void btnCargar_Click(object sender, EventArgs e)
+        private async void btnCargar_Click(object sender, EventArgs e)
         {
             rtbResumen.Clear();
             StringBuilder log = new StringBuilder();
@@ -63,111 +67,71 @@ namespace UI
             Cursor.Current = Cursors.WaitCursor;
             bool huboCarga = false;
 
-            string defaultGal = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fuentes", "Estacions_ITVEntrega.csv");
-            string defaultCat = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fuentes", "ITV-CAT.xml");
-            string defaultVal = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fuentes", "estaciones.json");
+            string response = "";
 
-            try
+            if (_http != null)
             {
-                if (chkGalicia.Checked)
+
+                try
                 {
-                    string ruta = ObtenerRutaArchivo("Galicia (CSV)", defaultGal, "CSV Files|*.csv");
-                    if (ruta != null)
+                    if (chkGalicia.Checked)
                     {
-                        log.AppendLine($"> Cargando Galicia desde: {Path.GetFileName(ruta)}");
-
-                        string jsonPath = CSVaJSONConversor.Ejecutar(ruta);
-
-                        var parser = new GALExtractor();
-
-                        parser.Load(jsonPath);
-
-                        var listaCruda = parser.ParseList();
-                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
-
-                        parser.Unload();
-                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
+                        var url = "/gal";
+                        log.AppendLine("\n--- CARGAA 1 ---");
+                        response = response + "\n--- CARGA GALICIA ---\n" + await _http.PostAsync(url, null);
 
                         huboCarga = true;
                     }
-                    else log.AppendLine("  ⚠️ Carga Galicia cancelada (archivo no encontrado).");
-                }
 
-                if (chkCataluna.Checked)
-                {
-                    string ruta = ObtenerRutaArchivo("Cataluña (XML)", defaultCat, "XML Files|*.xml");
-                    if (ruta != null)
+                    if (chkCataluna.Checked)
                     {
-                        log.AppendLine($"> Cargando Cataluña desde: {Path.GetFileName(ruta)}");
-                        string jsonPath = XMLaJSONConversor.Ejecutar(ruta);
-
-                        var parser = new CATExtractor();
-
-                        parser.Load(jsonPath);
-
-                        var listaCruda = parser.ParseList();
-                        // CORRECCIÓN: Añadido el descarte '_' para el 4º elemento (String debug) que devuelve CATExtractor
-                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
-
-                        parser.Unload();
-                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
+                        log.AppendLine("\n--- CARGA 2 ---");
+                        var url = "/cat";
+                        response = response + "\n--- CARGA CATALUÑA ---\n" + await _http.GetAsync(url);
 
                         huboCarga = true;
                     }
-                    else log.AppendLine("  ⚠️ Carga Cataluña cancelada.");
-                }
 
-                if (chkValencia.Checked)
-                {
-                    string ruta = ObtenerRutaArchivo("Valencia (JSON)", defaultVal, "JSON Files|*.json");
-                    if (ruta != null)
+                    if (chkValencia.Checked)
                     {
-                        log.AppendLine($"> Cargando Valencia desde: {Path.GetFileName(ruta)}");
-
-
-                        string jsonPath = CSVaJSONConversor.Ejecutar(ruta);
-
-                        var parser = new CVExtractor();
-
-                        parser.Load(jsonPath);
-
-                        var listaCruda = parser.ParseList();
-                        var (resultados, insertados, descartados, _) = parser.FromParsedToUsefull(listaCruda);
-
-                        parser.Unload();
-                        log.AppendLine($"Insertados: {resultados.Count} (Válidos: {insertados}, Descartados: {descartados})");
+                        var url = "/val";
+                        log.AppendLine("\n--- CARGA 3 ---");
+                        response = response + "\n--- CARGA VALENCIA ---\n" + await _http.GetAsync(url);
 
                         huboCarga = true;
                     }
-                    else log.AppendLine("  ⚠️ Carga Valencia cancelada.");
-                }
 
-                if (huboCarga)
-                {
-                    log.AppendLine("\n--- CARGA FINALIZADA ---");
-                    //this.DialogResult = DialogResult.OK;
-                }
-                else
-                {
-                    log.AppendLine("\n⚠️ No se seleccionó ninguna fuente o se canceló.");
-                }
+                    if (huboCarga)
+                    {
+                        log.AppendLine("\n--- CARGA FINALIZADA ---");
+                        //this.DialogResult = DialogResult.OK;
+                        log.AppendLine(response);
+                    }
+                    else
+                    {
+                        log.AppendLine("\n⚠️ No se seleccionó ninguna fuente o se canceló.");
+                    }
 
-                rtbResumen.Text = log.ToString();
+                    rtbResumen.Text = log.ToString();
+                }
+                catch (Exception ex)
+                {
+                    rtbResumen.Text += $"\n ERROR CRÍTICO: {ex.Message}";
+                    MessageBox.Show("Error durante la carga: " + ex.Message);
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
+                }
             }
-            catch (Exception ex)
-            {
-                rtbResumen.Text += $"\n ERROR CRÍTICO: {ex.Message}";
-                MessageBox.Show("Error durante la carga: " + ex.Message);
-            }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
+            else {
+                log.AppendLine("\n--- Error http ---");
             }
         }
 
         private string ObtenerRutaArchivo(string nombreFuente, string rutaDefecto, string filtro)
         {
-            if (File.Exists(rutaDefecto)) return rutaDefecto;
+            if (System.IO.File.Exists(rutaDefecto)) return rutaDefecto;
 
             // Si no está en la carpeta por defecto, preguntamos al usuario
             DialogResult dr = MessageBox.Show(
