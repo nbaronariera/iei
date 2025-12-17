@@ -37,18 +37,21 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<XMLData>>(contenido, opciones) ?? new List<XMLData>();
         }
 
-        public (List<ResultObject>, int, int, String) FromParsedToUsefull(List<XMLData> datosParseados)
+        public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<XMLData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
-            int noValidas = datosParseados.Count;
-            int validas = 0;
+            
+            int numValidas = 0;
 
             Debug.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
 
             foreach (var dato in datosParseados)
             {
+
+                
+
                 var resultadoDebug = new ResultadoDebug
                 {
                     Nombre = dato.denominaci?.Trim() ?? "(sin nombre)",
@@ -58,23 +61,33 @@ namespace UI.Parsers
                     Motivos = new List<string>()
                 };
 
+                resultadoDebug.Fuente = "CAT";
+
                 try
                 {
                     if (string.IsNullOrWhiteSpace(dato.denominaci))
                     {
                         resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
+                        resultadoDebug.Añadida = false;
                     }
 
                     if (string.IsNullOrWhiteSpace(dato.serveis_territorials))
+                    {
                         resultadoDebug.Motivos.Add("Provincia vacía o nula.");
+                        resultadoDebug.Añadida = false;
+                    }
                     if (string.IsNullOrWhiteSpace(dato.municipi))
+                    {
                         resultadoDebug.Motivos.Add("Municipio vacío o nulo.");
+                        resultadoDebug.Añadida = false;
+                    }
 
                     string cpRaw = dato.cp?.Trim() ?? "";
 
                     if (!Regex.IsMatch(cpRaw, @"^\d{5}$"))
                     {
                         resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.cp}'), al no tener 5 caracteres.");
+                        resultadoDebug.Añadida = false;
                     }
 
                     // Determinar provincia usando la nueva lógica
@@ -82,7 +95,8 @@ namespace UI.Parsers
 
                     if (string.IsNullOrWhiteSpace(provinciaNombre))
                     {
-                        resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia conocida.");
+                        resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia catalana.");
+                        resultadoDebug.Añadida = false;
                     }
 
                     resultadoDebug.Provincia = provinciaNombre;
@@ -101,6 +115,7 @@ namespace UI.Parsers
                         else
                         {
                             resultadoDebug.Motivos.Add("No se pudieron extraer coordenadas de Google Maps.");
+                            resultadoDebug.Añadida = false;
                         }
                     }
                     else
@@ -113,15 +128,19 @@ namespace UI.Parsers
                     if (EstacionYaExiste(contexto, dato.denominaci, lat, lon))
                     {
                         resultadoDebug.Motivos.Add("Estación duplicada.");
+                        resultadoDebug.Añadida = false;
                     }
 
                     if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
+                    {
                         resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
+                        resultadoDebug.Añadida = false;
+                    }
 
                     string correoLimpio = EsUrl(dato.correu_electr_nic) ? "" : dato.correu_electr_nic;
                     string contactoFormateado = $"Correo electrónico: {correoLimpio} Teléfono: {dato.tel_atenc_public}";
 
-                    if (resultadoDebug.Motivos.Count > 0)
+                    if (resultadoDebug.Añadida == false)
                     {
                         resultadoDebug.Añadida = false;
                         resultadoDebug.Provincia = dato.serveis_territorials?.Trim() ?? "(desconocida)";
@@ -130,8 +149,8 @@ namespace UI.Parsers
                     }
 
                     resultadoDebug.Añadida = true;
-                    validas++;
-                    noValidas--;
+                    numValidas++;
+                    
 
                     // Obtener o crear provincia y localidad de forma segura
                     var provincia = ObtenerOCrearProvincia(contexto, provinciaNombre);
@@ -173,7 +192,27 @@ namespace UI.Parsers
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
             Debug.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
-            return (resultados, validas, noValidas, "Aqui la informacion de debug");
+
+            int cargadasCorrectamente = debugResultados.Count(r => r.Añadida);
+
+            string estacionesReparadas = string.Join("\n",
+                debugResultados
+                    .Where(r => r.Reparada && r.Añadida)
+                    .Select(r =>
+                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
+                    )
+            );
+
+            string estacionesRechazadas = string.Join("\n",
+                debugResultados
+                    .Where(r => !r.Añadida)
+                    .Select(r =>
+                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}]}}"
+                    )
+            );
+
+            return (resultados, cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
+
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)

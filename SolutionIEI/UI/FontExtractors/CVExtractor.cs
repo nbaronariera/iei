@@ -33,16 +33,18 @@ namespace UI.Parsers
             return JsonSerializer.Deserialize<List<JSONData>>(contenido, opciones) ?? new List<JSONData>();
         }
 
-        public (List<ResultObject>, int, int, String) FromParsedToUsefull(List<JSONData> datosParseados)
+        public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<JSONData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
-            int noValidas = datosParseados.Count;
-            int validas = 0;
+            
+            int numValidas = 0;
 
             foreach (var dato in datosParseados)
             {
+
+               
 
                 var resultadoDebug = new ResultadoDebug
                 {
@@ -53,6 +55,7 @@ namespace UI.Parsers
                     Motivos = new List<string>()
                 };
 
+                resultadoDebug.Fuente = "CV";
 
                 // ---------------------------------------------------------
                 // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (Sanitización)
@@ -82,6 +85,9 @@ namespace UI.Parsers
                     dato.PROVINCIA.Trim().Equals("València", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.PROVINCIA = "Valencia";
+                    resultadoDebug.Reparada = true;
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: València");
+                    resultadoDebug.Reparaciones.Add("Provincia normalizada: València → Valencia");
                 }
 
                 // Normalizar variantes ortográficas comunes (Alacant -> Alicante)
@@ -89,6 +95,9 @@ namespace UI.Parsers
                     dato.PROVINCIA.Trim().Equals("Alacant", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.PROVINCIA = "Alicante";
+                    resultadoDebug.Reparada = true;
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: Alacant");
+                    resultadoDebug.Reparaciones.Add("Provincia normalizada: Alacant → Alicante");
                 }
 
                 // Normalizar variantes ortográficas comunes (Castelló -> Castellón)
@@ -96,6 +105,9 @@ namespace UI.Parsers
                     dato.PROVINCIA.Trim().Equals("Castelló", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.PROVINCIA = "Castellón";
+                    resultadoDebug.Reparada = true;
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: Castelló");
+                    resultadoDebug.Reparaciones.Add("Provincia normalizada: Castelló → Castellón");
                 }
 
 
@@ -133,7 +145,7 @@ namespace UI.Parsers
                 dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
                 resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
-                // ---------------------------------------------------------
+                
 
 
 
@@ -141,23 +153,46 @@ namespace UI.Parsers
                 {
                     // Validaciones (ahora es más difícil que fallen gracias a la corrección anterior)
                     if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
+                    {
                         resultadoDebug.Motivos.Add("Provincia vacía.");
+                        resultadoDebug.Añadida = false;
+                    }
 
                     if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
+                    {
                         resultadoDebug.Motivos.Add("Municipio vacío.");
+                        resultadoDebug.Añadida = false;
+                    }
 
                     if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$"))
                     {
-                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}').");
+                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres");
+                        resultadoDebug.Añadida = false;
                     }
 
 
                     if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
                     {
                         resultadoDebug.Motivos.Add("Provincia no válida");
+                        resultadoDebug.Añadida = false;
                     }
                     else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA))
+                    {
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
+                        resultadoDebug.Añadida = false;
+                    }
+
+                    if (dato.C_POSTAL.Length >= 2)
+                    {
+                        var cpPrefijo = dato.C_POSTAL.Substring(0, 2);
+                        var prefijosValidos = prefijosCpPorTerritorio.Values.ToHashSet();
+
+                        if (!prefijosValidos.Contains(cpPrefijo))
+                        {
+                            resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante");
+                        }
+                    }
+
 
                     double? lat = dato.Latitud, lon = dato.Longitud;
 
@@ -172,11 +207,12 @@ namespace UI.Parsers
                     if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat ?? 0, lon ?? 0))
                     {
                         resultadoDebug.Motivos.Add("Estación duplicada.");
+                        resultadoDebug.Añadida = false;
 
                     }
 
                     // Si hay errores graves, no insertamos
-                    if (resultadoDebug.Motivos.Count > 0)
+                    if (resultadoDebug.Añadida == false)
                     {
                         resultadoDebug.Añadida = false;
                         debugResultados.Add(resultadoDebug);
@@ -221,8 +257,8 @@ namespace UI.Parsers
 
                     contexto.Estaciones.Add(estacion);
                     resultados.Add(new ResultObject { Estacion = estacion, Localidad = localidad, Provincia = provincia });
-                    validas++;
-                    noValidas--;
+                    numValidas++;
+                    
 
                     resultadoDebug.Añadida = true;
                     debugResultados.Add(resultadoDebug);
@@ -237,7 +273,27 @@ namespace UI.Parsers
 
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
-            return (resultados, validas, noValidas, "Aqui va el debug de los resultados");
+
+            int cargadasCorrectamente = debugResultados.Count(r => r.Añadida);
+
+            string estacionesReparadas = string.Join("\n",
+                debugResultados
+                    .Where(r => r.Reparada && r.Añadida)
+                    .Select(r =>
+                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
+                    )
+            );
+
+            string estacionesRechazadas = string.Join("\n",
+                debugResultados
+                    .Where(r => !r.Añadida)
+                    .Select(r =>
+                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}]}}"
+                    )
+            );
+
+            return (resultados, cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
+
         }
 
 
