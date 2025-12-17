@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\APIs\\APIs.csproj": {}
+    "W:\\iei\\SolutionIEI\\APIs\\APIs.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\APIs\\APIs.csproj": {
+    "W:\\iei\\SolutionIEI\\APIs\\APIs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\APIs\\APIs.csproj",
+        "projectUniqueName": "W:\\iei\\SolutionIEI\\APIs\\APIs.csproj",
         "projectName": "APIs",
-        "projectPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\APIs\\APIs.csproj",
-        "packagesPath": "C:\\Users\\Nacheitor8\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\APIs\\obj\\",
+        "projectPath": "W:\\iei\\SolutionIEI\\APIs\\APIs.csproj",
+        "packagesPath": "C:\\Users\\NBARRIE\\.nuget\\packages\\",
+        "outputPath": "W:\\iei\\SolutionIEI\\APIs\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Nacheitor8\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\NBARRIE\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -28,8 +32,8 @@
           "net6.0-windows7.0": {
             "targetAlias": "net6.0-windows",
             "projectReferences": {
-              "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj": {
-                "projectPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj"
+              "W:\\iei\\SolutionIEI\\UI\\UI.csproj": {
+                "projectPath": "W:\\iei\\SolutionIEI\\UI\\UI.csproj"
               }
             }
           }
@@ -43,7 +47,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net6.0-windows7.0": {
@@ -69,24 +74,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -95,21 +82,25 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj": {
+    "W:\\iei\\SolutionIEI\\UI\\UI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj",
+        "projectUniqueName": "W:\\iei\\SolutionIEI\\UI\\UI.csproj",
         "projectName": "UI",
-        "projectPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\UI.csproj",
-        "packagesPath": "C:\\Users\\Nacheitor8\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Nacheitor8\\source\\repos\\TrabajoIEI\\SolutionIEI\\UI\\obj\\",
+        "projectPath": "W:\\iei\\SolutionIEI\\UI\\UI.csproj",
+        "packagesPath": "C:\\Users\\NBARRIE\\.nuget\\packages\\",
+        "outputPath": "W:\\iei\\SolutionIEI\\UI\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Nacheitor8\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\NBARRIE\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -134,7 +125,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net6.0-windows7.0": {
@@ -190,24 +182,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[6.0.33, 6.0.33]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -219,7 +193,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308\\RuntimeIdentifierGraph.json"
         }
       }
     }

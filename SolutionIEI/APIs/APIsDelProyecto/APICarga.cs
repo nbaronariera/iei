@@ -12,8 +12,8 @@ namespace APIs.Controllers
         private readonly LogicaCarga _logica;
         public APICarga(LogicaCarga logica) => _logica = logica;
 
-        [HttpGet("cv")]
-        public IActionResult GetCV()
+        [HttpPost("cv")]
+        public IActionResult LoadCV()
         {
             try
             {
@@ -27,8 +27,8 @@ namespace APIs.Controllers
             }
         }
 
-        [HttpDelete("clean")]
-        public IActionResult Clean()
+        [HttpDelete("delete")]
+        public IActionResult Delete()
         {
             try
             {
@@ -42,8 +42,8 @@ namespace APIs.Controllers
             }
         }
 
-        [HttpGet("cat")]
-        public IActionResult GetCat()
+        [HttpPost("cat")]
+        public IActionResult LoadCat()
         {
             try
             {
@@ -57,8 +57,8 @@ namespace APIs.Controllers
             }
         }
 
-        [HttpGet("gal")]
-        public IActionResult GetGal()
+        [HttpPost("gal")]
+        public IActionResult LoadGal()
         {
             try
             {
