@@ -57,3 +57,22 @@ dkms.conf
 .vs/
 
 *.cache
+
+## Ignorar carpetas de compilación y temporales
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio cache y opciones de usuario
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Archivos de log y temporales del sistema
+*.log
+Thumbs.db
+.DS_Store
+
+## Visual Studio Code
+.vscode/
