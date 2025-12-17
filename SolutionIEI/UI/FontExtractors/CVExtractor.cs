@@ -368,7 +368,7 @@ namespace UI.Parsers
             string JsonCV = JSONCoordenadas.Ejecutar();
             this.Load(JsonCV);
             var resultadosCv = this.FromParsedToUsefull(this.ParseList());
-            return resultadosCv.Item4;
+            return resultadosCv.Item2 + "\n" + resultadosCv.Item3 + "\n" + resultadosCv.Item4;
         }
     }
 }

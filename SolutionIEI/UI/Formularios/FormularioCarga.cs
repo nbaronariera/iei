@@ -77,7 +77,7 @@ namespace UI
                     if (chkGalicia.Checked)
                     {
                         var url = "/gal";
-                        log.AppendLine("\n--- CARGAA 1 ---");
+                        //log.AppendLine("\n--- CARGAA 1 ---");
                         response = response + "\n--- CARGA GALICIA ---\n" + await _http.PostAsync(url, null);
 
                         huboCarga = true;
@@ -85,9 +85,9 @@ namespace UI
 
                     if (chkCataluna.Checked)
                     {
-                        log.AppendLine("\n--- CARGA 2 ---");
+                        //log.AppendLine("\n--- CARGA 2 ---");
                         var url = "/cat";
-                        response = response + "\n--- CARGA CATALUÑA ---\n" + await _http.GetAsync(url);
+                        response = response + "\n--- CARGA CATALUÑA ---\n" + await _http.PostAsync(url, null);
 
                         huboCarga = true;
                     }
@@ -95,17 +95,17 @@ namespace UI
                     if (chkValencia.Checked)
                     {
                         var url = "/val";
-                        log.AppendLine("\n--- CARGA 3 ---");
-                        response = response + "\n--- CARGA VALENCIA ---\n" + await _http.GetAsync(url);
+                        //log.AppendLine("\n--- CARGA 3 ---");
+                        response = response + "\n--- CARGA VALENCIA ---\n" + await _http.PostAsync(url, null);
 
                         huboCarga = true;
                     }
 
                     if (huboCarga)
                     {
-                        log.AppendLine("\n--- CARGA FINALIZADA ---");
                         //this.DialogResult = DialogResult.OK;
                         log.AppendLine(response);
+                        log.AppendLine("\n--- CARGA FINALIZADA ---");
                     }
                     else
                     {
