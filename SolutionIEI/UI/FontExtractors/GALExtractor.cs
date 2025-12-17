@@ -437,7 +437,7 @@ namespace UI.Parsers
             string JsonGAL = CSVaJSONConversor.Ejecutar();
             this.Load(JsonGAL);
             var resultadosGal = this.FromParsedToUsefull(this.ParseList());
-            return resultadosGal.Item4;
+            return resultadosGal.Item2 + "\n" + resultadosGal.Item3 + "\n" + resultadosGal.Item4;
         }
     }
 }

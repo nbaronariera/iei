@@ -212,7 +212,6 @@ namespace UI.Parsers
             );
 
             return (resultados, cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
-
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)
@@ -335,7 +334,7 @@ namespace UI.Parsers
             string JsonCAT = XMLaJSONConversor.Ejecutar();
             this.Load(JsonCAT);
             var resultadosCat = this.FromParsedToUsefull(this.ParseList());
-            return resultadosCat.Item4;
+            return resultadosCat.Item2 + "\n" + resultadosCat.Item3 + "\n" + resultadosCat.Item4;
         }
     }
 }
