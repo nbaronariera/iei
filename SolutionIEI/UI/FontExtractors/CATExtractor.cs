@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -13,8 +14,9 @@ namespace UI.Parsers
     public class CATExtractor : Parser<XMLData>
     {
         private int codigoPostal;
+        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8083") };
 
-        private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
             "Barcelona", "Tarragona", "Lleida", "Girona"
         };
@@ -290,21 +292,6 @@ namespace UI.Parsers
         }
         private string ConvertirHorarioCAT(string raw)
         {
-            /*
-            if (string.IsNullOrWhiteSpace(raw)) return "";
-
-
-            string horario = raw;
-
-            horario = Regex.Replace(horario, "De dilluns a divendres", "L-V", RegexOptions.IgnoreCase);
-            horario = Regex.Replace(horario, "Dilluns a divendres", "L-V", RegexOptions.IgnoreCase);
-            horario = Regex.Replace(horario, "dissabtes?", "S", RegexOptions.IgnoreCase);
-            horario = Regex.Replace(horario, "diumenges?", "D", RegexOptions.IgnoreCase);
-
-            horario = horario.Replace(" h.", "").Replace(" h ", " ");
-
-            return horario.Trim();
-            */
             return raw;
         }
 
@@ -329,12 +316,20 @@ namespace UI.Parsers
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
-        public String LoadData()
+        public async Task<string> LoadData()
         {
-            string JsonCAT = XMLaJSONConversor.Ejecutar();
-            this.Load(JsonCAT);
-            var resultadosCat = this.FromParsedToUsefull(this.ParseList());
-            return resultadosCat.Item2 + "\n" + resultadosCat.Item3 + "\n" + resultadosCat.Item4;
+            try
+            {
+                var response = await _http.GetAsync("/cat/json");
+                var JsonCAT = await response.Content.ReadAsStringAsync();
+                this.Load(JsonCAT);
+                var resultadosCat = this.FromParsedToUsefull(this.ParseList());
+                return resultadosCat.Item2 + "\n" + resultadosCat.Item3 + "\n" + resultadosCat.Item4;
+            }
+            catch (Exception ex) {
+                Debug.WriteLine($"Excepcion cargando datos de Cataluña {ex.Message} ");
+                return "ERROR CAT";
+            }
         }
     }
 }

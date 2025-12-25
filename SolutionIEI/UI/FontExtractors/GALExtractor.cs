@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -26,6 +27,8 @@ namespace UI.Parsers
 
     public class GALExtractor : Parser<GALData>
     {
+
+        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8084") };
         private static readonly Dictionary<string, int> provinciasGallegas = new(StringComparer.OrdinalIgnoreCase)
         {
             {"A Coruña", 15},
@@ -53,8 +56,6 @@ namespace UI.Parsers
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
             
-            
-
             Debug.WriteLine($" Iniciando parseo de {datosParseados.Count} registros GAL.");
 
             foreach (var dato in datosParseados)
@@ -432,12 +433,22 @@ namespace UI.Parsers
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
-        public String LoadData()
+
+        public async Task<string> LoadData()
         {
-            string JsonGAL = CSVaJSONConversor.Ejecutar();
-            this.Load(JsonGAL);
-            var resultadosGal = this.FromParsedToUsefull(this.ParseList());
-            return resultadosGal.Item2 + "\n" + resultadosGal.Item3 + "\n" + resultadosGal.Item4;
+            try
+            {
+                var response = await _http.GetAsync("/gal/json");
+                var JsonGAL = await response.Content.ReadAsStringAsync();
+                this.Load(JsonGAL);
+                var resultadosGal = this.FromParsedToUsefull(this.ParseList());
+                return resultadosGal.Item2 + "\n" + resultadosGal.Item3 + "\n" + resultadosGal.Item4;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Excepcion cargando datos de Galicia {ex.Message} ");
+                return "ERROR GAL";
+            }
         }
     }
 }

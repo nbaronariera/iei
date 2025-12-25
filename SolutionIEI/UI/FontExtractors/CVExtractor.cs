@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -7,11 +8,14 @@ using UI.Entidades;
 using UI.Helpers;
 using UI.Parsers.ParsedObjects;
 using UI.Wrappers;
+using static System.Net.WebRequestMethods;
 
 namespace UI.Parsers
 {
     public class CVExtractor : Parser<JSONData>
     {
+
+        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8082") };
 
         private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -363,12 +367,21 @@ namespace UI.Parsers
             return input;
         }
 
-        public String LoadData()
+        public async Task<string> LoadData()
         {
-            string JsonCV = JSONCoordenadas.Ejecutar();
-            this.Load(JsonCV);
-            var resultadosCv = this.FromParsedToUsefull(this.ParseList());
-            return resultadosCv.Item2 + "\n" + resultadosCv.Item3 + "\n" + resultadosCv.Item4;
+            try
+            {
+                var response = await _http.GetAsync("/cv/json");
+                var JsonCV = await response.Content.ReadAsStringAsync();
+                this.Load(JsonCV);
+                var resultadosCv = this.FromParsedToUsefull(this.ParseList());
+                return resultadosCv.Item2 + "\n" + resultadosCv.Item3 + "\n" + resultadosCv.Item4;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message} ");
+                return "ERROR CV";
+            }
         }
     }
 }

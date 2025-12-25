@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------------
 var puertoForzado = Environment.GetEnvironmentVariable("PUERTO_API") is { } p && int.TryParse(p, out var port)
     ? port
-    : 5001;
+    : 8080;
 
 builder.WebHost.UseUrls($"http://localhost:{puertoForzado}");
 builder.WebHost.ConfigureKestrel(options => options.ListenLocalhost(puertoForzado));
@@ -67,33 +67,33 @@ app.UseAuthorization();
 
 Debug.WriteLine($"=== DIAGNÓSTICO ===");
 Debug.WriteLine($"Puerto forzado detectado: {puertoForzado}");
-Debug.WriteLine($"Controladores que se van a mapear: {(puertoForzado == 5001 ? "SÍ (API Búsqueda)" : "NO")}");
+Debug.WriteLine($"Controladores que se van a mapear: {(puertoForzado == 8080 ? "SÍ (API Búsqueda)" : "NO")}");
 Debug.WriteLine($"===================");
 
 // ---------------------------------------------------------------
 // 3. ACTIVACIÓN SELECTIVA DE CONTROLADORES SEGÚN PUERTO
 // ---------------------------------------------------------------
-if (puertoForzado == 5001)
+if (puertoForzado == 8080)
 {
-    // API de Búsqueda → puerto 5001
+    // API de Búsqueda
     app.MapControllers();
 }
-else if (puertoForzado == 5002)
+else if (puertoForzado == 8081)
 {
     // FUTURO: API de Carga → descomentar cuando exista el controlador
     // app.MapControllers();
 }
-else if (puertoForzado == 5003)
+else if (puertoForzado == 8082)
 {
     // FUTURO: Wrapper Comunidad Valenciana
     // app.MapControllers();
 }
-else if (puertoForzado == 5004)
+else if (puertoForzado == 8083)
 {
     // FUTURO: Wrapper CAT
     // app.MapControllers();
 }
-else if (puertoForzado == 5005)
+else if (puertoForzado == 8084)
 {
     // FUTURO: Wrapper GAL
     // app.MapControllers();

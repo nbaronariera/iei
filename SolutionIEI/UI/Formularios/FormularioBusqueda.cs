@@ -37,7 +37,7 @@ namespace UI.UI_Gestor
         public FormularioBusqueda()
         {
             InitializeComponent();
-            _http = new HttpClient { BaseAddress = new Uri("http://localhost:5001") };
+            _http = new HttpClient { BaseAddress = new Uri("http://localhost:8080") };
 
             // FIJAR EL PANEL IZQUIERDO: Esto evita que el mapa lo mueva
             splitHorizontal.FixedPanel = FixedPanel.Panel1;
