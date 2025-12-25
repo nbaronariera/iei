@@ -1,6 +1,7 @@
 ﻿// Controllers/APIBusqueda.cs
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using UI.Entidades;
 using UI.Logica;
 
 namespace APIs.Controllers
@@ -16,9 +17,11 @@ namespace APIs.Controllers
         /// <summary>
         /// Devuelve todas las provincias disponibles.
         /// </summary>
-        /// <returns>Lista de provincias.</returns>
+        /// 
+        ///<returns> Devuelve una lista de Provincias</returns> 
+        ///<response code="200">Retorna la lista de Provincias</response>
         [HttpGet("provincias")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<Provincia>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetProvincias()
         {
@@ -36,11 +39,13 @@ namespace APIs.Controllers
         }
 
         /// <summary>
-        /// Devuelve todas las localidades disponibles.
+        /// Obtiene las localidades.
         /// </summary>
-        /// <returns>Lista de localidades.</returns>
+        /// 
+        ///<returns> Devuelve una lista de Localidad</returns> 
+        ///<response code="200">Retorna la lista de Localidades</response>
         [HttpGet("localidades")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<Localidad>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetLocalidades()
         {
@@ -61,8 +66,16 @@ namespace APIs.Controllers
         /// <summary>
         /// Obtiene estaciones filtradas por CP, provincia, localidad y tipo.
         /// </summary>
+        /// 
+        /// <param name="cp">El cdigo postal de la estacion. Opcional</param>
+        /// <param name="provincia">La provincia de la estacion. Opcional</param>
+        /// <param name="localidad">La localidad de la estacion. Opcional</param>
+        /// <param name="tipo">El tipo de la estacion. Opcional</param>
+        /// 
+        ///<returns> Devuelve una lista de Estaciones</returns> 
+        ///<response code="200">Retorna la lista de Estaciones</response>
         [HttpGet("estaciones")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<Estacion>), StatusCodes.Status200OK)]
         public IActionResult GetEstaciones(
           [FromQuery] string? cp,
           [FromQuery] string? provincia,
@@ -79,15 +92,5 @@ namespace APIs.Controllers
             Debug.WriteLine($"[API] GetEstaciones → {lista.Count} estaciones devueltas (cp='{cp}', prov='{provincia}', loc='{localidad}', tipo='{tipo}')");
             return Ok(lista);
         }
-
-        // ← AÑADE ESTE MÉTODO DE PRUEBA (para confirmar que funciona)
-        /// <summary>
-        /// Prueba de diagnóstico para confirmar que la API está funcionando.
-        /// </summary>
-        [HttpGet("ping")]
-        public IActionResult Ping() => Ok(new { mensaje = "API Búsqueda funcionando", puerto = 5001, hora = DateTime.Now });
-
-        
-       
     }
 }
