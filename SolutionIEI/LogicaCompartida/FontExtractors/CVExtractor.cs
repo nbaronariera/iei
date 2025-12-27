@@ -18,7 +18,7 @@ namespace UI.Parsers
 
         static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
         HttpClient _http = new HttpClient { 
-            BaseAddress = new Uri("http://localhost:8090"),
+            BaseAddress = new Uri("http://localhost:8082"),
             Timeout = Timeout.InfiniteTimeSpan
         };
 
@@ -155,10 +155,6 @@ namespace UI.Parsers
                 dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
                 resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
-                
-
-
-
                 try
                 {
                     // Validaciones (ahora es más difícil que fallen gracias a la corrección anterior)
@@ -202,7 +198,6 @@ namespace UI.Parsers
                             resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante");
                         }
                     }
-
 
                     double? lat = dato.Latitud, lon = dato.Longitud;
 
@@ -399,24 +394,45 @@ namespace UI.Parsers
 
         public override void LoadFromString(string json)
         {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
-            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            string outputJsonPath = Path.Combine(outputDir, "tmp.json");
-            Directory.CreateDirectory(outputDir);
-            System.IO.File.WriteAllText(outputJsonPath, json, utf8NoBom);
+            try{
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
+                var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+                string outputJsonPath = Path.Combine(outputDir, "tmp.json");
+                Directory.CreateDirectory(outputDir);
+                System.IO.File.WriteAllText(outputJsonPath, json, utf8NoBom);
 
-            var csvParser = new JSONParser();
-            csvParser.Load(outputJsonPath);
-            var listaObjetos = csvParser.ParseList();
+                var jsonParser = new JSONParser();
+                jsonParser.Load(outputJsonPath);
+                var listaObjetos = jsonParser.ParseList();
 
-            // 2 Generar el JSON final con coordenadas 
-            string jsonContent = applySelenium(listaObjetos);
+                // 2 Generar el JSON final con coordenadas 
+                string jsonContent = applySelenium(listaObjetos);
 
-            // 3️ Guardar con UTF-8 sin BOM (opcional, para depuración)
-            outputJsonPath = Path.Combine(outputDir, "CVSelenium.json");
-            System.IO.File.WriteAllText(outputJsonPath, jsonContent, utf8NoBom);
-            base.LoadFromString(outputJsonPath);
+                // 3️ Guardar con UTF-8 sin BOM (opcional, para depuración)
+                outputJsonPath = Path.Combine(outputDir, "CVSelenium.json");
+                System.IO.File.WriteAllText(outputJsonPath, jsonContent, utf8NoBom);
+                base.LoadFromString(outputJsonPath);
+            }
+            catch (Exception ex)
+            {
+              var sb = new StringBuilder();
+                sb.AppendLine($"[CRITICAL ERROR] Fallo en LoadFromString.");
+                sb.AppendLine($"Message: {ex.Message}");
+                sb.AppendLine($"StackTrace: {ex.StackTrace}");
+
+                // Profundizar en el error real
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    sb.AppendLine("--- Inner Exception ---");
+                    sb.AppendLine($"Message: {inner.Message}");
+                    sb.AppendLine($"StackTrace: {inner.StackTrace}");
+                    inner = inner.InnerException;
+                }
+
+                Console.WriteLine(sb.ToString());
+            }
         }
 
         private static string applySelenium(List<JSONData> elementos)

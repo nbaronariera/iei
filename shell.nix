@@ -12,15 +12,15 @@ pkgs.mkShell {
   packages = [
     pkgs.dotnet-sdk_6
     pkgs.dotnet-ef
+    pkgs.chromium
+    pkgs.chromedriver
   ];
 
   shellHook = ''
-    # OJO: Aquí tenías un error, apuntabas al sdk_8. Lo cambio a sdk_6
     export DOTNET_ROOT="${pkgs.dotnet-sdk_6}"
-
+    export CHROME_BIN="${pkgs.chromium}/bin/chromium"
+    export CHROMEDRIVER_PATH="${pkgs.chromedriver}/bin/chromedriver"
     export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-
-    echo "⚠️  ATENCIÓN: Usando versión EOL de .NET 6"
     dotnet --info
   '';
 }

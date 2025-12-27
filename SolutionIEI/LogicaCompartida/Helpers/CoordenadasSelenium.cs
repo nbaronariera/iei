@@ -1,11 +1,11 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Support.UI;
+﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
+using System.Threading;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace UI.Helpers
 {
@@ -16,53 +16,87 @@ namespace UI.Helpers
 
         public CoordenadasSelenium()
         {
-            new DriverManager().SetUpDriver(new ChromeConfig());
-            var driverService = ChromeDriverService.CreateDefaultService();
-            driverService.HideCommandPromptWindow = true;
-            driver = new ChromeDriver(driverService);
+            // 1. Configuración de Opciones
+            var options = new ChromeOptions();
+            
+            options.AddArgument("--no-sandbox"); 
+            options.AddArgument("--disable-dev-shm-usage");
+            options.AddArgument("--window-size=1920,1080"); 
+            options.AddArgument("--ignore-certificate-errors");
+
+            string chromeBinEnv = Environment.GetEnvironmentVariable("CHROME_BIN");
+            string driverPathEnv = Environment.GetEnvironmentVariable("CHROMEDRIVER_PATH");
+
+            ChromeDriverService service;
+
+            if (!string.IsNullOrEmpty(chromeBinEnv) && !string.IsNullOrEmpty(driverPathEnv))
+            {
+                // --- Lógica para NixOS / Linux Configurado ---
+                Console.WriteLine($"[INFO] Modo NixOS detectado.");
+                
+                options.BinaryLocation = chromeBinEnv;
+                string driverDir = Path.GetDirectoryName(driverPathEnv);
+                string driverName = Path.GetFileName(driverPathEnv);
+                service = ChromeDriverService.CreateDefaultService(driverDir, driverName);
+            }
+            else
+            {
+                // --- Lógica para Windows / Entorno Estándar ---
+                Console.WriteLine($"[INFO] Modo Windows/Estándar detectado.");
+                service = ChromeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            }
+
+            service.HideCommandPromptWindow = true;
+            service.SuppressInitialDiagnosticInformation = true;
+            driver = new ChromeDriver(service, options);
+            
+            // Timeout implícito para encontrar elementos
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
         }
 
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
         {
             try
             {
+                // --- Limpieza de dirección (Tu lógica original) ---
                 if (!string.IsNullOrEmpty(direccion))
                 {
                     if (direccion.Contains("Plá De Rascanya", StringComparison.OrdinalIgnoreCase))
-                    {
                         direccion = "Calle Plá De Rascanya";
-                    }
+                    
                     if (direccion.Contains("Azagador de Lliria", StringComparison.OrdinalIgnoreCase))
-                    {
                         direccion = "ITV Massalfassar";
-                    }
+                    
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*s/\s*nº?", "", RegexOptions.IgnoreCase);
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*km\.?\s*\d+([.,]\d+)?", "", RegexOptions.IgnoreCase);
                     direccion = direccion.Trim().TrimEnd(',');
                 }
 
                 driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
-                Thread.Sleep(rnd.Next(2000, 4000));
+                // Pequeña espera aleatoria para parecer humano
+                Thread.Sleep(rnd.Next(2000, 3000));
 
+                // --- Gestión de Cookies ---
                 try
                 {
                     string xpathCookies = "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'consentir') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'aceptar') or contains(text(), 'Agree')]";
+                    
                     bool ClickarBanner()
                     {
                         try
                         {
-                            var btn = driver.FindElement(By.XPath(xpathCookies));
-                            if (btn.Displayed && btn.Enabled)
-                            {
-                                btn.Click();
-                                return true;
+                            var elements = driver.FindElements(By.XPath(xpathCookies));
+                            foreach(var btn in elements) {
+                                if (btn.Displayed && btn.Enabled) {
+                                    btn.Click();
+                                    return true;
+                                }
                             }
                         }
-                        catch (NoSuchElementException) { }
+                        catch { }
                         return false;
                     }
 
-                    Thread.Sleep(2000);
                     if (!ClickarBanner())
                     {
                         var iframes = driver.FindElements(By.TagName("iframe"));
@@ -78,64 +112,77 @@ namespace UI.Helpers
                                 }
                                 driver.SwitchTo().DefaultContent();
                             }
-                            catch
-                            {
-                                driver.SwitchTo().DefaultContent();
-                            }
+                            catch { driver.SwitchTo().DefaultContent(); }
                         }
                     }
                 }
                 catch (Exception) { }
 
+                // --- Introducir Datos ---
                 string direccionCompleta = $"{direccion}, {municipio}";
-                var addressInput = driver.FindElement(By.Id("address"));
+                
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                var addressInput = wait.Until(d => d.FindElement(By.Id("address"))); // Espera explícita
+                
                 addressInput.Clear();
                 addressInput.SendKeys(direccionCompleta);
 
                 var latInput = driver.FindElement(By.Id("latitude"));
                 var lngInput = driver.FindElement(By.Id("longitude"));
-                latInput.Clear();
-                lngInput.Clear();
+                
+                // Limpiar valores previos vía JS para asegurar
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                js.ExecuteScript("arguments[0].value = '';", latInput);
+                js.ExecuteScript("arguments[0].value = '';", lngInput);
 
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-
+                // --- Click en Obtener Coordenadas ---
                 try
                 {
                     var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
-                    submitButton.Click();
+                    
+                    try { submitButton.Click(); }
+                    catch 
+                    { 
+                        js.ExecuteScript("arguments[0].click();", submitButton); 
+                    }
+
+                    // Esperar a que la latitud tenga valor
                     wait.Until(d => !string.IsNullOrEmpty(d.FindElement(By.Id("latitude")).GetAttribute("value")));
                 }
-                catch (UnhandledAlertException)
+                catch (Exception)
                 {
+                    // Si falla el wait o salta alerta
                     try { driver.SwitchTo().Alert().Accept(); } catch { }
                     return (0.0, 0.0);
                 }
-                catch (WebDriverTimeoutException)
-                {
-                    return (0.0, 0.0);
-                }
 
+                // --- Parsear Resultados ---
                 string latStr = latInput.GetAttribute("value");
                 string lngStr = lngInput.GetAttribute("value");
 
                 if (double.TryParse(latStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
                     double.TryParse(lngStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lng))
                 {
-                    Thread.Sleep(rnd.Next(1000, 2000));
                     return (lat, lng);
                 }
 
                 return (0.0, 0.0);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[Error Selenium] {ex.Message}");
                 return (0.0, 0.0);
             }
         }
 
         public void Dispose()
         {
-            driver?.Quit();
+            try
+            {
+                driver?.Quit();
+                driver?.Dispose();
+            }
+            catch { }
         }
     }
 }
