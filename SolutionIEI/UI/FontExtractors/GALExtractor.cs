@@ -28,7 +28,12 @@ namespace UI.Parsers
     public class GALExtractor : Parser<GALData>
     {
 
-        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8084") };
+        private string Text { get; set; } = ""; // <-- esta línea corrige los errores
+
+        HttpClient _http = new HttpClient { 
+            BaseAddress = new Uri("http://localhost:8084"),
+            Timeout = Timeout.InfiniteTimeSpan
+        };
         private static readonly Dictionary<string, int> provinciasGallegas = new(StringComparer.OrdinalIgnoreCase)
         {
             {"A Coruña", 15},
@@ -45,10 +50,58 @@ namespace UI.Parsers
         {
             if (file == null) return new List<GALData>();
 
-            var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
-            return JsonSerializer.Deserialize<List<GALData>>(contenido, opciones) ?? new List<GALData>();
+
+            Debug.WriteLine($"[GALExtractor] Cargando JSON de {contenido.Length} caracteres");
+
+            var opciones = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = false
+            };
+
+            var filas = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(contenido, opciones) ?? new List<Dictionary<string, string>>();
+
+            Debug.WriteLine($"[GALExtractor] Deserializados {filas.Count} diccionarios");
+
+            var resultado = new List<GALData>();
+            foreach (var fila in filas)
+            {
+                var gal = new GALData
+                {
+                    NombreEstacion = Obtener(fila, "nombreEstacion"),
+                    Direccion = Obtener(fila, "direccion"),
+                    Municipio = Obtener(fila, "municipio"),
+                    CodigoPostal = Obtener(fila, "codigoPostal"),
+                    Provincia = Obtener(fila, "provincia"),
+                    Telefono = Obtener(fila, "telefono"),
+                    HorarioRaw = Obtener(fila, "horarioRaw"),
+                    UrlCita = Obtener(fila, "urlCita"),
+                    Correo = Obtener(fila, "correo"),
+                    Coordenadas = Obtener(fila, "coordenadas")
+                };
+                resultado.Add(gal);
+            }
+
+            Debug.WriteLine($"[GALExtractor] Convertidos a {resultado.Count} objetos GALData");
+            if (resultado.Count > 0)
+            {
+                var primeraFila = filas[0];
+                Debug.WriteLine("[GALExtractor] Claves de la primera fila:");
+                foreach (var key in primeraFila.Keys)
+                {
+                    Debug.WriteLine($"  Clave: '{key}' = '{primeraFila[key]}'");
+                }
+            }
+
+            return resultado;
         }
+
+        private string Obtener(Dictionary<string, string> fila, string clave)
+        {
+            return fila.TryGetValue(clave, out var valor) ? valor?.Trim() ?? "" : "";
+        }
+
+
 
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<GALData> datosParseados)
         {
@@ -66,7 +119,8 @@ namespace UI.Parsers
                     Provincia = dato?.Provincia ?? "",
                     Municipio = dato?.Municipio ?? "",
                     CodigoPostal = dato?.CodigoPostal ?? "",
-                    Motivos = new List<string>()
+                    Motivos = new List<string>(),
+                    Añadida = true  // ← ¡Empieza como true!
                 };
 
                 resultadoDebug.Fuente = "GAL";
@@ -278,7 +332,7 @@ namespace UI.Parsers
             // Normalizar símbolos
             dms = dms
                 .Replace("º", "°")
-                .Replace("", "°")
+              //  .Replace("", "°")
                 .Replace("’", "'")
                 .Replace("′", "'")
                 .Replace("“", "\"")
@@ -434,21 +488,35 @@ namespace UI.Parsers
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
-        public async Task<string> LoadData()
+        public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             try
             {
                 var response = await _http.GetAsync("/gal/json");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return (new List<ResultObject>(), 0, "", "ERROR GAL HTTP");
+                }
+
                 var JsonGAL = await response.Content.ReadAsStringAsync();
-                this.Load(JsonGAL);
-                var resultadosGal = this.FromParsedToUsefull(this.ParseList());
-                return resultadosGal.Item2 + "\n" + resultadosGal.Item3 + "\n" + resultadosGal.Item4;
+                Debug.WriteLine($"[GALExtractor] Recibido JSON de {JsonGAL.Length} caracteres");
+
+                this.LoadFromString(JsonGAL);
+                var datosParseados = this.ParseList();
+                Debug.WriteLine($"[GALExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+
+                return this.FromParsedToUsefull(datosParseados);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Excepcion cargando datos de Galicia {ex.Message} ");
-                return "ERROR GAL";
+                return (new List<ResultObject>(), 0, "", "ERROR GAL");
             }
         }
+
+
+
+
+
     }
 }

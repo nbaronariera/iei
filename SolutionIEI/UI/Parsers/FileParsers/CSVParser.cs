@@ -5,10 +5,10 @@ using UI.Parsers.ParsedObjects;
 
 namespace UI.Parsers
 {
-    public class CSVParser : Parser<CSVData>
+    public class CSVParser : Parser<GALData>
     {
 
-        protected override List<CSVData> ExecuteParse()
+        protected override List<GALData> ExecuteParse()
         {
             using var reader = new StreamReader(file!);
 
@@ -22,7 +22,8 @@ namespace UI.Parsers
             };
 
             using var csv = new CsvReader(reader, config);
-            return csv.GetRecords<CSVData>().ToList();
+            csv.Context.RegisterClassMap<GALDataMap>();
+            return csv.GetRecords<GALData>().ToList();
         }
     }
 }

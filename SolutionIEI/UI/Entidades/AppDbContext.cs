@@ -11,22 +11,22 @@ namespace UI.Entidades
 
         public AppDbContext()
         {
-            // Asegura que la base de datos y tablas existen (útil en desarrollo).
-            // Si prefieres manejar migraciones, elimina esta línea y usa migraciones EF Core.
-
-
-            if (!File.Exists("Datos.db"))
-            {
-                Database.EnsureCreated();
-            }
+            
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            
-            
-                optionsBuilder.UseSqlite("Data Source=Datos.db");
-            
+            // Sube 5 niveles desde AppContext.BaseDirectory (bin\Debug\net8.0)
+            // para llegar a la raíz de la solución: SolutionIEI
+            string solutionRoot = AppContext.BaseDirectory;
+            for (int i = 0; i < 5; i++)
+            {
+                solutionRoot = Directory.GetParent(solutionRoot)!.FullName;
+            }
+
+            string dbPath = Path.Combine(solutionRoot, "Datos.db");
+
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

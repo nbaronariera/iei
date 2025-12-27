@@ -37,7 +37,12 @@ namespace UI.UI_Gestor
         public FormularioBusqueda()
         {
             InitializeComponent();
-            _http = new HttpClient { BaseAddress = new Uri("http://localhost:8080") };
+            _http = new HttpClient { 
+                
+                BaseAddress = new Uri("http://localhost:8080"),
+                Timeout = Timeout.InfiniteTimeSpan
+
+            };
 
             // FIJAR EL PANEL IZQUIERDO: Esto evita que el mapa lo mueva
             splitHorizontal.FixedPanel = FixedPanel.Panel1;
@@ -89,14 +94,8 @@ namespace UI.UI_Gestor
 
         private void btnCargarDatos_Click(object sender, EventArgs e)
         {
-            FormularioCarga frmCarga = new FormularioCarga();
-
-            if (frmCarga.ShowDialog() == DialogResult.OK)
-            {
-                _ = PrepararCombos();
-                _ = AplicarFiltros();
-                MessageBox.Show("Datos actualizados correctamente.");
-            }
+            this.DialogResult = DialogResult.OK; // Indica que quiere ir a carga
+            this.Close(); // Cierra búsqueda completamente
         }
 
         private void gMapControl1_Load(object sender, EventArgs e)

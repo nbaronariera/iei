@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UI.Entidades;
 using UI.Parsers;
+using UI.Parsers.ParsedObjects;
 using UI.Wrappers;
 
 namespace UI.Logica
@@ -13,40 +15,52 @@ namespace UI.Logica
     {
         private readonly Persistencia.Persistencia _persistencia;
 
-        private const string TIPO_FIJA = "Estacion_fija";
-        private const string TIPO_MOVIL = "Estacion_movil";
-
         public LogicaCarga()
         {
             _persistencia = new Persistencia.Persistencia();
         }
 
-        public string ObtenerCV()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerGal()
         {
-            var cvExtractor = new CVExtractor();
-            return cvExtractor.LoadData();
+            var extractor = new GALExtractor();
+            return await extractor.LoadData();
         }
 
-        public string ObtenerCat()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerCat()
         {
-            var catExtractor = new CATExtractor();
-            return catExtractor.LoadData();
+            var extractor = new CATExtractor();
+            return await extractor.LoadData();
         }
 
-        public string ObtenerGal()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerCV()
         {
-            var galExtractor = new GALExtractor();
-            return galExtractor.LoadData();
+            var extractor = new CVExtractor();
+            return await extractor.LoadData();
         }
 
         public bool Clean()
         {
-            using (var db = new AppDbContext())
+            try
             {
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
+                using var contexto = new AppDbContext();
+                Debug.WriteLine("[LOGICA] Eliminando estaciones...");
+                contexto.Estaciones.RemoveRange(contexto.Estaciones);
+
+                Debug.WriteLine("[LOGICA] Eliminando localidades...");
+                contexto.Localidades.RemoveRange(contexto.Localidades);
+
+                Debug.WriteLine("[LOGICA] Eliminando provincias...");
+                contexto.Provincias.RemoveRange(contexto.Provincias);
+
+                contexto.SaveChanges();
+                Debug.WriteLine("[LOGICA] Base de datos limpiada correctamente.");
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LOGICA] ERROR limpiando DB: {ex.Message}");
+                return false;
+            }
         }
     }
 }

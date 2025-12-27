@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using UI.Parsers;
+using UI.Parsers.ParsedObjects;
 
 namespace UI.Wrappers
 {
@@ -13,83 +14,40 @@ namespace UI.Wrappers
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string csvPath = Path.Combine(baseDirectory, "Fuentes", "Estacions_ITVEntrega.csv");
-
             if (!File.Exists(csvPath))
                 throw new FileNotFoundException($"No se encontró el CSV: {csvPath}");
 
-            // 1️ Leer CSV
             var csvParser = new CSVParser();
             csvParser.Load(csvPath);
-            var listaObjetos = csvParser.ParseList(); // lista de objetos 'gal'
+            var listaGAL = csvParser.ParseList();
 
-            // 2️ Convertir a lista de diccionarios respetando nombres del CSV
-            var listaDiccionarios = new List<Dictionary<string, string>>();
-
-            foreach (var fila in listaObjetos)
+            Debug.WriteLine($"[CSVaJSON] CSV parseado correctamente → {listaGAL.Count} registros GAL");
+            if (listaGAL.Count > 0)
             {
-                var dict = new Dictionary<string, string>
-                {
-                    ["NOME DA ESTACIÓN"] = fila.NombreEstacion,
-                    ["ENDEREZO"] = fila.Direccion,
-                    ["CONCELLO"] = fila.Municipio,
-                    ["CÓDIGO POSTAL"] = fila.CodigoPostal,
-                    ["PROVINCIA"] = fila.Provincia,
-                    ["TELÉFONO"] = fila.Telefono,
-                    ["HORARIO"] = fila.HorarioRaw,
-                    ["SOLICITUDE DE CITA PREVIA"] = fila.UrlCita,
-                    ["CORREO ELECTRÓNICO"] = fila.Correo,
-                    ["COORDENADAS GMAPS"] = fila.Coordenadas
-                };
-                listaDiccionarios.Add(dict);
+                var g = listaGAL[0];
+                Debug.WriteLine($"[CSVaJSON] Primera estación:");
+                Debug.WriteLine($"  Nombre: {g.NombreEstacion}");
+                Debug.WriteLine($"  Municipio: {g.Municipio}");
+                Debug.WriteLine($"  Provincia: {g.Provincia}");
+                Debug.WriteLine($"  CP: {g.CodigoPostal}");
             }
 
-            // 3️ Convertir a JSON (acentos + formateado)
-            var opcionesJson = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            string jsonContent = JsonSerializer.Serialize(listaDiccionarios, opcionesJson);
-
-            // 4️ Guardar con UTF-8 sin BOM
-            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-            string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
-            Directory.CreateDirectory(outputDir);
-
-            string jsonPath = Path.Combine(outputDir, "Estacions_ITV.json");
-            File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
-
-            Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
-
-            return jsonPath;
-        }
-
-        public static string Ejecutar(string rutaArchivo)
-        {
-            if (!File.Exists(rutaArchivo))
-                throw new FileNotFoundException($"No se encontró el CSV: {rutaArchivo}");
-
-            var csvParser = new CSVParser();
-            csvParser.Load(rutaArchivo);
-            var listaObjetos = csvParser.ParseList();
-
+            // ← AQUÍ ESTÁ EL CAMBIO: usar diccionarios con claves originales
             var listaDiccionarios = new List<Dictionary<string, string>>();
-
-            foreach (var fila in listaObjetos)
+            foreach (var fila in listaGAL)
             {
                 var dict = new Dictionary<string, string>
                 {
-                    ["NOME DA ESTACIÓN"] = fila.NombreEstacion,
-                    ["ENDEREZO"] = fila.Direccion,
-                    ["CONCELLO"] = fila.Municipio,
-                    ["CÓDIGO POSTAL"] = fila.CodigoPostal,
-                    ["PROVINCIA"] = fila.Provincia,
-                    ["TELÉFONO"] = fila.Telefono,
-                    ["HORARIO"] = fila.HorarioRaw,
-                    ["SOLICITUDE DE CITA PREVIA"] = fila.UrlCita,
-                    ["CORREO ELECTRÓNICO"] = fila.Correo,
-                    ["COORDENADAS GMAPS"] = fila.Coordenadas
+                    ["NOME DA ESTACIÓN"] = fila.NombreEstacion ?? "",
+                    ["ENDEREZO"] = fila.Direccion ?? "",
+                    ["CONCELLO"] = fila.Municipio ?? "",
+                    ["CÓDIGO POSTAL"] = fila.CodigoPostal ?? "",
+                    ["PROVINCIA"] = fila.Provincia ?? "",
+                    ["TELÉFONO"] = fila.Telefono ?? "",
+                    ["HORARIO"] = fila.HorarioRaw ?? "",
+                    ["SOLICITUDE DE CITA PREVIA"] = fila.UrlCita ?? "",
+                    ["CORREO ELECTRÓNICO"] = fila.Correo ?? "",
+                    ["COORDENADAS GMAPS"] = fila.Coordenadas ?? ""
                 };
                 listaDiccionarios.Add(dict);
             }
@@ -102,17 +60,16 @@ namespace UI.Wrappers
 
             string jsonContent = JsonSerializer.Serialize(listaDiccionarios, opcionesJson);
 
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
             string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
             Directory.CreateDirectory(outputDir);
-
             string jsonPath = Path.Combine(outputDir, "Estacions_ITV.json");
+            var utf8NoBom = new UTF8Encoding(false);
             File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
 
-            Debug.WriteLine($"[OK] JSON generado con acentos y formato:\n    {jsonPath}");
+            Debug.WriteLine($"[CSVaJSON] JSON generado correctamente con cabeceras originales:");
+            Debug.WriteLine($"→ {jsonPath}");
 
-            return jsonPath;
+            return jsonContent;
         }
     }
 }

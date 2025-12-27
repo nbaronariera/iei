@@ -20,9 +20,35 @@ namespace UI
         /// </summary>
         [STAThread]
         static void Main()
-        { 
-            FormularioBusqueda mainForm = new FormularioBusqueda();
-            mainForm.ShowDialog();
+        {
+            Debug.WriteLine($" ARRANCANDO UI");
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // Bucle que mantiene la aplicación viva
+            while (true)
+            {
+                using (FormularioBusqueda frmBusqueda = new FormularioBusqueda())
+                {
+                    // Si el usuario cierra búsqueda sin ir a carga, salir de la app
+                    if (frmBusqueda.ShowDialog() != DialogResult.OK)
+                    {
+                        return; // Sale del bucle y termina la app
+                    }
+                }
+
+                // Si llega aquí, es porque desde búsqueda se pidió abrir carga
+                using (FormularioCarga frmCarga = new FormularioCarga())
+                {
+                    // Si el usuario cierra carga sin volver a búsqueda, salir
+                    if (frmCarga.ShowDialog() != DialogResult.OK)
+                    {
+                        return;
+                    }
+                }
+
+                // Si llega aquí, volver a abrir búsqueda (nueva instancia con datos frescos)
+            }
         }
     }
 }

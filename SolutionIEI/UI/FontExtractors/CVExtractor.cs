@@ -15,7 +15,10 @@ namespace UI.Parsers
     public class CVExtractor : Parser<JSONData>
     {
 
-        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8082") };
+        HttpClient _http = new HttpClient { 
+            BaseAddress = new Uri("http://localhost:8082"),
+            Timeout = Timeout.InfiniteTimeSpan
+        };
 
         private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -56,7 +59,8 @@ namespace UI.Parsers
                     Provincia = dato.PROVINCIA,
                     Municipio = dato.MUNICIPIO,
                     CodigoPostal = dato.C_POSTAL,
-                    Motivos = new List<string>()
+                    Motivos = new List<string>(),
+                    Añadida = true  // ← ¡Empieza como true!
                 };
 
                 resultadoDebug.Fuente = "CV";
@@ -367,20 +371,30 @@ namespace UI.Parsers
             return input;
         }
 
-        public async Task<string> LoadData()
+        public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             try
             {
                 var response = await _http.GetAsync("/cv/json");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return (new List<ResultObject>(), 0, "", "ERROR CV HTTP");
+                }
+
                 var JsonCV = await response.Content.ReadAsStringAsync();
-                this.Load(JsonCV);
-                var resultadosCv = this.FromParsedToUsefull(this.ParseList());
-                return resultadosCv.Item2 + "\n" + resultadosCv.Item3 + "\n" + resultadosCv.Item4;
+                Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
+
+                this.LoadFromString(JsonCV);
+                var datosParseados = this.ParseList();
+                Debug.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+
+                var resultados = this.FromParsedToUsefull(datosParseados);
+                return resultados; // Devuelve directamente la tupla
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message} ");
-                return "ERROR CV";
+                Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
+                return (new List<ResultObject>(), 0, "", "ERROR CV");
             }
         }
     }

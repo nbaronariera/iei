@@ -14,7 +14,10 @@ namespace UI.Parsers
     public class CATExtractor : Parser<XMLData>
     {
         private int codigoPostal;
-        HttpClient _http = new HttpClient { BaseAddress = new Uri("http://localhost:8083") };
+        HttpClient _http = new HttpClient { 
+            BaseAddress = new Uri("http://localhost:8083"),
+            Timeout = Timeout.InfiniteTimeSpan
+        };
 
     private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -60,7 +63,8 @@ namespace UI.Parsers
                     Provincia = dato.serveis_territorials?.Trim() ?? "",
                     Municipio = dato.municipi?.Trim() ?? "",
                     CodigoPostal = dato.cp?.Trim() ?? "",
-                    Motivos = new List<string>()
+                    Motivos = new List<string>(),
+                    Añadida = true  // ← ¡Empieza como true!
                 };
 
                 resultadoDebug.Fuente = "CAT";
@@ -316,19 +320,31 @@ namespace UI.Parsers
 
             Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
-        public async Task<string> LoadData()
+
+        public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             try
             {
                 var response = await _http.GetAsync("/cat/json");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return (new List<ResultObject>(), 0, "", "ERROR CAT HTTP");
+                }
+
                 var JsonCAT = await response.Content.ReadAsStringAsync();
-                this.Load(JsonCAT);
-                var resultadosCat = this.FromParsedToUsefull(this.ParseList());
-                return resultadosCat.Item2 + "\n" + resultadosCat.Item3 + "\n" + resultadosCat.Item4;
+                Debug.WriteLine($"[CATExtractor] Recibido JSON de {JsonCAT.Length} caracteres");
+
+                this.LoadFromString(JsonCAT);
+                var datosParseados = this.ParseList();
+                Debug.WriteLine($"[CATExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+
+                var resultados = this.FromParsedToUsefull(datosParseados);
+                return resultados; // Devuelve directamente la tupla
             }
-            catch (Exception ex) {
-                Debug.WriteLine($"Excepcion cargando datos de Cataluña {ex.Message} ");
-                return "ERROR CAT";
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Excepcion cargando datos de Cataluña {ex.Message}");
+                return (new List<ResultObject>(), 0, "", "ERROR CAT");
             }
         }
     }

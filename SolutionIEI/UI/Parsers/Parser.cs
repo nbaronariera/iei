@@ -1,10 +1,13 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
+using System.Text;
 
 namespace UI.Parsers
 {
     public abstract class Parser<T>
     {
-        protected FileStream? file;
+        protected Stream? file;
 
         public void Load(string path)
         {
@@ -13,7 +16,22 @@ namespace UI.Parsers
 
         public void Unload()
         {
-            if (file is not null) { file.Close(); }
+            file?.Dispose();
+            file = null;
+        }
+
+        public void LoadFromString(string jsonContent)
+        {
+            if (string.IsNullOrWhiteSpace(jsonContent))
+            {
+                Debug.WriteLine("[LoadFromString] JSON vacío recibido");
+                return;
+            }
+
+            Debug.WriteLine($"[LoadFromString] Cargando {jsonContent.Length} caracteres en MemoryStream");
+
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonContent);
+            file = new MemoryStream(bytes);
         }
 
         public List<T> ParseList()
@@ -23,5 +41,7 @@ namespace UI.Parsers
         }
 
         protected abstract List<T> ExecuteParse();
+
+
     }
 }

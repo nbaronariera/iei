@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using UI.Entidades;
 using UI.Parsers;
@@ -12,19 +13,23 @@ namespace UI.Logica
 {
     public class LogicaParseo
     {
-        public string loadCat() {
-            return XMLaJSONConversor.Ejecutar();
+        public List<GALData> loadGal()
+        {
+             
+            string jsonContent = CSVaJSONConversor.Ejecutar(); // sigue generando y guardando el archivo
+            return JsonSerializer.Deserialize<List<GALData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         }
 
-        public string loadCV()
+        public List<JSONData> loadCV()
         {
-            return JSONCoordenadas.Ejecutar();
+            string jsonContent = JSONaJSONConversor.Ejecutar();
+            return JsonSerializer.Deserialize<List<JSONData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         }
 
-        public string loadGal()
+        public List<XMLData> loadCat()
         {
-
-            return CSVaJSONConversor.Ejecutar();
+            string jsonContent = XMLaJSONConversor.Ejecutar();
+            return JsonSerializer.Deserialize<List<XMLData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         }
     }
 }

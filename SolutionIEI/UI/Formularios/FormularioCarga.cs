@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Windows.Forms;
 using UI.Entidades;
 using UI.Parsers;
@@ -13,13 +15,25 @@ using static System.Net.WebRequestMethods;
 
 namespace UI
 {
+
+    class RespuestaJSON
+    {
+        public int numRegistrosAnyadidos { get; set; }
+        public String data { get; set; }
+    }
+
     public partial class FormularioCarga : Form
     {
         private readonly HttpClient _http;
         public FormularioCarga()
         {
             InitializeComponent();
-            _http = new HttpClient { BaseAddress = new Uri("http://localhost:8080") };
+            _http = new HttpClient { 
+                
+                BaseAddress = new Uri("http://localhost:8081"),
+                Timeout = Timeout.InfiniteTimeSpan
+
+            };
         }
 
         private void chkTodos_CheckedChanged(object sender, EventArgs e)
@@ -30,26 +44,26 @@ namespace UI
             chkCataluna.Checked = estado;
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
+      
 
-        private void btnBorrar_Click(object sender, EventArgs e)
+        private async void btnBorrar_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("¿Seguro que quieres borrar TODOS los datos?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 try
                 {
-                    using (var db = new AppDbContext())
+                    var response = await _http.DeleteAsync("carga/delete"); // sin barra inicial
+                    if (response.IsSuccessStatusCode)
                     {
-                        db.Estaciones.RemoveRange(db.Estaciones);
-                        db.Localidades.RemoveRange(db.Localidades);
-                        db.Provincias.RemoveRange(db.Provincias);
-                        db.SaveChanges();
+                        rtbResumen.Text = " Base de datos limpiada correctamente.\n";
+                        MessageBox.Show("Datos borrados correctamente.");
                     }
-                    rtbResumen.Text = "✅ Almacén de datos borrado correctamente.";
-                    MessageBox.Show("Base de datos limpia.");
+                    else
+                    {
+                        string error = await response.Content.ReadAsStringAsync();
+                        rtbResumen.Text = $" Error al borrar: {response.StatusCode}\n{error}";
+                        MessageBox.Show($"Error al borrar: {response.StatusCode}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -65,69 +79,99 @@ namespace UI
             log.AppendLine("--- INICIO DE CARGA ---\n");
 
             Cursor.Current = Cursors.WaitCursor;
-            bool huboCarga = false;
 
-            string response = "";
+            int totalCargadas = 0;
+            List<string> todasReparadas = new List<string>();
+            List<string> todasRechazadas = new List<string>();
 
-            if (_http != null)
+            try
             {
+                if (chkGalicia.Checked)
+                {
+                    var (cargados, reparados, rechazados) = await CargarComunidad("gal");
+                    totalCargadas += cargados;
+                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    log.AppendLine("--- CARGA GALICIA COMPLETADA ---");
+                }
+
+                if (chkCataluna.Checked)
+                {
+                    var (cargados, reparados, rechazados) = await CargarComunidad("cat");
+                    totalCargadas += cargados;
+                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    log.AppendLine("--- CARGA CATALUÑA COMPLETADA ---");
+                }
+
+                if (chkValencia.Checked)
+                {
+                    var (cargados, reparados, rechazados) = await CargarComunidad("cv");
+                    totalCargadas += cargados;
+                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    log.AppendLine("--- CARGA COMUNIDAD VALENCIANA COMPLETADA ---");
+                }
+
+                // Mensaje final formateado
+                log.AppendLine($"\nNúmero de registros cargados correctamente: {totalCargadas}");
+
+                log.AppendLine("\nRegistros con errores y reparados:");
+                log.AppendLine(todasReparadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasReparadas));
+
+                log.AppendLine("\nRegistros con errores y rechazados:");
+                log.AppendLine(todasRechazadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasRechazadas));
+
+                log.AppendLine("\n--- CARGA FINALIZADA ---");
+            }
+            catch (Exception ex)
+            {
+                log.AppendLine($"\nERROR CRÍTICO: {ex.Message}");
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+
+            rtbResumen.Text = log.ToString();
+        }
+
+        private async Task<(int cargados, string reparados, string rechazados)> CargarComunidad(string endpoint)
+        {
+            var response = await _http.PostAsync($"carga/{endpoint}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
 
                 try
                 {
-                    if (chkGalicia.Checked)
-                    {
-                        var url = "/gal";
-                        //log.AppendLine("\n--- CARGAA 1 ---");
-                        response = response + "\n--- CARGA GALICIA ---\n" + await _http.PostAsync(url, null);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var obj = JsonSerializer.Deserialize<JsonCargaResponse>(json, options);
 
-                        huboCarga = true;
-                    }
-
-                    if (chkCataluna.Checked)
-                    {
-                        //log.AppendLine("\n--- CARGA 2 ---");
-                        var url = "/cat";
-                        response = response + "\n--- CARGA CATALUÑA ---\n" + await _http.PostAsync(url, null);
-
-                        huboCarga = true;
-                    }
-
-                    if (chkValencia.Checked)
-                    {
-                        var url = "/val";
-                        //log.AppendLine("\n--- CARGA 3 ---");
-                        response = response + "\n--- CARGA VALENCIA ---\n" + await _http.PostAsync(url, null);
-
-                        huboCarga = true;
-                    }
-
-                    if (huboCarga)
-                    {
-                        //this.DialogResult = DialogResult.OK;
-                        log.AppendLine(response);
-                        log.AppendLine("\n--- CARGA FINALIZADA ---");
-                    }
-                    else
-                    {
-                        log.AppendLine("\n⚠️ No se seleccionó ninguna fuente o se canceló.");
-                    }
-
-                    rtbResumen.Text = log.ToString();
+                    return (obj.RegistrosCargados, obj.RegistrosReparados ?? "", obj.RegistrosRechazados ?? "");
                 }
                 catch (Exception ex)
                 {
-                    rtbResumen.Text += $"\n ERROR CRÍTICO: {ex.Message}";
-                    MessageBox.Show("Error durante la carga: " + ex.Message);
-                }
-                finally
-                {
-                    Cursor.Current = Cursors.Default;
+                    Debug.WriteLine($"[CLIENTE] Error deserializando respuesta de {endpoint}: {ex.Message}\nJSON: {json}");
+                    return (0, "", $"Error al procesar respuesta: {ex.Message}\nJSON recibido: {json}");
                 }
             }
-            else {
-                log.AppendLine("\n--- Error http ---");
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return (0, "", $"Error HTTP {response.StatusCode}: {error}");
             }
         }
+
+        // Clase auxiliar para deserializar
+        private class JsonCargaResponse
+        {
+            public int RegistrosCargados { get; set; }
+            public string? RegistrosReparados { get; set; }
+            public string? RegistrosRechazados { get; set; }
+        }
+
 
         private string ObtenerRutaArchivo(string nombreFuente, string rutaDefecto, string filtro)
         {
@@ -151,6 +195,12 @@ namespace UI
                 }
             }
             return null; // Cancelado
+        }
+
+        private void btnBusqueda_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK; // Indica que quiere ir a carga
+            this.Close(); // Cierra búsqueda completamente
         }
     }
 }
