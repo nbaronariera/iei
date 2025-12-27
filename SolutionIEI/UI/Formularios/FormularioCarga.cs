@@ -88,39 +88,28 @@ namespace UI
             {
                 if (chkGalicia.Checked)
                 {
-                    var (cargados, reparados, rechazados) = await CargarComunidad("gal");
-                    totalCargadas += cargados;
-                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
-                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    var res = await CargarComunidad("gal");
                     log.AppendLine("--- CARGA GALICIA COMPLETADA ---");
+                    log.AppendLine(res);
+                    log.AppendLine();
                 }
 
                 if (chkCataluna.Checked)
                 {
-                    var (cargados, reparados, rechazados) = await CargarComunidad("cat");
-                    totalCargadas += cargados;
-                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
-                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    var res = await CargarComunidad("cat");
                     log.AppendLine("--- CARGA CATALUÑA COMPLETADA ---");
+                    log.AppendLine(res);
+                    log.AppendLine();
                 }
 
                 if (chkValencia.Checked)
                 {
-                    var (cargados, reparados, rechazados) = await CargarComunidad("cv");
-                    totalCargadas += cargados;
-                    if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
-                    if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    var res = await CargarComunidad("cv");
                     log.AppendLine("--- CARGA COMUNIDAD VALENCIANA COMPLETADA ---");
+                    log.AppendLine(res);
+                    log.AppendLine();
+
                 }
-
-                // Mensaje final formateado
-                log.AppendLine($"\nNúmero de registros cargados correctamente: {totalCargadas}");
-
-                log.AppendLine("\nRegistros con errores y reparados:");
-                log.AppendLine(todasReparadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasReparadas));
-
-                log.AppendLine("\nRegistros con errores y rechazados:");
-                log.AppendLine(todasRechazadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasRechazadas));
 
                 log.AppendLine("\n--- CARGA FINALIZADA ---");
             }
@@ -153,7 +142,7 @@ namespace UI
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[CLIENTE] Error deserializando respuesta de {endpoint}: {ex.Message}\nJSON: {json}");
+                    Console.WriteLine($"[CLIENTE] Error deserializando respuesta de {endpoint}: {ex.Message}\nJSON: {json}");
                     return (0, "", $"Error al procesar respuesta: {ex.Message}\nJSON recibido: {json}");
                 }
             }

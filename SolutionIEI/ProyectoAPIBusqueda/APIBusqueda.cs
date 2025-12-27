@@ -29,12 +29,12 @@ namespace ProyectoAPIBusqueda
             try
             {
                 var lista = _logica.ObtenerProvincias();
-                Debug.WriteLine($"[API] GetProvincias → {lista.Count} provincias devueltas");
+                Console.WriteLine($"[API] GetProvincias → {lista.Count} provincias devueltas");
                 return Ok(lista);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[API] ERROR en GetProvincias: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"[API] ERROR en GetProvincias: {ex.Message}\n{ex.StackTrace}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -53,12 +53,12 @@ namespace ProyectoAPIBusqueda
             try
             {
                 var lista = _logica.ObtenerLocalidades();
-                Debug.WriteLine($"[API] GetLocalidades → {lista.Count} localidades devueltas");
+                Console.WriteLine($"[API] GetLocalidades → {lista.Count} localidades devueltas");
                 return Ok(lista);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[API] ERROR en GetLocalidades: {ex.Message}");
+                Console.WriteLine($"[API] ERROR en GetLocalidades: {ex.Message}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -90,7 +90,7 @@ namespace ProyectoAPIBusqueda
             tipo ??= "";
 
             var lista = _logica.ObtenerEstaciones(cp, provincia, localidad, tipo);
-            Debug.WriteLine($"[API] GetEstaciones → {lista.Count} estaciones devueltas (cp='{cp}', prov='{provincia}', loc='{localidad}', tipo='{tipo}')");
+            Console.WriteLine($"[API] GetEstaciones → {lista.Count} estaciones devueltas (cp='{cp}', prov='{provincia}', loc='{localidad}', tipo='{tipo}')");
             return Ok(lista);
         }
     }

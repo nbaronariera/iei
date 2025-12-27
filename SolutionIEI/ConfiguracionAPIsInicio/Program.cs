@@ -15,9 +15,9 @@ class Program
         string apisProjectPath = Path.Combine(solutionRoot, "APIs", "APIs.csproj");
         string uiProjectPath = Path.Combine(solutionRoot, "UI", "UI.csproj");
 
-        Debug.WriteLine($"Solution Root: {solutionRoot}");
-        Debug.WriteLine($"APIs Project: {apisProjectPath}");
-        Debug.WriteLine($"UI Project: {uiProjectPath}");
+        Console.WriteLine($"Solution Root: {solutionRoot}");
+        Console.WriteLine($"APIs Project: {apisProjectPath}");
+        Console.WriteLine($"UI Project: {uiProjectPath}");
 
         // Lanzar las 5 APIs (sin ventana de consola)
         LanzarAPI(apisProjectPath, "Busqueda8080");
@@ -62,11 +62,11 @@ class Program
         if (proc != null)
         {
             procesosLanzados.Add(proc);
-            Debug.WriteLine($" Lanzada API: {profileName}");
+            Console.WriteLine($" Lanzada API: {profileName}");
         }
         else
         {
-            Debug.WriteLine($" Fallo al lanzar API {profileName}");
+            Console.WriteLine($" Fallo al lanzar API {profileName}");
         }
     }
 
@@ -85,11 +85,11 @@ class Program
         if (proc != null)
         {
             procesosLanzados.Add(proc);
-            Debug.WriteLine("✓ Lanzada UI");
+            Console.WriteLine("✓ Lanzada UI");
         }
         else
         {
-            Debug.WriteLine(" Fallo al lanzar UI");
+            Console.WriteLine(" Fallo al lanzar UI");
         }
     }
 

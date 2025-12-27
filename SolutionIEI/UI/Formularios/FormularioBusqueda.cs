@@ -126,21 +126,21 @@ namespace UI.UI_Gestor
             try
             {
                 var response = await _http.GetAsync("/provincias");
-                Debug.WriteLine($"[CLIENTE] /provincias → Status: {response.StatusCode}");
+                Console.WriteLine($"[CLIENTE] /provincias → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Debug.WriteLine($"Error API provincias: {response.StatusCode}");
+                    Console.WriteLine($"Error API provincias: {response.StatusCode}");
                     MessageBox.Show($"Error API provincias: {response.StatusCode}");
                     return;
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[CLIENTE] JSON provincias ({json.Length} caracteres): {json.Substring(0, Math.Min(500, json.Length))}...");
+                Console.WriteLine($"[CLIENTE] JSON provincias ({json.Length} caracteres): {json.Substring(0, Math.Min(500, json.Length))}...");
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var provincias = JsonSerializer.Deserialize<List<Provincia>>(json, options) ?? new List<Provincia>();
-                Debug.WriteLine($"[CLIENTE] Provincias deserializadas: {provincias.Count}");
+                Console.WriteLine($"[CLIENTE] Provincias deserializadas: {provincias.Count}");
 
                 _provinciasCompletas = provincias;
 
@@ -150,7 +150,7 @@ namespace UI.UI_Gestor
             catch (Exception ex)
             {
                 MessageBox.Show("Error cargando provincias: " + ex.Message);
-                Debug.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}\n{ex.StackTrace}");
                 comboProvincia.DataSource = new List<string> { "Cualquiera" };
             }
             cargando = false;
@@ -163,22 +163,22 @@ namespace UI.UI_Gestor
             try
             {
                 var response = await _http.GetAsync("/localidades");
-                Debug.WriteLine($"[CLIENTE] /localidades → Status: {response.StatusCode}");
+                Console.WriteLine($"[CLIENTE] /localidades → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Debug.WriteLine($"[CLIENTE] ERROR API provincias: {response.StatusCode}");
+                    Console.WriteLine($"[CLIENTE] ERROR API provincias: {response.StatusCode}");
                     MessageBox.Show($"Error API localidades: {response.StatusCode}");
                     comboProvincia.DataSource = new List<string> { "Cualquiera" };
                     return;
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[CLIENTE] JSON localidades ({json.Length} caracteres): {(json.Length > 500 ? json.Substring(0, 500) + "..." : json)}");
+                Console.WriteLine($"[CLIENTE] JSON localidades ({json.Length} caracteres): {(json.Length > 500 ? json.Substring(0, 500) + "..." : json)}");
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var localidades = JsonSerializer.Deserialize<List<Localidad>>(json, options) ?? new List<Localidad>();
-                Debug.WriteLine($"[CLIENTE] Localidades deserializadas: {localidades.Count} elementos");
+                Console.WriteLine($"[CLIENTE] Localidades deserializadas: {localidades.Count} elementos");
 
                 _localidadesCompletas = localidades;
                 _cacheLocalidades = localidades;
@@ -189,12 +189,12 @@ namespace UI.UI_Gestor
                     .ToList();
 
                 comboLocalidad.DataSource = nombres;
-                Debug.WriteLine($"[CLIENTE] comboLocalidad rellenado con {nombres.Count} elementos (incluye 'Cualquiera')");
+                Console.WriteLine($"[CLIENTE] comboLocalidad rellenado con {nombres.Count} elementos (incluye 'Cualquiera')");
 
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[CLIENTE] EXCEPCIÓN en CargarLocalidades: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"[CLIENTE] EXCEPCIÓN en CargarLocalidades: {ex.Message}\n{ex.StackTrace}");
                 MessageBox.Show("Error cargando localidades: " + ex.Message);
             }
 
@@ -247,7 +247,7 @@ namespace UI.UI_Gestor
 
                 int idx = comboProvincia.FindStringExact(provincia);
 
-                Debug.WriteLine($"[DEBUG] Intentando seleccionar provincia '{provincia}' - FindStringExact -> idx={idx}");
+                Console.WriteLine($"[DEBUG] Intentando seleccionar provincia '{provincia}' - FindStringExact -> idx={idx}");
 
                 if (idx >= 0)
                 {
@@ -260,12 +260,12 @@ namespace UI.UI_Gestor
                                    .ToList();
 
                     int idx2 = items.FindIndex(s => string.Equals(s, provincia.Trim(), StringComparison.OrdinalIgnoreCase));
-                    Debug.WriteLine($"[DEBUG] Fallback FindIndex (Trim+IgnoreCase) -> idx2={idx2}");
+                    Console.WriteLine($"[DEBUG] Fallback FindIndex (Trim+IgnoreCase) -> idx2={idx2}");
                     if (idx2 >= 0)
                         comboProvincia.SelectedIndex = idx2;
                     else
                     {
-                        Debug.WriteLine($"[DEBUG] Provincia '{provincia}' NO encontrada entre items: {string.Join(", ", items.Take(20))}...");
+                        Console.WriteLine($"[DEBUG] Provincia '{provincia}' NO encontrada entre items: {string.Join(", ", items.Take(20))}...");
                     }
                 }
             }
@@ -297,16 +297,16 @@ namespace UI.UI_Gestor
             string tipoParam = tipo == "Cualquiera" ? "" : tipo;
 
             var url = $"/estaciones?cp={cp}&provincia={provinciaParam}&localidad={localidadParam}&tipo={tipoParam}";
-            Debug.WriteLine($"[CLIENTE] Llamando a API corregida: {url}");
+            Console.WriteLine($"[CLIENTE] Llamando a API corregida: {url}");
 
             try
             {
                 var response = await _http.GetAsync(url);
-                Debug.WriteLine($"[CLIENTE] /estaciones → Status: {response.StatusCode}");
+                Console.WriteLine($"[CLIENTE] /estaciones → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Debug.WriteLine($"[CLIENTE] ERROR API estaciones: {response.StatusCode} → {await response.Content.ReadAsStringAsync()}");
+                    Console.WriteLine($"[CLIENTE] ERROR API estaciones: {response.StatusCode} → {await response.Content.ReadAsStringAsync()}");
                     MessageBox.Show($"Error API estaciones: {response.StatusCode}");
                     ActualizarGrid(new List<EstacionParaMostrar>());
                     ActualizarMapa(new List<EstacionParaMostrar>());
@@ -316,7 +316,7 @@ namespace UI.UI_Gestor
                 var json = await response.Content.ReadAsStringAsync();
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var resultado = JsonSerializer.Deserialize<List<EstacionParaMostrar>>(json, options) ?? new List<EstacionParaMostrar>();
-                Debug.WriteLine($"[CLIENTE] Estaciones recibidas: {resultado.Count}");
+                Console.WriteLine($"[CLIENTE] Estaciones recibidas: {resultado.Count}");
 
                 var paraMapa = resultado.Where(e => e.latitud != 0 && e.longitud != 0).ToList();
 
@@ -325,7 +325,7 @@ namespace UI.UI_Gestor
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[CLIENTE] Excepción en AplicarFiltros: {ex.Message}");
+                Console.WriteLine($"[CLIENTE] Excepción en AplicarFiltros: {ex.Message}");
                 MessageBox.Show("Error: " + ex.Message);
             }
         }

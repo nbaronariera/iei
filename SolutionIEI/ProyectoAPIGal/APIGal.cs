@@ -34,7 +34,7 @@ namespace ProyectoAPIGal
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[API] ERROR en gal/GetJSON: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"[API] ERROR en gal/GetJSON: {ex.Message}\n{ex.StackTrace}");
                 return StatusCode(500, ex.Message);
             }
         }

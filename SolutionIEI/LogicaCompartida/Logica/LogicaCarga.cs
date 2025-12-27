@@ -20,22 +20,29 @@ namespace UI.Logica
             _persistencia = new Persistencia.Persistencia();
         }
 
-        public async Task<(List<ResultObject>, int, string, string)> ObtenerGal()
+        public async Task<string> ObtenerGal()
         {
             var extractor = new GALExtractor();
-            return await extractor.LoadData();
+            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
+            string res = $"Cargado Galicia.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
+            return res; 
         }
 
-        public async Task<(List<ResultObject>, int, string, string)> ObtenerCat()
+        public async Task<string> ObtenerCat()
         {
             var extractor = new CATExtractor();
-            return await extractor.LoadData();
+            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
+            Console.WriteLine(result.Item3);
+            string res = $"Cargado Cataluña.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
+            return res;
         }
 
-        public async Task<(List<ResultObject>, int, string, string)> ObtenerCV()
+        public async Task<string> ObtenerCV()
         {
             var extractor = new CVExtractor();
-            return await extractor.LoadData();
+            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
+            string res = $"Cargado Comunidad Valenciana.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
+            return res;
         }
 
         public bool Clean()
@@ -43,22 +50,22 @@ namespace UI.Logica
             try
             {
                 using var contexto = new AppDbContext();
-                Debug.WriteLine("[LOGICA] Eliminando estaciones...");
+                Console.WriteLine("[LOGICA] Eliminando estaciones...");
                 contexto.Estaciones.RemoveRange(contexto.Estaciones);
 
-                Debug.WriteLine("[LOGICA] Eliminando localidades...");
+                Console.WriteLine("[LOGICA] Eliminando localidades...");
                 contexto.Localidades.RemoveRange(contexto.Localidades);
 
-                Debug.WriteLine("[LOGICA] Eliminando provincias...");
+                Console.WriteLine("[LOGICA] Eliminando provincias...");
                 contexto.Provincias.RemoveRange(contexto.Provincias);
 
                 contexto.SaveChanges();
-                Debug.WriteLine("[LOGICA] Base de datos limpiada correctamente.");
+                Console.WriteLine("[LOGICA] Base de datos limpiada correctamente.");
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[LOGICA] ERROR limpiando DB: {ex.Message}");
+                Console.WriteLine($"[LOGICA] ERROR limpiando DB: {ex.Message}");
                 return false;
             }
         }

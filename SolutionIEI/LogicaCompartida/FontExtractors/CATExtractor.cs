@@ -50,7 +50,7 @@ namespace UI.Parsers
             
             int numValidas = 0;
 
-            Debug.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
+            Console.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
 
             foreach (var dato in datosParseados)
             {
@@ -191,19 +191,19 @@ namespace UI.Parsers
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[CAT] Error procesando estación {dato.denominaci}: {ex.Message}");
+                    Console.WriteLine($"[CAT] Error procesando estación {dato.denominaci}: {ex.Message}");
                 }
             }
 
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
-            Debug.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
+            Console.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
 
-            int cargadasCorrectamente = debugResultados.Count(r => r.Añadida);
+            int omitidas = debugResultados.Count(r => !r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
-                    .Where(r => r.Reparada && r.Añadida)
+                    .Where(r => r.Añadida)
                     .Select(r =>
                         $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
                     )
@@ -217,7 +217,7 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados, cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
+            return (resultados, omitidas, estacionesReparadas, estacionesRechazadas);
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)
@@ -304,21 +304,21 @@ namespace UI.Parsers
             var añadidas = resultados.Where(r => r.Añadida).ToList();
             var descartadas = resultados.Where(r => !r.Añadida).ToList();
 
-            Debug.WriteLine("\n ESTACIONES AÑADIDAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES AÑADIDAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in añadidas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine("\n ESTACIONES DESCARTADAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES DESCARTADAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in descartadas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
+            Console.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
@@ -332,18 +332,19 @@ namespace UI.Parsers
                 }
 
                 var JsonCAT = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[CATExtractor] Recibido JSON de {JsonCAT.Length} caracteres");
+                Console.WriteLine($"[CATExtractor] Recibido JSON de {JsonCAT.Length} caracteres");
 
                 this.LoadFromString(JsonCAT);
                 var datosParseados = this.ParseList();
-                Debug.WriteLine($"[CATExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+                Console.WriteLine($"[CATExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
                 var resultados = this.FromParsedToUsefull(datosParseados);
+
                 return resultados; // Devuelve directamente la tupla
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Excepcion cargando datos de Cataluña {ex.Message}");
+                Console.WriteLine($"Excepcion cargando datos de Cataluña {ex.Message}");
                 return (new List<ResultObject>(), 0, "", "ERROR CAT");
             }
         }

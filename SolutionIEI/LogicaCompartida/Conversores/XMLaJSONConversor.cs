@@ -39,7 +39,7 @@ namespace UI.Wrappers
             string jsonPath = Path.Combine(outputDir, "ITV-CAT.json");
             File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
 
-            Debug.WriteLine($"[OK] JSON generado de CAT con acentos y formato:\n    {jsonPath}");
+            Console.WriteLine($"[OK] JSON generado de CAT con acentos y formato:\n    {jsonPath}");
 
             return jsonContent;
         }

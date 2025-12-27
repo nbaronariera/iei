@@ -24,11 +24,11 @@ namespace UI.Parsers
         {
             if (string.IsNullOrWhiteSpace(jsonContent))
             {
-                Debug.WriteLine("[LoadFromString] JSON vacío recibido");
+                Console.WriteLine("[LoadFromString] JSON vacío recibido");
                 return;
             }
 
-            Debug.WriteLine($"[LoadFromString] Cargando {jsonContent.Length} caracteres en MemoryStream");
+            Console.WriteLine($"[LoadFromString] Cargando {jsonContent.Length} caracteres en MemoryStream");
 
             byte[] bytes = Encoding.UTF8.GetBytes(jsonContent);
             file = new MemoryStream(bytes);

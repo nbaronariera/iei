@@ -21,15 +21,15 @@ namespace UI.Wrappers
             csvParser.Load(csvPath);
             var listaGAL = csvParser.ParseList();
 
-            Debug.WriteLine($"[CSVaJSON] CSV parseado correctamente → {listaGAL.Count} registros GAL");
+            Console.WriteLine($"[CSVaJSON] CSV parseado correctamente → {listaGAL.Count} registros GAL");
             if (listaGAL.Count > 0)
             {
                 var g = listaGAL[0];
-                Debug.WriteLine($"[CSVaJSON] Primera estación:");
-                Debug.WriteLine($"  Nombre: {g.NombreEstacion}");
-                Debug.WriteLine($"  Municipio: {g.Municipio}");
-                Debug.WriteLine($"  Provincia: {g.Provincia}");
-                Debug.WriteLine($"  CP: {g.CodigoPostal}");
+                Console.WriteLine($"[CSVaJSON] Primera estación:");
+                Console.WriteLine($"  Nombre: {g.NombreEstacion}");
+                Console.WriteLine($"  Municipio: {g.Municipio}");
+                Console.WriteLine($"  Provincia: {g.Provincia}");
+                Console.WriteLine($"  CP: {g.CodigoPostal}");
             }
 
             // ← AQUÍ ESTÁ EL CAMBIO: usar diccionarios con claves originales
@@ -66,8 +66,8 @@ namespace UI.Wrappers
             var utf8NoBom = new UTF8Encoding(false);
             File.WriteAllText(jsonPath, jsonContent, utf8NoBom);
 
-            Debug.WriteLine($"[CSVaJSON] JSON generado correctamente con cabeceras originales:");
-            Debug.WriteLine($"→ {jsonPath}");
+            Console.WriteLine($"[CSVaJSON] JSON generado correctamente con cabeceras originales:");
+            Console.WriteLine($"→ {jsonPath}");
 
             return jsonContent;
         }

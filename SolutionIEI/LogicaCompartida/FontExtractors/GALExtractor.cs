@@ -52,7 +52,7 @@ namespace UI.Parsers
 
             string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
 
-            Debug.WriteLine($"[GALExtractor] Cargando JSON de {contenido.Length} caracteres");
+            Console.WriteLine($"[GALExtractor] Cargando JSON de {contenido.Length} caracteres");
 
             var opciones = new JsonSerializerOptions
             {
@@ -61,7 +61,7 @@ namespace UI.Parsers
 
             var filas = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(contenido, opciones) ?? new List<Dictionary<string, string>>();
 
-            Debug.WriteLine($"[GALExtractor] Deserializados {filas.Count} diccionarios");
+            Console.WriteLine($"[GALExtractor] Deserializados {filas.Count} diccionarios");
 
             var resultado = new List<GALData>();
             foreach (var fila in filas)
@@ -82,14 +82,14 @@ namespace UI.Parsers
                 resultado.Add(gal);
             }
 
-            Debug.WriteLine($"[GALExtractor] Convertidos a {resultado.Count} objetos GALData");
+            Console.WriteLine($"[GALExtractor] Convertidos a {resultado.Count} objetos GALData");
             if (resultado.Count > 0)
             {
                 var primeraFila = filas[0];
-                Debug.WriteLine("[GALExtractor] Claves de la primera fila:");
+                Console.WriteLine("[GALExtractor] Claves de la primera fila:");
                 foreach (var key in primeraFila.Keys)
                 {
-                    Debug.WriteLine($"  Clave: '{key}' = '{primeraFila[key]}'");
+                    Console.WriteLine($"  Clave: '{key}' = '{primeraFila[key]}'");
                 }
             }
 
@@ -109,7 +109,7 @@ namespace UI.Parsers
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
             
-            Debug.WriteLine($" Iniciando parseo de {datosParseados.Count} registros GAL.");
+            Console.WriteLine($" Iniciando parseo de {datosParseados.Count} registros GAL.");
 
             foreach (var dato in datosParseados)
             {
@@ -239,11 +239,11 @@ namespace UI.Parsers
 
             MostrarResumen(debugResultados);
 
-            int cargadasCorrectamente = debugResultados.Count(r => r.Añadida);
+            int omitidas = debugResultados.Count(r => !r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
-                    .Where(r => r.Reparada && r.Añadida)
+                    .Where(r => r.Añadida)
                     .Select(r =>
                         $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
                     )
@@ -257,7 +257,7 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados,cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
+            return (resultados,omitidas, estacionesReparadas, estacionesRechazadas);
 
         }
 
@@ -471,21 +471,21 @@ namespace UI.Parsers
             var añadidas = resultados.Where(r => r.Añadida).ToList();
             var descartadas = resultados.Where(r => !r.Añadida).ToList();
 
-            Debug.WriteLine("\n ESTACIONES AÑADIDAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES AÑADIDAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in añadidas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine("\n ESTACIONES DESCARTADAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES DESCARTADAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in descartadas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
+            Console.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
@@ -499,17 +499,17 @@ namespace UI.Parsers
                 }
 
                 var JsonGAL = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[GALExtractor] Recibido JSON de {JsonGAL.Length} caracteres");
+                Console.WriteLine($"[GALExtractor] Recibido JSON de {JsonGAL.Length} caracteres");
 
                 this.LoadFromString(JsonGAL);
                 var datosParseados = this.ParseList();
-                Debug.WriteLine($"[GALExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+                Console.WriteLine($"[GALExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
                 return this.FromParsedToUsefull(datosParseados);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Excepcion cargando datos de Galicia {ex.Message} ");
+                Console.WriteLine($"Excepcion cargando datos de Galicia {ex.Message} ");
                 return (new List<ResultObject>(), 0, "", "ERROR GAL");
             }
         }

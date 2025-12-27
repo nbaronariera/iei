@@ -18,7 +18,7 @@ namespace UI
         [STAThread]
         static void Main()
         {
-            Debug.WriteLine($" ARRANCANDO UI");
+            Console.WriteLine($" ARRANCANDO UI");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

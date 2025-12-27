@@ -18,7 +18,7 @@ namespace UI.Parsers
 
         static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
         HttpClient _http = new HttpClient { 
-            BaseAddress = new Uri("http://localhost:8082"),
+            BaseAddress = new Uri("http://localhost:8090"),
             Timeout = Timeout.InfiniteTimeSpan
         };
 
@@ -275,7 +275,7 @@ namespace UI.Parsers
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Error insertando estación CV: {ex.Message}");
+                    Console.WriteLine($"Error insertando estación CV: {ex.Message}");
                     resultadoDebug.Motivos.Add($"Excepción: {ex.Message}");
                     debugResultados.Add(resultadoDebug);
                 }
@@ -284,11 +284,11 @@ namespace UI.Parsers
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
 
-            int cargadasCorrectamente = debugResultados.Count(r => r.Añadida);
+            int omitidas = debugResultados.Count(r => !r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
-                    .Where(r => r.Reparada && r.Añadida)
+                    .Where(r => r.Añadida)
                     .Select(r =>
                         $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
                     )
@@ -302,12 +302,9 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados, cargadasCorrectamente, estacionesReparadas, estacionesRechazadas);
+            return (resultados, omitidas, estacionesReparadas, estacionesRechazadas);
 
         }
-
-
-
         private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
         {
             return ctx.Estaciones.Any(e => e.nombre == nombre && e.latitud == lat && e.longitud == lon);
@@ -339,21 +336,21 @@ namespace UI.Parsers
             var añadidas = resultados.Where(r => r.Añadida).ToList();
             var descartadas = resultados.Where(r => !r.Añadida).ToList();
 
-            Debug.WriteLine("\n ESTACIONES AÑADIDAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES AÑADIDAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in añadidas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine("\n ESTACIONES DESCARTADAS");
-            Debug.WriteLine("------------------------------------------------------------");
-            Debug.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
-            Debug.WriteLine("------------------------------------------------------------");
+            Console.WriteLine("\n ESTACIONES DESCARTADAS");
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine($"{"Nombre",-35} | {"Provincia",-12} | {"Municipio",-18} | {"CP",-6} | {"Motivos"}");
+            Console.WriteLine("------------------------------------------------------------");
             foreach (var r in descartadas)
-                Debug.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
+                Console.WriteLine($"{r.Nombre,-35} | {r.Provincia,-12} | {r.Municipio,-18} | {r.CodigoPostal,-6} | {string.Join("; ", r.Motivos)}");
 
-            Debug.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
+            Console.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
         private bool CodigoPostalValido(string codigoPostal, string provincia)
@@ -384,18 +381,18 @@ namespace UI.Parsers
                 }
 
                 var JsonCV = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
+                Console.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
 
                 this.LoadFromString(JsonCV);
                 var datosParseados = this.ParseList();
-                Debug.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+                Console.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
                 var resultados = this.FromParsedToUsefull(datosParseados);
                 return resultados; // Devuelve directamente la tupla
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
+                Console.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
                 return (new List<ResultObject>(), 0, "", "ERROR CV");
             }
         }
