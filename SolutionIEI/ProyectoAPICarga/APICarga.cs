@@ -20,25 +20,36 @@ namespace ProyectoAPICarga
         ///<returns> Devuelve el log de la carga </returns> 
         ///<response code="200">Retorna el log de la carga</response>
         [HttpPost("cv")]
-        [ProducesResponseType(typeof(LoadResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoadCV()
         {
-            Console.WriteLine("[API CARGA] INICIO LoadCV");
+            Debug.WriteLine("[API CARGA] INICIO LoadCV");
             try
             {
-                Console.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerCV()");
+                Debug.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerCV()");
                 var resultado = await _logica.ObtenerCV();
-                Console.WriteLine("[API CARGA] FIN LoadCV OK");
-                return Ok(resultado);
+
+                var respuesta = new
+                {
+                    RegistrosCargados = resultado.Item2,
+                    RegistrosReparados = resultado.Item3 ?? "",
+                    RegistrosRechazados = resultado.Item4 ?? ""
+                };
+
+                Debug.WriteLine("[API CARGA] FIN LoadCV OK");
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                string errorMsg = $"ERROR al cargar la Comunidad Valenciana: {ex.Message}";
-                if (ex.InnerException != null)
-                    errorMsg += $"\nInner: {ex.InnerException.Message}";
-                Console.WriteLine($"[API] ERROR en LoadCV: {ex}");
-                return StatusCode(500, errorMsg);
+                var errorResponse = new
+                {
+                    RegistrosCargados = 0,
+                    RegistrosReparados = "",
+                    RegistrosRechazados = $"ERROR al cargar Comunidad Valenciana: {ex.Message}"
+                };
+                Debug.WriteLine($"[API] ERROR en LoadCV: {ex}");
+                return StatusCode(500, errorResponse);
             }
         }
 
@@ -75,25 +86,36 @@ namespace ProyectoAPICarga
         ///<returns> Devuelve el log de la carga </returns> 
         ///<response code="200">Retorna los datos de la carga</response>
         [HttpPost("cat")]
-        [ProducesResponseType(typeof(LoadResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoadCat()
         {
-            Console.WriteLine("[API CARGA] INICIO LoadCat");
+            Debug.WriteLine("[API CARGA] INICIO LoadCat");
             try
             {
-                Console.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerCat()");
+                Debug.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerCat()");
                 var resultado = await _logica.ObtenerCat();
-                Console.WriteLine("[API CARGA] FIN LoadCat OK");
-                return Ok(resultado);
+
+                var respuesta = new
+                {
+                    RegistrosCargados = resultado.Item2,
+                    RegistrosReparados = resultado.Item3 ?? "",
+                    RegistrosRechazados = resultado.Item4 ?? ""
+                };
+
+                Debug.WriteLine("[API CARGA] FIN LoadCat OK");
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                string errorMsg = $"ERROR al cargar Cataluña: {ex.Message}";
-                if (ex.InnerException != null)
-                    errorMsg += $"\nInner: {ex.InnerException.Message}";
-                Console.WriteLine($"[API] ERROR en LoadCat: {ex}");
-                return StatusCode(500, errorMsg);
+                var errorResponse = new
+                {
+                    RegistrosCargados = 0,
+                    RegistrosReparados = "",
+                    RegistrosRechazados = $"ERROR al cargar Cataluña: {ex.Message}"
+                };
+                Debug.WriteLine($"[API] ERROR en LoadCat: {ex}");
+                return StatusCode(500, errorResponse);
             }
         }
 
@@ -104,25 +126,36 @@ namespace ProyectoAPICarga
         ///<returns> Devuelve el log de la carga </returns> 
         ///<response code="200">Retorna los datos de la carga</response>
         [HttpPost("gal")]
-        [ProducesResponseType(typeof(LoadResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoadGal()
         {
-            Console.WriteLine("[API CARGA] INICIO LoadGal");
+            Debug.WriteLine("[API CARGA] INICIO LoadGal");
             try
             {
-                Console.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerGal()");
+                Debug.WriteLine("[API CARGA] Llamando a LogicaCarga.ObtenerGal()");
                 var resultado = await _logica.ObtenerGal();
-                Console.WriteLine("[API CARGA] FIN LoadGal OK");
-                return Ok(resultado);
+
+                var respuesta = new
+                {
+                    RegistrosCargados = resultado.Item2,
+                    RegistrosReparados = resultado.Item3 ?? "",
+                    RegistrosRechazados = resultado.Item4 ?? ""
+                };
+
+                Debug.WriteLine("[API CARGA] FIN LoadGal OK");
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                string errorMsg = $"ERROR al cargar Galicia: {ex.Message}";
-                if (ex.InnerException != null)
-                    errorMsg += $"\nInner: {ex.InnerException.Message}";
-                Console.WriteLine($"[API] ERROR en LoadGal: {ex}");
-                return StatusCode(500, errorMsg);
+                var errorResponse = new
+                {
+                    RegistrosCargados = 0,
+                    RegistrosReparados = "",
+                    RegistrosRechazados = $"ERROR al cargar Galicia: {ex.Message}"
+                };
+                Debug.WriteLine($"[API] ERROR en LoadGal: {ex}");
+                return StatusCode(500, errorResponse);
             }
         }
     }

@@ -20,29 +20,25 @@ namespace UI.Logica
             _persistencia = new Persistencia.Persistencia();
         }
 
-        public async Task<string> ObtenerGal()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerGal()
         {
-            var extractor = new GALExtractor();
-            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
-            string res = $"Cargado Galicia.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
-            return res; 
+            Debug.WriteLine("[LOGICA CARGA] Creando GALExtractor");
+            var galExtractor = new GALExtractor();
+            return await galExtractor.LoadData(); // ← Ahora LoadData() devuelve tupla
         }
 
-        public async Task<string> ObtenerCat()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerCat()
         {
-            var extractor = new CATExtractor();
-            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
-            Console.WriteLine(result.Item3);
-            string res = $"Cargado Cataluña.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
-            return res;
+            Debug.WriteLine("[LOGICA CARGA] Creando CATExtractor");
+            var catExtractor = new CATExtractor();
+            return await catExtractor.LoadData(); // ← Tupla
         }
 
-        public async Task<string> ObtenerCV()
+        public async Task<(List<ResultObject>, int, string, string)> ObtenerCV()
         {
-            var extractor = new CVExtractor();
-            (List<ResultObject>, int, string, string) result = await extractor.LoadData(); 
-            string res = $"Cargado Comunidad Valenciana.\n Añadidas: {result.Item1.Count}, Omitidas: {result.Item2}. Log:\nAñadidas:\n{result.Item3}\nOmitidas:\n{result.Item4}";
-            return res;
+            Debug.WriteLine("[LOGICA CARGA] Creando CVExtractor");
+            var cvExtractor = new CVExtractor();
+            return await cvExtractor.LoadData(); // ← Tupla
         }
 
         public bool Clean()

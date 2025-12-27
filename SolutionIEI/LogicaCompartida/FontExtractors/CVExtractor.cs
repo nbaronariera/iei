@@ -283,7 +283,7 @@ namespace UI.Parsers
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
-                    .Where(r => r.Añadida)
+                    .Where(r => r.Reparada && r.Añadida)
                     .Select(r =>
                         $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
                     )
