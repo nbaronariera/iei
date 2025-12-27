@@ -30,7 +30,7 @@ namespace ProyectoAPIGal
             try
             {
                 var lista = _logica.loadGal();
-                return Ok(lista);
+                return Content(lista, "application/json");
             }
             catch (Exception ex)
             {

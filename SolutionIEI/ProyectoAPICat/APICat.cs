@@ -30,7 +30,7 @@ namespace ProyectoAPICat
             try
             {
                 var lista = _logica.loadCat();
-                return Ok(lista);
+                return Content(lista, "application/json");
             }
             catch (Exception ex)
             {

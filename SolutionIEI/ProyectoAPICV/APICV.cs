@@ -30,7 +30,7 @@ namespace ProyectoAPICV
             try
             {
                 var lista = _logica.loadCV();
-                return Ok(lista);
+                return Content(lista, "application/json");
             }
             catch (Exception ex)
             {

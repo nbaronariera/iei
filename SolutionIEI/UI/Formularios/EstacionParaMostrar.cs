@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UI
+namespace UI.Formularios
 {
     public class EstacionParaMostrar
     {
