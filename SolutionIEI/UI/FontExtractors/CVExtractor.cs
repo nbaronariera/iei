@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Json;using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ namespace UI.Parsers
     public class CVExtractor : Parser<JSONData>
     {
 
+        static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
         HttpClient _http = new HttpClient { 
             BaseAddress = new Uri("http://localhost:8082"),
             Timeout = Timeout.InfiniteTimeSpan
@@ -396,6 +398,73 @@ namespace UI.Parsers
                 Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
                 return (new List<ResultObject>(), 0, "", "ERROR CV");
             }
+        }
+
+        public override void LoadFromString(string json)
+        {
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
+            var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            string outputJsonPath = Path.Combine(outputDir, "tmp.json");
+            Directory.CreateDirectory(outputDir);
+            System.IO.File.WriteAllText(outputJsonPath, json, utf8NoBom);
+
+            var csvParser = new JSONParser();
+            csvParser.Load(outputJsonPath);
+            var listaObjetos = csvParser.ParseList();
+
+            // 2 Generar el JSON final con coordenadas 
+            string jsonContent = applySelenium(listaObjetos);
+
+            // 3️ Guardar con UTF-8 sin BOM (opcional, para depuración)
+            outputJsonPath = Path.Combine(outputDir, "CVSelenium.json");
+            System.IO.File.WriteAllText(outputJsonPath, jsonContent, utf8NoBom);
+            base.LoadFromString(outputJsonPath);
+        }
+
+        private static string applySelenium(List<JSONData> elementos)
+        {
+            string res = "[";
+
+            for (int i = 0; i < elementos.Count; i++)
+            {
+                var elemento = elementos[i];
+
+                // --- LÓGICA DE FILTRADO ---
+                bool esEstacionFija = elemento.TIPO_ESTACION != null &&
+                                      elemento.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase);
+
+                if (esEstacionFija)
+                {
+                    // CASO A: Es Fija -> Usamos Selenium
+                    // Buscamos por Dirección + Municipio
+                    var coords = seleniumHelper.ObtenerCoordenadas(elemento.DIRECCION, elemento.MUNICIPIO);
+                    elemento.Latitud = coords.Lat;
+                    elemento.Longitud = coords.Lng;
+                }
+                else
+                {
+                    // CASO B: Es Móvil o Agrícola -> Ponemos 0 y NO usamos Selenium
+                    elemento.Latitud = 0.0;
+                    elemento.Longitud = 0.0;
+                }
+
+                // Añadimos al string JSON
+                res += "{" + elemento.ToJSON() + "}";
+
+                // Añadimos coma si no es el último elemento
+                if (i < elementos.Count - 1)
+                {
+                    res += ",\n";
+                }
+                else
+                {
+                    res += "\n";
+                }
+            }
+
+            res += "]";
+            return res;
         }
     }
 }

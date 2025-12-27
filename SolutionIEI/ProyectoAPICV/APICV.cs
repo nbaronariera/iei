@@ -23,7 +23,7 @@ namespace ProyectoAPICV
         ///<response code="200">Retorna el json</response>
         [HttpGet("json")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(List<JSONData>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult getJSON()
         {

@@ -20,7 +20,7 @@ namespace UI.Parsers
             file = null;
         }
 
-        public void LoadFromString(string jsonContent)
+        public virtual void LoadFromString(string jsonContent)
         {
             if (string.IsNullOrWhiteSpace(jsonContent))
             {

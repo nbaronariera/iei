@@ -13,23 +13,19 @@ namespace UI.Logica
 {
     public class LogicaParseo
     {
-        public List<GALData> loadGal()
+        public string loadGal()
         {
-             
-            string jsonContent = CSVaJSONConversor.Ejecutar(); // sigue generando y guardando el archivo
-            return JsonSerializer.Deserialize<List<GALData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+            return CSVaJSONConversor.Ejecutar(); 
         }
 
-        public List<JSONData> loadCV()
+        public string loadCV()
         {
-            string jsonContent = JSONaJSONConversor.Ejecutar();
-            return JsonSerializer.Deserialize<List<JSONData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+            return JSONConversor.Ejecutar();
         }
 
-        public List<XMLData> loadCat()
+        public string loadCat()
         {
-            string jsonContent = XMLaJSONConversor.Ejecutar();
-            return JsonSerializer.Deserialize<List<XMLData>>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+            return XMLaJSONConversor.Ejecutar();
         }
     }
 }
