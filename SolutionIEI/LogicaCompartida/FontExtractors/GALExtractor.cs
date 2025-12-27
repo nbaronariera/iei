@@ -49,50 +49,37 @@ namespace UI.Parsers
         protected override List<GALData> ExecuteParse()
         {
             if (file == null) return new List<GALData>();
-
             string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
-
-            Console.WriteLine($"[GALExtractor] Cargando JSON de {contenido.Length} caracteres");
+            Debug.WriteLine($"[GALExtractor] Cargando JSON de {contenido.Length} caracteres");
 
             var opciones = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = false
+                PropertyNameCaseInsensitive = true // ← CLAVE: permite coincidencia sin importar mayúsculas
             };
 
             var filas = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(contenido, opciones) ?? new List<Dictionary<string, string>>();
-
-            Console.WriteLine($"[GALExtractor] Deserializados {filas.Count} diccionarios");
 
             var resultado = new List<GALData>();
             foreach (var fila in filas)
             {
                 var gal = new GALData
                 {
-                    NombreEstacion = Obtener(fila, "nombreEstacion"),
-                    Direccion = Obtener(fila, "direccion"),
-                    Municipio = Obtener(fila, "municipio"),
-                    CodigoPostal = Obtener(fila, "codigoPostal"),
-                    Provincia = Obtener(fila, "provincia"),
-                    Telefono = Obtener(fila, "telefono"),
-                    HorarioRaw = Obtener(fila, "horarioRaw"),
-                    UrlCita = Obtener(fila, "urlCita"),
-                    Correo = Obtener(fila, "correo"),
-                    Coordenadas = Obtener(fila, "coordenadas")
+                    // Usa las claves originales del CSV convertido
+                    NombreEstacion = Obtener(fila, "NOME DA ESTACIÓN"),
+                    Direccion = Obtener(fila, "ENDEREZO"),
+                    Municipio = Obtener(fila, "CONCELLO"),
+                    CodigoPostal = Obtener(fila, "CÓDIGO POSTAL"),
+                    Provincia = Obtener(fila, "PROVINCIA"),
+                    Telefono = Obtener(fila, "TELÉFONO"),
+                    HorarioRaw = Obtener(fila, "HORARIO"),
+                    UrlCita = Obtener(fila, "SOLICITUDE DE CITA PREVIA"),
+                    Correo = Obtener(fila, "CORREO ELECTRÓNICO"),
+                    Coordenadas = Obtener(fila, "COORDENADAS GMAPS")
                 };
                 resultado.Add(gal);
             }
 
-            Console.WriteLine($"[GALExtractor] Convertidos a {resultado.Count} objetos GALData");
-            if (resultado.Count > 0)
-            {
-                var primeraFila = filas[0];
-                Console.WriteLine("[GALExtractor] Claves de la primera fila:");
-                foreach (var key in primeraFila.Keys)
-                {
-                    Console.WriteLine($"  Clave: '{key}' = '{primeraFila[key]}'");
-                }
-            }
-
+            Debug.WriteLine($"[GALExtractor] Convertidos a {resultado.Count} objetos GALData");
             return resultado;
         }
 
@@ -243,7 +230,7 @@ namespace UI.Parsers
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
-                    .Where(r => r.Añadida)
+                    .Where(r => r.Reparada && r.Añadida)
                     .Select(r =>
                         $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
                     )

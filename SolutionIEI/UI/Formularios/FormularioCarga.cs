@@ -88,29 +88,36 @@ namespace UI
             {
                 if (chkGalicia.Checked)
                 {
-                    var res = await CargarComunidad("gal");
+                    var result = await CargarComunidad("gal");
+                    totalCargadas += result.cargados;
+                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
+                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
                     log.AppendLine("--- CARGA GALICIA COMPLETADA ---");
-                    log.AppendLine(res);
-                    log.AppendLine();
                 }
 
                 if (chkCataluna.Checked)
                 {
-                    var res = await CargarComunidad("cat");
+                    var result = await CargarComunidad("cat");
+                    totalCargadas += result.cargados;
+                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
+                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
                     log.AppendLine("--- CARGA CATALUÑA COMPLETADA ---");
-                    log.AppendLine(res);
-                    log.AppendLine();
                 }
 
                 if (chkValencia.Checked)
                 {
-                    var res = await CargarComunidad("cv");
+                    var result = await CargarComunidad("cv");
+                    totalCargadas += result.cargados;
+                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
+                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
                     log.AppendLine("--- CARGA COMUNIDAD VALENCIANA COMPLETADA ---");
-                    log.AppendLine(res);
-                    log.AppendLine();
-
                 }
 
+                log.AppendLine($"\nNúmero de registros cargados correctamente: {totalCargadas}");
+                log.AppendLine("\nRegistros con errores y reparados:");
+                log.AppendLine(todasReparadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasReparadas));
+                log.AppendLine("\nRegistros con errores y rechazados:");
+                log.AppendLine(todasRechazadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasRechazadas));
                 log.AppendLine("\n--- CARGA FINALIZADA ---");
             }
             catch (Exception ex)
@@ -132,18 +139,21 @@ namespace UI
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-
                 try
                 {
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var obj = JsonSerializer.Deserialize<JsonCargaResponse>(json, options);
 
-                    return (obj.RegistrosCargados, obj.RegistrosReparados ?? "", obj.RegistrosRechazados ?? "");
+                    return (
+                        obj?.RegistrosCargados ?? 0,
+                        obj?.RegistrosReparados ?? "",
+                        obj?.RegistrosRechazados ?? ""
+                    );
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[CLIENTE] Error deserializando respuesta de {endpoint}: {ex.Message}\nJSON: {json}");
-                    return (0, "", $"Error al procesar respuesta: {ex.Message}\nJSON recibido: {json}");
+                    Debug.WriteLine($"[CLIENTE] Error deserializando {endpoint}: {ex.Message}\nJSON: {json}");
+                    return (0, "", $"Error al procesar JSON: {ex.Message}");
                 }
             }
             else
@@ -152,6 +162,7 @@ namespace UI
                 return (0, "", $"Error HTTP {response.StatusCode}: {error}");
             }
         }
+
 
         // Clase auxiliar para deserializar
         private class JsonCargaResponse
