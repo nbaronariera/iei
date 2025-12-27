@@ -10,37 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="FontExtractors\CATExtractor.cs~RF397c250.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
 	  <FrameworkReference Include="Microsoft.AspNetCore.App"></FrameworkReference>
-    <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="GMap.NET.Core" Version="2.1.7" />
     <PackageReference Include="GMap.NET.WinForms" Version="2.1.7" />
     <PackageReference Include="GMap.NET.WinPresentation" Version="2.1.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Selenium.WebDriver" Version="4.38.0" />
-    <PackageReference Include="WebDriverManager" Version="2.17.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ArchivosFuenteConvertidos\" />
-    <Folder Include="SeleniumTasks\" />
-  </ItemGroup>
 
 	<ItemGroup>
-		<None Update="Fuentes\Estacions_ITV.csv">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Fuentes\**\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<ProjectReference Include="..\LogicaCompartida\LogicaCompartida.csproj" />
 	</ItemGroup>
 
 </Project>

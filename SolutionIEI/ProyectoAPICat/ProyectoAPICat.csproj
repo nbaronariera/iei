@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -11,8 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\UI\UI.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\LogicaCompartida\LogicaCompartida.csproj" />
+		<ProjectReference Include="..\ProyectoAPICarga\ProyectoAPICarga.csproj" />
+	</ItemGroup>
 
 </Project>
