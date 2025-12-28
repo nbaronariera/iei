@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\SolutionIEI"
+    "\\SolutionIEI",
+    "\\SolutionIEI\\ProyectoAPICV"
   ],
-  "SelectedNode": "\\SolutionIEI\\SolutionIEI.sln",
+  "SelectedNode": "\\SolutionIEI\\ProyectoAPICV\\APICV.cs",
   "PreviewInSolutionExplorer": false
 }

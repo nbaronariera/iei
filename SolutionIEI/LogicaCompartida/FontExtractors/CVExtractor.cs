@@ -386,6 +386,8 @@ namespace UI.Parsers
                     return (new List<ResultObject>(), 0, "", "ERROR CV HTTP");
                 }
 
+               
+
                 var JsonCV = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
 
@@ -411,24 +413,27 @@ namespace UI.Parsers
 
             try
             {
-                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
-                var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-                string outputJsonPath = Path.Combine(outputDir, "tmp.json");
-                Directory.CreateDirectory(outputDir);
-                System.IO.File.WriteAllText(outputJsonPath, json, utf8NoBom);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var listaObjetos = JsonSerializer.Deserialize<List<JSONData>>(json, options);
 
-                var jsonParser = new JSONParser();
-                jsonParser.Load(outputJsonPath);
-                var listaObjetos = jsonParser.ParseList();
+                if (listaObjetos == null || listaObjetos.Count == 0)
+                {
+                    Console.WriteLine("[CVExtractor] JSON vacío o inválido → no se procesa nada");
+                    return;
+                }
 
-                // 2 Generar el JSON final con coordenadas 
-                string jsonContent = applySelenium(listaObjetos);
+                Console.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
 
-                // 3️ Guardar con UTF-8 sin BOM (opcional, para depuración)
-                outputJsonPath = Path.Combine(outputDir, "CVSelenium.json");
-                System.IO.File.WriteAllText(outputJsonPath, jsonContent, utf8NoBom);
-                base.LoadFromString(outputJsonPath);
+                // Aplicamos Selenium directamente sobre los objetos en memoria
+                ApplySelenium(listaObjetos);
+
+                // Guardamos los objetos modificados en la propiedad 'file' del parser base
+                // para que ExecuteParse() los lea (aunque no usemos ExecuteParse, el base lo necesita)
+                string tempJson = JsonSerializer.Serialize(listaObjetos, new JsonSerializerOptions { WriteIndented = false });
+                var tempStream = new MemoryStream(Encoding.UTF8.GetBytes(tempJson));
+                this.file = tempStream;  // 'file' es la propiedad protegida del Parser<T> base
+
+                Debug.WriteLine("[CVExtractor] Objetos modificados con coordenadas y listos para procesar");
             }
             catch (Exception ex)
             {
@@ -451,49 +456,50 @@ namespace UI.Parsers
             }
         }
 
-        private static string applySelenium(List<JSONData> elementos)
+        private static void ApplySelenium(List<JSONData> elementos)
         {
-            string res = "[";
+            Debug.WriteLine($"[CVExtractor] Aplicando Selenium a {elementos.Count} elementos");
 
-            for (int i = 0; i < elementos.Count; i++)
+            foreach (var elemento in elementos)
             {
-                var elemento = elementos[i];
-
-                // --- LÓGICA DE FILTRADO ---
                 bool esEstacionFija = elemento.TIPO_ESTACION != null &&
                                       elemento.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase);
 
-                if (esEstacionFija)
+                if (esEstacionFija && (elemento.Latitud == null || elemento.Latitud == 0 || elemento.Longitud == null || elemento.Longitud == 0))
                 {
-                    // CASO A: Es Fija -> Usamos Selenium
-                    // Buscamos por Dirección + Municipio
-                    var coords = seleniumHelper.ObtenerCoordenadas(elemento.DIRECCION, elemento.MUNICIPIO);
-                    elemento.Latitud = coords.Lat;
-                    elemento.Longitud = coords.Lng;
+                    Debug.WriteLine($"[SELENIUM] Obteniendo coordenadas para: {elemento.DIRECCION ?? "sin dirección"}, {elemento.MUNICIPIO ?? "sin municipio"}");
+
+                    try
+                    {
+                        var coords = seleniumHelper.ObtenerCoordenadas(elemento.DIRECCION ?? "", elemento.MUNICIPIO ?? "");
+                        elemento.Latitud = coords.Lat;
+                        elemento.Longitud = coords.Lng;
+
+                        if (coords.Lat != 0 || coords.Lng != 0)
+                        {
+                            Debug.WriteLine($"[SELENIUM] ÉXITO → ({coords.Lat}, {coords.Lng})");
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[SELENIUM] No encontradas → usando (0,0)");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[SELENIUM] Error en esta estación: {ex.Message}");
+                        elemento.Latitud = 0.0;
+                        elemento.Longitud = 0.0;
+                    }
                 }
                 else
                 {
-                    // CASO B: Es Móvil o Agrícola -> Ponemos 0 y NO usamos Selenium
-                    elemento.Latitud = 0.0;
-                    elemento.Longitud = 0.0;
-                }
-
-                // Añadimos al string JSON
-                res += "{" + elemento.ToJSON() + "}";
-
-                // Añadimos coma si no es el último elemento
-                if (i < elementos.Count - 1)
-                {
-                    res += ",\n";
-                }
-                else
-                {
-                    res += "\n";
+                    // Móviles o agrícolas → coordenadas 0
+                    elemento.Latitud ??= 0.0;
+                    elemento.Longitud ??= 0.0;
                 }
             }
 
-            res += "]";
-            return res;
+            Debug.WriteLine("[CVExtractor] Selenium aplicado a todos los elementos");
         }
     }
 }
