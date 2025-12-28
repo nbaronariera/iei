@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -56,6 +57,8 @@ namespace UI.Helpers
 
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
         {
+            Debug.WriteLine($"[SELENIUM] Iniciando búsqueda para: '{direccion}', {municipio}");
+
             try
             {
                 // --- Limpieza de dirección (Tu lógica original) ---
@@ -71,12 +74,20 @@ namespace UI.Helpers
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*km\.?\s*\d+([.,]\d+)?", "", RegexOptions.IgnoreCase);
                     direccion = direccion.Trim().TrimEnd(',');
                 }
+                else
+                {
 
-                driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
+                    Debug.WriteLine("[SELENIUM] Dirección y municipio vacíos → devolviendo (0,0)");
+                    return (0.0, 0.0);
+
+                }
+
+                    driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
                 // Pequeña espera aleatoria para parecer humano
                 Thread.Sleep(rnd.Next(2000, 3000));
 
                 // --- Gestión de Cookies ---
+              
                 try
                 {
                     string xpathCookies = "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'consentir') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'aceptar') or contains(text(), 'Agree')]";
@@ -120,7 +131,9 @@ namespace UI.Helpers
 
                 // --- Introducir Datos ---
                 string direccionCompleta = $"{direccion}, {municipio}";
-                
+
+                Debug.WriteLine($"[SELENIUM] Dirección limpia: '{direccionCompleta}'");
+
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
                 var addressInput = wait.Until(d => d.FindElement(By.Id("address"))); // Espera explícita
                 
@@ -129,7 +142,9 @@ namespace UI.Helpers
 
                 var latInput = driver.FindElement(By.Id("latitude"));
                 var lngInput = driver.FindElement(By.Id("longitude"));
-                
+
+               
+
                 // Limpiar valores previos vía JS para asegurar
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
                 js.ExecuteScript("arguments[0].value = '';", latInput);
@@ -160,17 +175,21 @@ namespace UI.Helpers
                 string latStr = latInput.GetAttribute("value");
                 string lngStr = lngInput.GetAttribute("value");
 
+               
+
                 if (double.TryParse(latStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
                     double.TryParse(lngStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lng))
                 {
+                    Debug.WriteLine($"[SELENIUM] Coordenadas detectadas con éxito: Lat={latStr}, Lng={lngStr}");
                     return (lat, lng);
                 }
-
+                Debug.WriteLine("[SELENIUM] Fallo al parsear coordenadas");
                 return (0.0, 0.0);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Error Selenium] {ex.Message}");
+
+                Debug.WriteLine($"[Error Selenium] {ex.Message}");
                 return (0.0, 0.0);
             }
         }

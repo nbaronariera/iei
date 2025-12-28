@@ -36,9 +36,11 @@ namespace UI.Logica
 
         public async Task<(List<ResultObject>, int, string, string)> ObtenerCV()
         {
-            Debug.WriteLine("[LOGICA CARGA] Creando CVExtractor");
+            Debug.WriteLine("[LOGICA] === INICIANDO CARGA CV ===");
             var cvExtractor = new CVExtractor();
-            return await cvExtractor.LoadData(); // ← Tupla
+            var resultado = await cvExtractor.LoadData();
+            Debug.WriteLine($"[LOGICA] === CARGA CV FINALIZADA: {resultado.Item1.Count} estaciones ===");
+            return resultado;
         }
 
         public bool Clean()

@@ -44,6 +44,8 @@ namespace UI.Parsers
 
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<JSONData> datosParseados)
         {
+
+            Debug.WriteLine($"[CVExtractor] Procesando {datosParseados.Count} registros...");
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
@@ -224,6 +226,12 @@ namespace UI.Parsers
                         continue;
                     }
 
+                    if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
+                    {
+                        resultadoDebug.Añadida = false;
+                        resultadoDebug.Motivos.Add("No se pudieron obtener las coordenadas (Selenium falló o no encontró)");
+                    }
+
                     // Procesamiento de Horario
                     var horario = dato.HORARIOS ?? "Sin horario";
                     if (dato.TIPO_ESTACION != null && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
@@ -263,10 +271,11 @@ namespace UI.Parsers
                     contexto.Estaciones.Add(estacion);
                     resultados.Add(new ResultObject { Estacion = estacion, Localidad = localidad, Provincia = provincia });
                     numValidas++;
-                    
 
+                    Debug.WriteLine($"[CVExtractor] Carga completada: {resultados.Count} añadidas, {debugResultados.Count(r => !r.Añadida)} rechazadas");
                     resultadoDebug.Añadida = true;
                     debugResultados.Add(resultadoDebug);
+
                 }
                 catch (Exception ex)
                 {
@@ -367,34 +376,41 @@ namespace UI.Parsers
 
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
+            Debug.WriteLine("[CVExtractor] === INICIO CARGA COMUNIDAD VALENCIANA ===");
             try
             {
                 var response = await _http.GetAsync("/cv/json");
+                Debug.WriteLine($"[CVExtractor] Respuesta HTTP: {response.StatusCode}");
                 if (!response.IsSuccessStatusCode)
                 {
                     return (new List<ResultObject>(), 0, "", "ERROR CV HTTP");
                 }
 
                 var JsonCV = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
+                Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
 
                 this.LoadFromString(JsonCV);
                 var datosParseados = this.ParseList();
-                Console.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+                Debug.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
                 var resultados = this.FromParsedToUsefull(datosParseados);
+                Debug.WriteLine($"[CVExtractor] === FIN CARGA: {resultados.Item1.Count} estaciones añadidas ===");
                 return resultados; // Devuelve directamente la tupla
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
+                Debug.WriteLine($"Excepcion cargando datos de CV {ex.Message}");
                 return (new List<ResultObject>(), 0, "", "ERROR CV");
             }
         }
 
         public override void LoadFromString(string json)
         {
-            try{
+
+            Debug.WriteLine("[CVExtractor] LoadFromString iniciado");
+
+            try
+            {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 string outputDir = Path.Combine(baseDirectory, "ArchivosFuenteConvertidos");
                 var utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
