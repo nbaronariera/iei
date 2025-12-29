@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogicaCompartida.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,10 +25,10 @@ namespace UI.Logica
         // ========= Conversión común lista y mapa ===================
         // ============================================================
         public List<EstacionParaMostrar> ObtenerEstaciones(
-            string codPostal,
-            string provincia,
-            string localidad,
-            string tipoEstacion)
+          string codPostal,
+          string provincia,
+          string localidad,
+          string tipoEstacion)
         {
             var estaciones = _persistencia.ObtenerEstaciones();
 
@@ -42,9 +43,8 @@ namespace UI.Logica
             // Filtro código postal
             if (!string.IsNullOrWhiteSpace(codPostal))
             {
-                if (codPostal.EndsWith("000"))
+                if (codPostal.EndsWith("000") || codPostal.Length != 5)
                     return new List<EstacionParaMostrar>();
-
                 estaciones = estaciones.Where(e => e.codigoPostal == codPostal).ToList();
             }
 
@@ -56,12 +56,13 @@ namespace UI.Logica
             if (!string.IsNullOrWhiteSpace(localidad) && localidad != "Cualquiera")
                 estaciones = estaciones.Where(e => e.localidad?.nombre == localidad).ToList();
 
-            // Conversión final
+            // Conversión final con lógica de visibilidad
             return estaciones.Select(e => new EstacionParaMostrar
             {
                 nombre = e.nombre,
                 Tipo = TraducirTipo(e.tipo.ToString()),
-                direccion = e.direccion,
+                // Solo mostrar dirección, CP, localidad, lat/long si es fija
+                direccion = e.tipo == TipoEstacion.Estacion_fija ? e.direccion ?? "" : "",
                 Provincia = e.localidad?.Provincia?.nombre ?? "",
                 Localidad = e.tipo == TipoEstacion.Estacion_fija ? e.localidad?.nombre ?? "" : "",
                 CP = e.tipo == TipoEstacion.Estacion_fija ? e.codigoPostal ?? "" : "",
@@ -69,68 +70,48 @@ namespace UI.Logica
                 horario = e.horario ?? "",
                 contacto = e.contacto ?? "",
                 URL = e.URL ?? "",
-                latitud = e.latitud,
-                longitud = e.longitud
+                latitud = e.tipo == TipoEstacion.Estacion_fija ? e.latitud : 0,
+                longitud = e.tipo == TipoEstacion.Estacion_fija ? e.longitud : 0
             }).ToList();
         }
 
         // ============================================================
         // =============== PROVINCIAS (DEVUELVE OBJETOS) =============
         // ============================================================
-        public List<Provincia> ObtenerProvincias()
+        public List<ProvinciaDTO> ObtenerProvincias()
         {
             return _persistencia.ObtenerProvincias()
-                .Select(p => new Provincia
+                .Where(l => !l.nombre.Contains("Desconocida"))
+                .Select(p => new ProvinciaDTO
                 {
-                    codigo = p.codigo,
-                    nombre = p.nombre
-                    // NO incluir Localidades → evita referencia circular
+                    
+                    Nombre = p.nombre
+                 
                 })
-                .OrderBy(p => p.nombre)
+                .OrderBy(p => p.Nombre)
                 .ToList();
         }
 
         // ============================================================
         // =============== LOCALIDADES (DEVUELVE OBJETOS) ============
         // ============================================================
-        public List<Localidad> ObtenerLocalidades()
+        public List<LocalidadDTO> ObtenerLocalidades()
         {
             return _persistencia.ObtenerLocalidades()
-                .Where(l => l.nombre != "Agrícola" && l.nombre != "Móvil")
-                .Select(l => new Localidad
+                .Where(l => l.nombre != "Agrícola" && l.nombre != "Móvil" && l.nombre != "Itinerante" && l.Provincia != null && !l.nombre.Contains("Desconocida"))
+                .Select(l => new LocalidadDTO
                 {
-                    codigo = l.codigo,
-                    nombre = l.nombre,
-                    codigoProvincia = l.codigoProvincia,
-                    Provincia = l.Provincia != null ? new Provincia
-                    {
-                        codigo = l.Provincia.codigo,
-                        nombre = l.Provincia.nombre
-                    } : null
-                    // NO incluir Estaciones → evita referencia circular
+                   
+                    NombreLocalidad = l.nombre,
+                    NombreProvincia = l.Provincia.nombre
+                   
+                    
                 })
-                .OrderBy(l => l.Provincia?.nombre)
-                .ThenBy(l => l.nombre)
+                .OrderBy(l => l.NombreProvincia)
+                .ThenBy(l => l.NombreLocalidad)
                 .ToList();
         }
 
-        // ============================================================
-        // ========== LOCALIDADES POR PROVINCIA (solo nombres) ========
-        // ============================================================
-        public List<string> ObtenerLocalidadesPorProvincia(string provincia)
-        {
-            var lista = _persistencia.ObtenerLocalidades()
-                .Where(l => l.Provincia != null &&
-                            l.Provincia.nombre == provincia &&
-                            l.nombre != "Agrícola" &&
-                            l.nombre != "Móvil" && !l.Provincia.nombre.Contains("Desconocida"))
-                .Select(l => l.nombre)
-                .OrderBy(n => n)
-                .ToList();
-
-            lista.Insert(0, "Cualquiera");
-            return lista;
-        }
 
         // ============================================================
         // ====================== UTILIDADES =========================
