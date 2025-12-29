@@ -12,13 +12,22 @@ namespace UI.Helpers
 {
     internal class CoordenadasSelenium : IDisposable
     {
+
+        private static CoordenadasSelenium _instance;
+        private static readonly object _lock = new();
+
+        public bool Disponible { get; private set; }
+
         private IWebDriver driver;
         private Random rnd = new Random();
 
         public CoordenadasSelenium()
         {
-            // 1. Configuración de Opciones
-            var options = new ChromeOptions();
+
+            try
+            {
+                // 1. Configuración de Opciones
+                var options = new ChromeOptions();
             
             options.AddArgument("--no-sandbox"); 
             options.AddArgument("--disable-dev-shm-usage");
@@ -33,7 +42,7 @@ namespace UI.Helpers
             if (!string.IsNullOrEmpty(chromeBinEnv) && !string.IsNullOrEmpty(driverPathEnv))
             {
                 // --- Lógica para NixOS / Linux Configurado ---
-                Console.WriteLine($"[INFO] Modo NixOS detectado.");
+                Debug.WriteLine($"[INFO] Modo NixOS detectado.");
                 
                 options.BinaryLocation = chromeBinEnv;
                 string driverDir = Path.GetDirectoryName(driverPathEnv);
@@ -43,20 +52,48 @@ namespace UI.Helpers
             else
             {
                 // --- Lógica para Windows / Entorno Estándar ---
-                Console.WriteLine($"[INFO] Modo Windows/Estándar detectado.");
+                Debug.WriteLine($"[INFO] Modo Windows/Estándar detectado.");
                 service = ChromeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
             }
 
             service.HideCommandPromptWindow = true;
             service.SuppressInitialDiagnosticInformation = true;
             driver = new ChromeDriver(service, options);
-            
+
+          
+
             // Timeout implícito para encontrar elementos
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+
+            Disponible = true;
+
+            }
+            catch (Exception ex)
+            {
+                Disponible = false;
+                Debug.WriteLine($"[SELENIUM] ERROR inicializando: {ex.Message}");
+            }
         }
+
+        public static CoordenadasSelenium Instance
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    _instance ??= new CoordenadasSelenium();
+                    return _instance;
+                }
+            }
+        }
+
 
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
         {
+
+            if (!Disponible)
+                return (0.0, 0.0);
+
             Debug.WriteLine($"[SELENIUM] Iniciando búsqueda para: '{direccion}', {municipio}");
 
             try

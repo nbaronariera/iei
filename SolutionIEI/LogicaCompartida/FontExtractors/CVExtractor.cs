@@ -13,10 +13,14 @@ using static System.Net.WebRequestMethods;
 
 namespace UI.Parsers
 {
+
+
     public class CVExtractor : Parser<JSONData>
     {
+        private List<JSONData> objetosParseados = new List<JSONData>();
 
-        static CoordenadasSelenium seleniumHelper = new CoordenadasSelenium();
+      
+
         HttpClient _http = new HttpClient { 
             BaseAddress = new Uri("http://localhost:8082"),
             Timeout = Timeout.InfiniteTimeSpan
@@ -392,8 +396,10 @@ namespace UI.Parsers
                 Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
 
                 this.LoadFromString(JsonCV);
-                var datosParseados = this.ParseList();
-                Debug.WriteLine($"[CVExtractor] ParseList() devolvió {datosParseados.Count} objetos");
+
+                var datosParseados = objetosParseados;
+
+                Debug.WriteLine($"[CVExtractor] objetosParseados devolvió {datosParseados.Count} objetos");
 
                 var resultados = this.FromParsedToUsefull(datosParseados);
                 Debug.WriteLine($"[CVExtractor] === FIN CARGA: {resultados.Item1.Count} estaciones añadidas ===");
@@ -418,41 +424,26 @@ namespace UI.Parsers
 
                 if (listaObjetos == null || listaObjetos.Count == 0)
                 {
-                    Console.WriteLine("[CVExtractor] JSON vacío o inválido → no se procesa nada");
+                    Debug.WriteLine("[CVExtractor] JSON vacío o inválido → no se procesa nada");
+                    objetosParseados = new List<JSONData>();
                     return;
                 }
 
-                Console.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
+                Debug.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
 
                 // Aplicamos Selenium directamente sobre los objetos en memoria
                 ApplySelenium(listaObjetos);
 
-                // Guardamos los objetos modificados en la propiedad 'file' del parser base
-                // para que ExecuteParse() los lea (aunque no usemos ExecuteParse, el base lo necesita)
-                string tempJson = JsonSerializer.Serialize(listaObjetos, new JsonSerializerOptions { WriteIndented = false });
-                var tempStream = new MemoryStream(Encoding.UTF8.GetBytes(tempJson));
-                this.file = tempStream;  // 'file' es la propiedad protegida del Parser<T> base
+                // Guardamos en variable de instancia para usarla en otros metodos
+                objetosParseados = listaObjetos;
+
 
                 Debug.WriteLine("[CVExtractor] Objetos modificados con coordenadas y listos para procesar");
             }
             catch (Exception ex)
             {
-              var sb = new StringBuilder();
-                sb.AppendLine($"[CRITICAL ERROR] Fallo en LoadFromString.");
-                sb.AppendLine($"Message: {ex.Message}");
-                sb.AppendLine($"StackTrace: {ex.StackTrace}");
-
-                // Profundizar en el error real
-                var inner = ex.InnerException;
-                while (inner != null)
-                {
-                    sb.AppendLine("--- Inner Exception ---");
-                    sb.AppendLine($"Message: {inner.Message}");
-                    sb.AppendLine($"StackTrace: {inner.StackTrace}");
-                    inner = inner.InnerException;
-                }
-
-                Console.WriteLine(sb.ToString());
+                Debug.WriteLine($"[CRITICAL ERROR] LoadFromString falló: {ex.Message}");
+                objetosParseados = new List<JSONData>();
             }
         }
 
@@ -460,18 +451,32 @@ namespace UI.Parsers
         {
             Debug.WriteLine($"[CVExtractor] Aplicando Selenium a {elementos.Count} elementos");
 
+            var selenium = CoordenadasSelenium.Instance;
+
+            if (!selenium.Disponible)
+            {
+                Debug.WriteLine("[SELENIUM] No disponible → todas las coordenadas a (0,0)");
+                foreach (var e in elementos)
+                {
+                    e.Latitud = 0;
+                    e.Longitud = 0;
+                }
+                return;
+            }
+
             foreach (var elemento in elementos)
             {
                 bool esEstacionFija = elemento.TIPO_ESTACION != null &&
                                       elemento.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase);
 
-                if (esEstacionFija && (elemento.Latitud == null || elemento.Latitud == 0 || elemento.Longitud == null || elemento.Longitud == 0))
+                if (esEstacionFija)
                 {
                     Debug.WriteLine($"[SELENIUM] Obteniendo coordenadas para: {elemento.DIRECCION ?? "sin dirección"}, {elemento.MUNICIPIO ?? "sin municipio"}");
 
                     try
                     {
-                        var coords = seleniumHelper.ObtenerCoordenadas(elemento.DIRECCION ?? "", elemento.MUNICIPIO ?? "");
+                      
+                        var coords = selenium.ObtenerCoordenadas(elemento.DIRECCION ?? "", elemento.MUNICIPIO ?? "");
                         elemento.Latitud = coords.Lat;
                         elemento.Longitud = coords.Lng;
 
@@ -482,6 +487,8 @@ namespace UI.Parsers
                         else
                         {
                             Debug.WriteLine("[SELENIUM] No encontradas → usando (0,0)");
+                            elemento.Latitud = 0.0;
+                            elemento.Longitud = 0.0;
                         }
                     }
                     catch (Exception ex)
