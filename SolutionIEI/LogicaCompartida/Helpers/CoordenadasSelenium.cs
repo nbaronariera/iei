@@ -101,11 +101,13 @@ namespace UI.Helpers
                 // --- Limpieza de dirección (Tu lógica original) ---
                 if (!string.IsNullOrEmpty(direccion))
                 {
+                    /*
                     if (direccion.Contains("Plá De Rascanya", StringComparison.OrdinalIgnoreCase))
                         direccion = "Calle Plá De Rascanya";
                     
                     if (direccion.Contains("Azagador de Lliria", StringComparison.OrdinalIgnoreCase))
                         direccion = "ITV Massalfassar";
+                    */
                     
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*s/\s*nº?", "", RegexOptions.IgnoreCase);
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*km\.?\s*\d+([.,]\d+)?", "", RegexOptions.IgnoreCase);

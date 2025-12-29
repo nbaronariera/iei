@@ -149,7 +149,7 @@ namespace UI.UI_Gestor
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando provincias: " + ex.Message);
+           
                 Console.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}\n{ex.StackTrace}");
                 comboProvincia.DataSource = new List<string> { "Cualquiera" };
             }
@@ -195,7 +195,7 @@ namespace UI.UI_Gestor
             catch (Exception ex)
             {
                 Console.WriteLine($"[CLIENTE] EXCEPCIÓN en CargarLocalidades: {ex.Message}\n{ex.StackTrace}");
-                MessageBox.Show("Error cargando localidades: " + ex.Message);
+                comboLocalidad.DataSource = new List<string> { "Cualquiera" };
             }
 
             cargando = false;

@@ -103,7 +103,7 @@ namespace UI.Parsers
                     dato.PROVINCIA = "Valencia";
                     resultadoDebug.Reparada = true;
                     resultadoDebug.Motivos.Add("Provincia incorrecta: València");
-                    resultadoDebug.Reparaciones.Add("Provincia normalizada: València → Valencia");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de València a Valencia");
                 }
 
                 // Normalizar variantes ortográficas comunes (Alacant -> Alicante)
@@ -113,7 +113,7 @@ namespace UI.Parsers
                     dato.PROVINCIA = "Alicante";
                     resultadoDebug.Reparada = true;
                     resultadoDebug.Motivos.Add("Provincia incorrecta: Alacant");
-                    resultadoDebug.Reparaciones.Add("Provincia normalizada: Alacant → Alicante");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Alacant a Alicante");
                 }
 
                 // Normalizar variantes ortográficas comunes (Castelló -> Castellón)
@@ -123,7 +123,7 @@ namespace UI.Parsers
                     dato.PROVINCIA = "Castellón";
                     resultadoDebug.Reparada = true;
                     resultadoDebug.Motivos.Add("Provincia incorrecta: Castelló");
-                    resultadoDebug.Reparaciones.Add("Provincia normalizada: Castelló → Castellón");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Castelló a Castellón");
                 }
 
 
@@ -132,8 +132,8 @@ namespace UI.Parsers
                 // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
                 string cpRaw = dato.C_POSTAL?.Trim() ?? "";
 
-                if (string.IsNullOrWhiteSpace(cpRaw) || dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) ||
-                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrWhiteSpace(cpRaw) && ( dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) ||
+                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase)))
                 {
                     // CASO 1: No tiene CP  o es estacion movil u agricola -> Asignamos el genérico de la provincia
                     // Buscamos si la provincia está en tu diccionario (ej: Valencia -> 46)
@@ -222,13 +222,6 @@ namespace UI.Parsers
 
                     }
 
-                    // Si hay errores graves, no insertamos
-                    if (resultadoDebug.Añadida == false)
-                    {
-                        resultadoDebug.Añadida = false;
-                        debugResultados.Add(resultadoDebug);
-                        continue;
-                    }
 
                     if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
                     {
@@ -245,6 +238,15 @@ namespace UI.Parsers
                             horario = ConvertirFormatoFecha(dato.HORARIOS);
                         }
                         catch { /* Si falla el formato, dejamos el original */ }
+                    }
+
+
+                    // Si hay errores graves, no insertamos
+                    if (resultadoDebug.Añadida == false)
+                    {
+                        resultadoDebug.Añadida = false;
+                        debugResultados.Add(resultadoDebug);
+                        continue;
                     }
 
                     // Gestión de Base de Datos (Provincias y Localidades)
@@ -292,7 +294,7 @@ namespace UI.Parsers
             contexto.SaveChanges();
             MostrarResumen(debugResultados);
 
-            int omitidas = debugResultados.Count(r => !r.Añadida);
+            int agregadas = debugResultados.Count(r => r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
@@ -310,12 +312,19 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados, omitidas, estacionesReparadas, estacionesRechazadas);
+            return (resultados, agregadas, estacionesReparadas, estacionesRechazadas);
 
         }
-        private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
+        private bool EstacionYaExiste(AppDbContext ctx, string numeroEstacion, double lat, double lon)
         {
-            return ctx.Estaciones.Any(e => e.nombre == nombre && e.latitud == lat && e.longitud == lon);
+            const double tolerancia = 0.0001; // ~11 metros
+
+            return ctx.Estaciones.Any(e => e.nombre.Contains(numeroEstacion) || (
+
+            Math.Abs(e.latitud - lat) < tolerancia &&
+            Math.Abs(e.longitud - lon) < tolerancia 
+
+            ));
         }
         private bool EsCorreo(string texto)
         {
@@ -397,11 +406,11 @@ namespace UI.Parsers
 
                 this.LoadFromString(JsonCV);
 
-                var datosParseados = objetosParseados;
+                
 
-                Debug.WriteLine($"[CVExtractor] objetosParseados devolvió {datosParseados.Count} objetos");
+                Debug.WriteLine($"[CVExtractor] objetosParseados devolvió {objetosParseados.Count} objetos");
 
-                var resultados = this.FromParsedToUsefull(datosParseados);
+                var resultados = this.FromParsedToUsefull(objetosParseados);
                 Debug.WriteLine($"[CVExtractor] === FIN CARGA: {resultados.Item1.Count} estaciones añadidas ===");
                 return resultados; // Devuelve directamente la tupla
             }
@@ -431,8 +440,7 @@ namespace UI.Parsers
 
                 Debug.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
 
-                // Aplicamos Selenium directamente sobre los objetos en memoria
-                ApplySelenium(listaObjetos);
+               
 
                 // Guardamos en variable de instancia para usarla en otros metodos
                 objetosParseados = listaObjetos;

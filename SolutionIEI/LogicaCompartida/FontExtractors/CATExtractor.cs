@@ -199,7 +199,7 @@ namespace UI.Parsers
             MostrarResumen(debugResultados);
             Console.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
 
-            int omitidas = debugResultados.Count(r => !r.Añadida);
+            int agregadas = debugResultados.Count(r => r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
@@ -217,7 +217,7 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados, omitidas, estacionesReparadas, estacionesRechazadas);
+            return (resultados, agregadas, estacionesReparadas, estacionesRechazadas);
         }
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)

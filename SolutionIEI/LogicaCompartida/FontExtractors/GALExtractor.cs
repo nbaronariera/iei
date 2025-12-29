@@ -226,7 +226,7 @@ namespace UI.Parsers
 
             MostrarResumen(debugResultados);
 
-            int omitidas = debugResultados.Count(r => !r.Añadida);
+            int agregadas = debugResultados.Count(r => r.Añadida);
 
             string estacionesReparadas = string.Join("\n",
                 debugResultados
@@ -244,7 +244,7 @@ namespace UI.Parsers
                     )
             );
 
-            return (resultados,omitidas, estacionesReparadas, estacionesRechazadas);
+            return (resultados,agregadas, estacionesReparadas, estacionesRechazadas);
 
         }
 
