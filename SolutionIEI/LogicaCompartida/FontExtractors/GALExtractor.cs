@@ -254,7 +254,7 @@ namespace UI.Parsers
                 throw new ArgumentNullException(nameof(ctx));
 
             if (string.IsNullOrWhiteSpace(nombre))
-                nombre = "Provincia desconocida";
+                nombre = "Desconocida";
 
             nombre = nombre.Trim();
 
@@ -275,7 +275,7 @@ namespace UI.Parsers
         {
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
             if (provincia == null) throw new ArgumentNullException(nameof(provincia));
-            if (string.IsNullOrWhiteSpace(nombre)) nombre = "Localidad desconocida";
+            if (string.IsNullOrWhiteSpace(nombre)) nombre = "Desconocida";
 
             nombre = nombre.Trim();
 

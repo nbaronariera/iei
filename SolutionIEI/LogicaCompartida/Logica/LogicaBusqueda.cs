@@ -123,7 +123,7 @@ namespace UI.Logica
                 .Where(l => l.Provincia != null &&
                             l.Provincia.nombre == provincia &&
                             l.nombre != "Agrícola" &&
-                            l.nombre != "Móvil")
+                            l.nombre != "Móvil" && !l.Provincia.nombre.Contains("Desconocida"))
                 .Select(l => l.nombre)
                 .OrderBy(n => n)
                 .ToList();

@@ -73,30 +73,8 @@ namespace UI.Parsers
 
                 resultadoDebug.Fuente = "CV";
 
-                // ---------------------------------------------------------
-                // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (Sanitización)
-                // ---------------------------------------------------------
-
-                // A. Si el municipio viene vacío (común en móviles), le asignamos "Itinerante" y coordenadas 0,0
-                if (string.IsNullOrWhiteSpace(dato.MUNICIPIO)){
-
-                    dato.Latitud = 0.0;
-                    dato.Longitud = 0.0;
-
-                    if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
-                    {
-                        dato.MUNICIPIO = "Agrícola";
-
-                    }
-                    else if (dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
-                    {
-                        dato.MUNICIPIO = "Móvil";
-                    }
-                    else 
-                    {
-                        dato.MUNICIPIO = "Itinerante";
-                    }
-                }
+                
+               
 
                 //Nombre en base a la localización o tipo si no es fija más ID estación
                 resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
@@ -133,69 +111,47 @@ namespace UI.Parsers
                     resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Castelló a Castellón.");
                 }
 
-
-
-
-                // C. LÓGICA DE CÓDIGO POSTAL INTELIGENTE
-                string cpRaw = dato.C_POSTAL?.Trim() ?? "";
-
-                if (string.IsNullOrWhiteSpace(cpRaw) && ( dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) ||
-                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase) || !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase)))
-                {
-                    // CASO 1: No tiene CP  o es estacion movil u agricola -> Asignamos el genérico de la provincia
-                    // Buscamos si la provincia está en tu diccionario (ej: Valencia -> 46)
-                    var claveProvincia = prefijosCpPorTerritorio.Keys
-                        .FirstOrDefault(k => k.Equals(dato.PROVINCIA, StringComparison.OrdinalIgnoreCase));
-
-                    dato.DIRECCION = "";
-
-                    if (claveProvincia != null)
-                    {
-                        cpRaw = prefijosCpPorTerritorio[claveProvincia] + "000"; // Ej: "46" + "000" = "46000"
-                    }
-                    else
-                    {
-                        cpRaw = "00000"; // Fallback total si no encontramos la provincia
-                    }
-                }
-                else
-                {
-                    cpRaw = Regex.Replace(cpRaw, @"[^\d]", ""); // quitar cualquier carácter no numérico
-                    if (cpRaw.Length < 5)
-                        cpRaw = cpRaw.PadLeft(5, '0');
-                }
-
-                dato.C_POSTAL = cpRaw; // Guardamos el CP corregido para usarlo después
                 resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
                 try
                 {
-                    // Validaciones (ahora es más difícil que fallen gracias a la corrección anterior)
+               
                     if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
                     {
                         resultadoDebug.Motivos.Add("Provincia vacía.");
                         resultadoDebug.Añadida = false;
                     }
 
-                    if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
+                    if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add("Municipio vacío.");
                         resultadoDebug.Añadida = false;
                     }
 
-                    if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$"))
+                    if (!string.IsNullOrWhiteSpace(dato.MUNICIPIO) && !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Motivos.Add("El municipio de una estación no fija ha de estar vacío.");
+                        resultadoDebug.Añadida = false;
+                    }
+
+                    if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$") && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres.");
                         resultadoDebug.Añadida = false;
                     }
 
+                    if (!string.IsNullOrWhiteSpace(dato.C_POSTAL) && !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Motivos.Add($"El código postal de una estación no fija ha de estar vacío.");
+                        resultadoDebug.Añadida = false;
+                    }
 
                     if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
                     {
                         resultadoDebug.Motivos.Add("Provincia no válida.");
                         resultadoDebug.Añadida = false;
                     }
-                    else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA))
+                    else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA) && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
                         resultadoDebug.Añadida = false;
@@ -209,10 +165,11 @@ namespace UI.Parsers
                         if (!prefijosValidos.Contains(cpPrefijo))
                         {
                             resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante.");
+                            resultadoDebug.Añadida = false;
                         }
                     }
 
-                    double? lat = dato.Latitud, lon = dato.Longitud;
+                    double lat = (double)dato.Latitud, lon = (double)dato.Longitud;
 
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
                     if (dato.TIPO_ESTACION != null)
@@ -224,24 +181,15 @@ namespace UI.Parsers
                     // Chequeo de duplicados (Nº Estación)
                     if (EstacionYaExiste(contexto, dato.Nº_ESTACION))
                     {
-                        resultadoDebug.Motivos.Add("Estación duplicada al contener el mismo número de estación.");
+                        resultadoDebug.Motivos.Add("Estación duplicada al contener el mismo Nº ESTACIÓN.");
                         resultadoDebug.Añadida = false;
 
                     }
 
-                    // Todas las comprobaciones de estaciones no fijas realizadas. Descartar dichas estaciones si contienen un error.
-                    if (resultadoDebug.Añadida == false && tipo != TipoEstacion.Estacion_fija)
+                    if (UbicacionRepetida(contexto,lat, lon) && tipo == TipoEstacion.Estacion_fija)
                     {
+                        resultadoDebug.Motivos.Add($"Ubicación ya usada ({lat}, {lon}).");
                         resultadoDebug.Añadida = false;
-                        debugResultados.Add(resultadoDebug);
-                        continue;
-                    }
-
-                    //Actualizamos ubicación (lat y long) mediante Selenium para las estaciones fijas
-                    if (tipo == TipoEstacion.Estacion_fija)
-                    {
-                        var datoLista = new List<JSONData> { dato };
-                        ApplySelenium(datoLista);
                     }
 
                     if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
@@ -250,12 +198,25 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add("No se pudieron obtener las coordenadas (Selenium falló o no encontró).");
                     }
 
+                    if (!EsCoordenadaEnEspañaPeninsular(lat, lon) && tipo == TipoEstacion.Estacion_fija)
+                    {
+                        resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
+                        resultadoDebug.Añadida = false;
+                    }
+
+
                     // Procesamiento de Horario
                     var horario = dato.HORARIOS ?? "Sin horario";
-                    
 
 
-                  
+                    if (resultadoDebug.Añadida == false)
+                    {
+
+                        debugResultados.Add(resultadoDebug);
+                        continue;
+                    }
+
+
 
                     // Gestión de Base de Datos (Provincias y Localidades)
                     var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
@@ -270,10 +231,10 @@ namespace UI.Parsers
                     {
                         nombre = string.IsNullOrWhiteSpace(dato.MUNICIPIO) ? (dato.DIRECCION ?? "Estación") : dato.MUNICIPIO + " " + dato.Nº_ESTACION,
                         tipo = tipo,
-                        direccion = dato.DIRECCION ?? "Sin dirección",
+                        direccion = dato.DIRECCION,
                         codigoPostal = dato.C_POSTAL,
-                        latitud = lat ?? 0,
-                        longitud = lon ?? 0,
+                        latitud = lat ,
+                        longitud = lon,
                         descripcion = dato.TIPO_ESTACION ?? "",
                         horario = horario,
                         contacto = $"Correo electrónico: {dato.CORREOS}",
@@ -333,6 +294,21 @@ namespace UI.Parsers
         {
             if (string.IsNullOrWhiteSpace(texto)) return false;
             return Regex.IsMatch(texto, @"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+        }
+
+        private bool UbicacionRepetida(AppDbContext ctx, double lat, double lon)
+        {
+         
+
+            const double tolerancia = 0.0001; // ~11 metros
+            return ctx.Estaciones.Any(e =>   Math.Abs(e.latitud - lat) < tolerancia && Math.Abs(e.longitud - lon) < tolerancia );
+        }
+
+        private bool EsCoordenadaEnEspañaPeninsular(double lat, double lon)
+        {
+            const double latMin = 36.0, latMax = 43.8;
+            const double lonMin = -9.3, lonMax = 3.3;
+            return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
         }
 
         private Provincia ObtenerOCrearProvincia(AppDbContext ctx, string nombre)
@@ -440,7 +416,8 @@ namespace UI.Parsers
 
                 Debug.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
 
-               
+                //Obtención coordenadas de las estaciones mediante Selenium
+                ApplySelenium(listaObjetos);
 
                 // Guardamos en variable de instancia para usarla en otros metodos
                 objetosParseados = listaObjetos;

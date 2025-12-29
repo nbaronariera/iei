@@ -98,16 +98,10 @@ namespace UI.Helpers
 
             try
             {
-                // --- Limpieza de dirección (Tu lógica original) ---
+                // --- Limpieza de dirección ---
                 if (!string.IsNullOrEmpty(direccion))
                 {
-                    /*
-                    if (direccion.Contains("Plá De Rascanya", StringComparison.OrdinalIgnoreCase))
-                        direccion = "Calle Plá De Rascanya";
                     
-                    if (direccion.Contains("Azagador de Lliria", StringComparison.OrdinalIgnoreCase))
-                        direccion = "ITV Massalfassar";
-                    */
                     
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*s/\s*nº?", "", RegexOptions.IgnoreCase);
                     direccion = Regex.Replace(direccion, @"\s*[,]?\s*km\.?\s*\d+([.,]\d+)?", "", RegexOptions.IgnoreCase);
@@ -123,7 +117,7 @@ namespace UI.Helpers
 
                     driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
                 // Pequeña espera aleatoria para parecer humano
-                Thread.Sleep(rnd.Next(2000, 3000));
+                Thread.Sleep(rnd.Next(1500, 2500));
 
                 // --- Gestión de Cookies ---
               
@@ -169,11 +163,12 @@ namespace UI.Helpers
                 catch (Exception) { }
 
                 // --- Introducir Datos ---
-                string direccionCompleta = $"{direccion}, {municipio}";
+                string direccionCompleta = $"{direccion}, {municipio}, España";
 
                 Debug.WriteLine($"[SELENIUM] Dirección limpia: '{direccionCompleta}'");
 
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
                 var addressInput = wait.Until(d => d.FindElement(By.Id("address"))); // Espera explícita
                 
                 addressInput.Clear();
@@ -193,14 +188,19 @@ namespace UI.Helpers
                 try
                 {
                     var submitButton = driver.FindElement(By.XPath("//button[contains(text(), 'Obtener Coordenadas GPS')]"));
-                    
-                    try { submitButton.Click(); }
+                    Thread.Sleep(1000);
+                    try { 
+                        
+                        submitButton.Click();
+                        Thread.Sleep(1000);
+
+                    }
                     catch 
                     { 
                         js.ExecuteScript("arguments[0].click();", submitButton); 
                     }
 
-                    // Esperar a que la latitud tenga valor
+                    // Esperar resultado
                     wait.Until(d => !string.IsNullOrEmpty(d.FindElement(By.Id("latitude")).GetAttribute("value")));
                 }
                 catch (Exception)
