@@ -77,21 +77,28 @@ namespace UI.Parsers
                 // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (Sanitización)
                 // ---------------------------------------------------------
 
-                // A. Si el municipio viene vacío (común en móviles), le asignamos "Itinerante"
-                if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
-                {
-                    dato.MUNICIPIO = "Agrícola";
-                }
-                else if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
-                {
-                    dato.MUNICIPIO = "Móvil";
-                }
-                else if (string.IsNullOrWhiteSpace(dato.MUNICIPIO))
-                {
-                    dato.MUNICIPIO = "Itinerante";
+                // A. Si el municipio viene vacío (común en móviles), le asignamos "Itinerante" y coordenadas 0,0
+                if (string.IsNullOrWhiteSpace(dato.MUNICIPIO)){
+
+                    dato.Latitud = 0.0;
+                    dato.Longitud = 0.0;
+
+                    if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dato.MUNICIPIO = "Agrícola";
+
+                    }
+                    else if (dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dato.MUNICIPIO = "Móvil";
+                    }
+                    else 
+                    {
+                        dato.MUNICIPIO = "Itinerante";
+                    }
                 }
 
-                //Cambiamos nombre para el debug
+                //Nombre en base a la localización o tipo si no es fija más ID estación
                 resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
 
                 resultadoDebug.Municipio = dato.MUNICIPIO;
@@ -102,8 +109,8 @@ namespace UI.Parsers
                 {
                     dato.PROVINCIA = "Valencia";
                     resultadoDebug.Reparada = true;
-                    resultadoDebug.Motivos.Add("Provincia incorrecta: València");
-                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de València a Valencia");
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: València.");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de València a Valencia.");
                 }
 
                 // Normalizar variantes ortográficas comunes (Alacant -> Alicante)
@@ -112,8 +119,8 @@ namespace UI.Parsers
                 {
                     dato.PROVINCIA = "Alicante";
                     resultadoDebug.Reparada = true;
-                    resultadoDebug.Motivos.Add("Provincia incorrecta: Alacant");
-                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Alacant a Alicante");
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: Alacant.");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Alacant a Alicante.");
                 }
 
                 // Normalizar variantes ortográficas comunes (Castelló -> Castellón)
@@ -122,8 +129,8 @@ namespace UI.Parsers
                 {
                     dato.PROVINCIA = "Castellón";
                     resultadoDebug.Reparada = true;
-                    resultadoDebug.Motivos.Add("Provincia incorrecta: Castelló");
-                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Castelló a Castellón");
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: Castelló.");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Castelló a Castellón.");
                 }
 
 
@@ -133,7 +140,7 @@ namespace UI.Parsers
                 string cpRaw = dato.C_POSTAL?.Trim() ?? "";
 
                 if (string.IsNullOrWhiteSpace(cpRaw) && ( dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) ||
-                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase)))
+                    dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase) || !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase)))
                 {
                     // CASO 1: No tiene CP  o es estacion movil u agricola -> Asignamos el genérico de la provincia
                     // Buscamos si la provincia está en tu diccionario (ej: Valencia -> 46)
@@ -178,14 +185,14 @@ namespace UI.Parsers
 
                     if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$"))
                     {
-                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres");
+                        resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres.");
                         resultadoDebug.Añadida = false;
                     }
 
 
                     if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
                     {
-                        resultadoDebug.Motivos.Add("Provincia no válida");
+                        resultadoDebug.Motivos.Add("Provincia no válida.");
                         resultadoDebug.Añadida = false;
                     }
                     else if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !CodigoPostalValido(dato.C_POSTAL, dato.PROVINCIA))
@@ -201,7 +208,7 @@ namespace UI.Parsers
 
                         if (!prefijosValidos.Contains(cpPrefijo))
                         {
-                            resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante");
+                            resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con Castellón, Valencia o Alicante.");
                         }
                     }
 
@@ -214,40 +221,41 @@ namespace UI.Parsers
                         else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
                     }
 
-                    // Chequeo de duplicados (Nº Estación + Coordenadas)
-                    if (EstacionYaExiste(contexto, dato.Nº_ESTACION, lat ?? 0, lon ?? 0))
+                    // Chequeo de duplicados (Nº Estación)
+                    if (EstacionYaExiste(contexto, dato.Nº_ESTACION))
                     {
-                        resultadoDebug.Motivos.Add("Estación duplicada.");
+                        resultadoDebug.Motivos.Add("Estación duplicada al contener el mismo número de estación.");
                         resultadoDebug.Añadida = false;
 
                     }
 
-
-                    if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
-                    {
-                        resultadoDebug.Añadida = false;
-                        resultadoDebug.Motivos.Add("No se pudieron obtener las coordenadas (Selenium falló o no encontró)");
-                    }
-
-                    // Procesamiento de Horario
-                    var horario = dato.HORARIOS ?? "Sin horario";
-                    if (dato.TIPO_ESTACION != null && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
-                    {
-                        try
-                        {
-                            horario = ConvertirFormatoFecha(dato.HORARIOS);
-                        }
-                        catch { /* Si falla el formato, dejamos el original */ }
-                    }
-
-
-                    // Si hay errores graves, no insertamos
-                    if (resultadoDebug.Añadida == false)
+                    // Todas las comprobaciones de estaciones no fijas realizadas. Descartar dichas estaciones si contienen un error.
+                    if (resultadoDebug.Añadida == false && tipo != TipoEstacion.Estacion_fija)
                     {
                         resultadoDebug.Añadida = false;
                         debugResultados.Add(resultadoDebug);
                         continue;
                     }
+
+                    //Actualizamos ubicación (lat y long) mediante Selenium para las estaciones fijas
+                    if (tipo == TipoEstacion.Estacion_fija)
+                    {
+                        var datoLista = new List<JSONData> { dato };
+                        ApplySelenium(datoLista);
+                    }
+
+                    if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
+                    {
+                        resultadoDebug.Añadida = false;
+                        resultadoDebug.Motivos.Add("No se pudieron obtener las coordenadas (Selenium falló o no encontró).");
+                    }
+
+                    // Procesamiento de Horario
+                    var horario = dato.HORARIOS ?? "Sin horario";
+                    
+
+
+                  
 
                     // Gestión de Base de Datos (Provincias y Localidades)
                     var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
@@ -315,16 +323,11 @@ namespace UI.Parsers
             return (resultados, agregadas, estacionesReparadas, estacionesRechazadas);
 
         }
-        private bool EstacionYaExiste(AppDbContext ctx, string numeroEstacion, double lat, double lon)
+        private bool EstacionYaExiste(AppDbContext ctx, string numeroEstacion)
         {
-            const double tolerancia = 0.0001; // ~11 metros
-
-            return ctx.Estaciones.Any(e => e.nombre.Contains(numeroEstacion) || (
-
-            Math.Abs(e.latitud - lat) < tolerancia &&
-            Math.Abs(e.longitud - lon) < tolerancia 
-
-            ));
+            
+            
+            return ctx.Estaciones.Any(e => e.nombre.Contains(numeroEstacion));
         }
         private bool EsCorreo(string texto)
         {
@@ -382,10 +385,7 @@ namespace UI.Parsers
             return codigoPostal.StartsWith(prefijo);
         }
 
-        private string ConvertirFormatoFecha(string input)
-        {
-            return input;
-        }
+       
 
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {

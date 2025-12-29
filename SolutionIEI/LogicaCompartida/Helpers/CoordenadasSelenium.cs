@@ -13,7 +13,7 @@ namespace UI.Helpers
     internal class CoordenadasSelenium : IDisposable
     {
 
-        private static CoordenadasSelenium _instance;
+        private static CoordenadasSelenium instance;
         private static readonly object _lock = new();
 
         public bool Disponible { get; private set; }
@@ -81,8 +81,8 @@ namespace UI.Helpers
             {
                 lock (_lock)
                 {
-                    _instance ??= new CoordenadasSelenium();
-                    return _instance;
+                    instance ??= new CoordenadasSelenium();
+                    return instance;
                 }
             }
         }
