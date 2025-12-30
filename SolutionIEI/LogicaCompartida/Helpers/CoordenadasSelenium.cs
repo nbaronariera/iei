@@ -80,12 +80,11 @@ namespace UI.Helpers
 
             try
             {
-                // Limpieza básica opcional
-                string direccionLimpia = LimpiarDireccionBasica(direccion);
+               
 
 
                 // Construir dirección completa
-                string direccionCompleta = $"{direccionLimpia}, {municipio}, España";
+                string direccionCompleta = $"{direccion}, {municipio}, España";
                 Debug.WriteLine($"[SELENIUM] Dirección para búsqueda: '{direccionCompleta}'");
 
                 // Navegar a la página
@@ -234,30 +233,7 @@ namespace UI.Helpers
             }
         }
 
-        private string LimpiarDireccionBasica(string direccion)
-        {
-            if (string.IsNullOrEmpty(direccion))
-                return direccion;
-
-            // Solo quitar las partes que SABEMOS que mejoran los resultados
-            // Basado en tus pruebas:
-
-            // 1. Quitar "s/ nº" y variantes
-            direccion = Regex.Replace(direccion, @"\s*s/\s*n[º°]?\b", "", RegexOptions.IgnoreCase);
-
-            // 2. Quitar "s/n" 
-            direccion = Regex.Replace(direccion, @"\s*s/n\b", "", RegexOptions.IgnoreCase);
-
-            // 3. Mantener "Km X" si está, pero quizás limpiar formato
-            // Ya que "Km 55" funciona bien según tu prueba
-
-            // Limpiar espacios extra y comas
-            direccion = direccion.Trim();
-            direccion = Regex.Replace(direccion, @"\s*,\s*", ", ");
-            direccion = Regex.Replace(direccion, @",\s*,", ","); // Quitar comas duplicadas
-
-            return direccion;
-        }
+       
 
         public void Dispose()
         {
