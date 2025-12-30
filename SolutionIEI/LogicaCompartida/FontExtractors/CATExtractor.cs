@@ -92,13 +92,45 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    string provinciaNombre = ObtenerProvinciaPorCodigoPostal(cpRaw, resultadoDebug.Motivos);
-                    if (string.IsNullOrWhiteSpace(provinciaNombre))
+                    // Provincia según código postal (siempre la referencia correcta)
+                    string provinciaPorCP = ObtenerProvinciaPorCodigoPostal(cpRaw, resultadoDebug.Motivos);
+                    if (string.IsNullOrWhiteSpace(provinciaPorCP))
                     {
                         resultadoDebug.Motivos.Add($"Código postal '{cpRaw}' no corresponde con ninguna provincia catalana.");
                         resultadoDebug.Añadida = false;
                     }
-                    resultadoDebug.Provincia = provinciaNombre;
+
+                    string provinciaCampoOriginal = dato.serveis_territorials?.Trim() ?? "";
+                    string provinciaCampo = provinciaCampoOriginal;
+
+                    // === Mapeo de variantes en castellano a catalán para la comprobación ===
+                    var variantesCastellano = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Gerona", "Girona" },
+                { "Lérida", "Lleida" }
+                // Barcelona y Tarragona son iguales
+            };
+
+                    if (variantesCastellano.TryGetValue(provinciaCampoOriginal, out string provinciaCatalana))
+                    {
+                        provinciaCampo = provinciaCatalana;
+                    }
+
+                    // === Comprobación de coherencia: solo si es una provincia catalana principal (incluyendo variantes) ===
+                    var provinciasPrincipales = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "Barcelona", "Girona", "Lleida", "Tarragona"
+            };
+
+                    if (provinciasPrincipales.Contains(provinciaCampo) &&
+                        !string.Equals(provinciaCampo, provinciaPorCP, StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Motivos.Add($"Código postal {cpRaw} no coincide con la provincia almacenada en el campo serveis_territorials ({provinciaCampoOriginal}).");
+                        resultadoDebug.Añadida = false; // ← Se descarta directamente
+                    }
+
+                    // Si es "Terres de l'Ebre" o cualquier otro valor → no se comprueba coherencia
+                    resultadoDebug.Provincia = provinciaPorCP; // Siempre usamos la del CP como definitiva
 
                     double lat = 0.0;
                     double lon = 0.0;
@@ -125,7 +157,7 @@ namespace UI.Parsers
                     string nombreNormalizado = dato.denominaci?.Trim() ?? "";
                     string coordsKey = $"{lat:F6},{lon:F6}";
 
-                    // Duplicados internos (fichero)
+                    // Duplicados internos
                     if (!string.IsNullOrWhiteSpace(nombreNormalizado) && !nombresEnEsteFichero.Add(nombreNormalizado))
                     {
                         resultadoDebug.Motivos.Add($"Nombre repetido dentro del archivo CAT ({nombreNormalizado}).");
@@ -137,8 +169,8 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Duplicados en BD física
-                    if (contexto.Estaciones.Any(e => string.Equals(e.nombre, nombreNormalizado, StringComparison.OrdinalIgnoreCase)))
+                    // Duplicados en BD
+                    if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                     {
                         resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
                         resultadoDebug.Añadida = false;
@@ -162,8 +194,8 @@ namespace UI.Parsers
                         continue;
                     }
 
-                    // Todo OK → crear objetos
-                    var provincia = ObtenerOCrearProvincia(contexto, provinciaNombre);
+                    // Todo válido → crear objetos
+                    var provincia = ObtenerOCrearProvincia(contexto, provinciaPorCP);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.municipi, provincia);
 
                     string correoLimpio = EsUrl(dato.correu_electr_nic) ? "" : dato.correu_electr_nic;
@@ -202,7 +234,6 @@ namespace UI.Parsers
                 }
             }
 
-            // Insertar todo de golpe al final
             if (estacionesValidas.Any())
             {
                 contexto.Estaciones.AddRange(estacionesValidas);
@@ -223,6 +254,7 @@ namespace UI.Parsers
 
             return (resultados, agregadas, estacionesReparadas, estacionesRechazadas);
         }
+
 
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)
         {

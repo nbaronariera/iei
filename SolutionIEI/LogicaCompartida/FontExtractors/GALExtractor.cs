@@ -88,20 +88,17 @@ namespace UI.Parsers
             return fila.TryGetValue(clave, out var valor) ? valor?.Trim() ?? "" : "";
         }
 
-
-
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<GALData> datosParseados)
         {
             var resultados = new List<ResultObject>();
-            var estacionesValidas = new List<Estacion>(); // ← Nueva lista temporal
+            var estacionesValidas = new List<Estacion>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
 
-            // Para detectar duplicados dentro del mismo archivo
             var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
-            Console.WriteLine($" Iniciando parseo de {datosParseados.Count} registros GAL.");
+            Console.WriteLine($"Iniciando parseo de {datosParseados.Count} registros GAL.");
 
             foreach (var dato in datosParseados)
             {
@@ -112,27 +109,26 @@ namespace UI.Parsers
                     Municipio = dato?.Municipio ?? "",
                     CodigoPostal = dato?.CodigoPostal ?? "",
                     Motivos = new List<string>(),
-                    Añadida = true
+                    Reparaciones = new List<string>(),
+                    Añadida = true,
+                    Reparada = false
                 };
                 resultadoDebug.Fuente = "GAL";
 
-                // Normalizar variantes ortográficas comunes (La Coruña -> A Coruña)
+                // Normalización de provincia
+                string provinciaOriginal = dato?.Provincia?.Trim() ?? "";
+
                 if (!string.IsNullOrWhiteSpace(dato.Provincia) &&
                     dato.Provincia.Trim().Equals("La Coruña", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.Provincia = "A Coruña";
                     resultadoDebug.Reparada = true;
-                    resultadoDebug.Motivos.Add("Provincia incorrecta: " + dato.Provincia + ".");
-                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de " + dato.Provincia + " a A Coruña.");
                 }
-                // Normalizar variantes ortográficas comunes (Orense -> Ourense)
                 if (!string.IsNullOrWhiteSpace(dato.Provincia) &&
                     dato.Provincia.Trim().Equals("Orense", StringComparison.OrdinalIgnoreCase))
                 {
                     dato.Provincia = "Ourense";
                     resultadoDebug.Reparada = true;
-                    resultadoDebug.Motivos.Add("Provincia incorrecta: " + dato.Provincia + ".");
-                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de " + dato.Provincia + " a Ourense.");
                 }
 
                 if (string.IsNullOrWhiteSpace(dato.NombreEstacion))
@@ -140,8 +136,6 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add("Nombre de estación vacío o nulo.");
                     resultadoDebug.Añadida = false;
                 }
-
-                // Validaciones básicas
                 if (string.IsNullOrWhiteSpace(dato.Provincia))
                 {
                     resultadoDebug.Motivos.Add("Provincia vacía o nula.");
@@ -152,7 +146,7 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add("Municipio vacío o nulo.");
                     resultadoDebug.Añadida = false;
                 }
-                if (!int.TryParse(dato.CodigoPostal, out codigoPostal) || codigoPostal < 10000 || codigoPostal > 99999)
+                if (!int.TryParse(dato.CodigoPostal, out int codigoPostal) || codigoPostal < 10000 || codigoPostal > 99999)
                 {
                     resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.CodigoPostal}'), al no tener 5 caracteres");
                     resultadoDebug.Añadida = false;
@@ -160,9 +154,7 @@ namespace UI.Parsers
                 if (dato.CodigoPostal.Length >= 2)
                 {
                     var cpPrefijo = dato.CodigoPostal.Substring(0, 2);
-                    var prefijosValidos = provinciasGallegas.Values
-                                                    .Select(v => v.ToString("D2"))
-                                                    .ToHashSet();
+                    var prefijosValidos = provinciasGallegas.Values.Select(v => v.ToString("D2")).ToHashSet();
                     if (!prefijosValidos.Contains(cpPrefijo))
                     {
                         resultadoDebug.Motivos.Add("El prefijo del código postal no coincide con ninguna provincia gallega");
@@ -190,23 +182,30 @@ namespace UI.Parsers
                     resultadoDebug.Añadida = false;
                 }
 
-                // === Duplicados internos (dentro del archivo) ===
                 string nombreNormalizado = dato.NombreEstacion?.Trim() ?? "";
+
+                // Duplicados internos
                 if (!string.IsNullOrWhiteSpace(nombreNormalizado) && !nombresEnEsteFichero.Add(nombreNormalizado))
                 {
-                    resultadoDebug.Motivos.Add($"Estación duplicada dentro del mismo archivo (nombre: {nombreNormalizado}).");
+                    resultadoDebug.Motivos.Add($"Nombre repetido dentro del mismo archivo GAL ({nombreNormalizado}).");
                     resultadoDebug.Añadida = false;
                 }
                 if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
                 {
-                    resultadoDebug.Motivos.Add($"Estación duplicada dentro del mismo archivo (coordenadas: {lat:F6}, {lon:F6}).");
+                    resultadoDebug.Motivos.Add($"Coordenadas repetidas dentro del mismo archivo GAL ({lat:F6}, {lon:F6}).");
                     resultadoDebug.Añadida = false;
                 }
 
-                // === Duplicados en la base de datos (real) ===
-                if (EstacionYaExiste(contexto, dato.NombreEstacion, lat, lon))
+                // Duplicados en BD
+                if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                 {
-                    resultadoDebug.Motivos.Add("Estación duplicada (ya existe en la base de datos).");
+                    resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
+                    resultadoDebug.Añadida = false;
+                }
+                if (lat != 0 && lon != 0 && contexto.Estaciones.Any(e =>
+                    Math.Abs(e.latitud - lat) < 0.0001 && Math.Abs(e.longitud - lon) < 0.0001))
+                {
+                    resultadoDebug.Motivos.Add($"Ubicación ya usada en la base de datos ({lat:F6}, {lon:F6}).");
                     resultadoDebug.Añadida = false;
                 }
 
@@ -216,9 +215,21 @@ namespace UI.Parsers
                     continue;
                 }
 
-                resultadoDebug.Añadida = true;
+                // === Solo si se añade, registramos el mensaje de reparación ===
+                if (resultadoDebug.Reparada)
+                {
+                    if (provinciaOriginal.Equals("La Coruña", StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de La Coruña a A Coruña.");
+                        resultadoDebug.Motivos.Add("Provincia normalizada: de La Coruña a A Coruña.");
+                    }
+                    else if (provinciaOriginal.Equals("Orense", StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de Orense a Ourense.");
+                        resultadoDebug.Motivos.Add("Provincia normalizada: de Orense a Ourense.");
+                    }
+                }
 
-                // Obtener o crear provincia y localidad de forma segura
                 var provincia = ObtenerOCrearProvincia(contexto, dato.Provincia);
                 var localidad = ObtenerOCrearLocalidad(contexto, dato.Municipio, provincia);
 
@@ -238,7 +249,6 @@ namespace UI.Parsers
                     codigoLocalidad = localidad.codigo
                 };
 
-                // Guardamos en lista temporal, NO añadimos al contexto aún
                 estacionesValidas.Add(estacion);
                 resultados.Add(new ResultObject
                 {
@@ -246,11 +256,9 @@ namespace UI.Parsers
                     Localidad = localidad,
                     Provincia = provincia
                 });
-
                 debugResultados.Add(resultadoDebug);
             }
 
-            // === Inserción masiva al final ===
             if (estacionesValidas.Any())
             {
                 contexto.Estaciones.AddRange(estacionesValidas);
@@ -258,21 +266,15 @@ namespace UI.Parsers
             }
 
             MostrarResumen(debugResultados);
-            int agregadas = debugResultados.Count(r => r.Añadida);
+            int agregadas = resultados.Count;
             string estacionesReparadas = string.Join("\n",
-                debugResultados
-                    .Where(r => r.Reparada && r.Añadida)
-                    .Select(r =>
-                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"
-                    )
-            );
+                debugResultados.Where(r => r.Reparada && r.Añadida)
+                    .Select(r => $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"));
+
             string estacionesRechazadas = string.Join("\n",
-                debugResultados
-                    .Where(r => !r.Añadida)
-                    .Select(r =>
-                        $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}]}}"
-                    )
-            );
+                debugResultados.Where(r => !r.Añadida)
+                    .Select(r => $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}]}}"));
+
             return (resultados, agregadas, estacionesReparadas, estacionesRechazadas);
         }
 
@@ -382,7 +384,21 @@ namespace UI.Parsers
         private bool CodigoPostalValido(int codigo, string provincia)
         {
             if (string.IsNullOrWhiteSpace(provincia)) return false;
-            return provinciasGallegas.TryGetValue(provincia.Trim(), out int cp) && (codigo / 1000) == cp;
+
+            // Convertimos el código postal a string para extraer los dos primeros dígitos
+            string cpStr = codigo.ToString();
+
+            if (cpStr.Length < 2) return false; // Si tiene menos de 2 dígitos, inválido
+
+            string prefijoCP = cpStr.Substring(0, 2); // Siempre los 2 primeros: "27" para 271003, 27001, 27, etc.
+
+            // Obtenemos el prefijo esperado para la provincia (como string "27" para Lugo)
+            if (!provinciasGallegas.TryGetValue(provincia.Trim(), out int prefijoEsperado))
+                return false;
+
+            string prefijoEsperadoStr = prefijoEsperado.ToString("D2"); // Asegura 2 dígitos: 15 → "15", 27 → "27"
+
+            return prefijoCP == prefijoEsperadoStr;
         }
 
         private bool EsCoordenadaEnEspañaPeninsular(double lat, double lon)

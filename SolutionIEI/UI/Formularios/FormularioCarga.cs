@@ -48,7 +48,7 @@ namespace UI
 
         private async void btnBorrar_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("¿Seguro que quieres borrar TODOS los datos?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            if (MessageBox.Show("¿Seguro que quiere borrar TODOS los datos de TODAS las comunidades autónomas?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 this.Enabled = false;                    // ← Bloquea toda la ventana
                 

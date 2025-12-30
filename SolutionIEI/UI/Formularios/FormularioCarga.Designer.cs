@@ -3,28 +3,23 @@
     partial class FormularioCarga
     {
         private System.ComponentModel.IContainer components = null;
-
-        // Controles
-        private System.Windows.Forms.Label lblTitulo;
+        // Controles
+        private System.Windows.Forms.Label lblTitulo;
         private System.Windows.Forms.GroupBox grpSeleccion;
         private System.Windows.Forms.CheckBox chkTodos;
         private System.Windows.Forms.CheckBox chkGalicia;
         private System.Windows.Forms.CheckBox chkValencia;
         private System.Windows.Forms.CheckBox chkCataluna;
-
         private System.Windows.Forms.Button btnCancelar;
         private System.Windows.Forms.Button btnCargar;
         private System.Windows.Forms.Button btnBorrar;
-
         private System.Windows.Forms.Label lblLog;
         private System.Windows.Forms.RichTextBox rtbResumen;
-
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null)) components.Dispose();
             base.Dispose(disposing);
         }
-
         #region Windows Form Designer generated code
 
         private void InitializeComponent()
@@ -40,22 +35,21 @@
             btnBorrar = new Button();
             lblLog = new Label();
             rtbResumen = new RichTextBox();
+
             grpSeleccion.SuspendLayout();
             SuspendLayout();
-            // 
+
             // lblTitulo
-            // 
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point);
             lblTitulo.ForeColor = Color.DarkBlue;
-            lblTitulo.Location = new Point(20, 20);
+            lblTitulo.Location = new Point(25, 20);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(300, 30);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Carga del almacén de datos";
-            // 
+
             // grpSeleccion
-            // 
             grpSeleccion.Controls.Add(chkCataluna);
             grpSeleccion.Controls.Add(chkValencia);
             grpSeleccion.Controls.Add(chkGalicia);
@@ -63,43 +57,12 @@
             grpSeleccion.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             grpSeleccion.Location = new Point(25, 70);
             grpSeleccion.Name = "grpSeleccion";
-            grpSeleccion.Size = new Size(540, 100);
+            grpSeleccion.Size = new Size(550, 100);
             grpSeleccion.TabIndex = 1;
             grpSeleccion.TabStop = false;
             grpSeleccion.Text = "Seleccione fuente:";
-            // 
-            // chkCataluna
-            // 
-            chkCataluna.AutoSize = true;
-            chkCataluna.Location = new Point(180, 80);
-            chkCataluna.Name = "chkCataluna";
-            chkCataluna.Size = new Size(89, 23);
-            chkCataluna.TabIndex = 3;
-            chkCataluna.Text = "Catalunya";
-            chkCataluna.UseVisualStyleBackColor = true;
-            // 
-            // chkValencia
-            // 
-            chkValencia.AutoSize = true;
-            chkValencia.Location = new Point(180, 53);
-            chkValencia.Name = "chkValencia";
-            chkValencia.Size = new Size(161, 23);
-            chkValencia.TabIndex = 2;
-            chkValencia.Text = "Comunitat Valenciana";
-            chkValencia.UseVisualStyleBackColor = true;
-            // 
-            // chkGalicia
-            // 
-            chkGalicia.AutoSize = true;
-            chkGalicia.Location = new Point(180, 27);
-            chkGalicia.Name = "chkGalicia";
-            chkGalicia.Size = new Size(67, 23);
-            chkGalicia.TabIndex = 1;
-            chkGalicia.Text = "Galicia";
-            chkGalicia.UseVisualStyleBackColor = true;
-            // 
+
             // chkTodos
-            // 
             chkTodos.AutoSize = true;
             chkTodos.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             chkTodos.Location = new Point(180, 0);
@@ -109,9 +72,35 @@
             chkTodos.Text = "Todas";
             chkTodos.UseVisualStyleBackColor = true;
             chkTodos.CheckedChanged += chkTodos_CheckedChanged;
-            // 
+
+            // chkGalicia
+            chkGalicia.AutoSize = true;
+            chkGalicia.Location = new Point(180, 27);
+            chkGalicia.Name = "chkGalicia";
+            chkGalicia.Size = new Size(67, 23);
+            chkGalicia.TabIndex = 1;
+            chkGalicia.Text = "Galicia";
+            chkGalicia.UseVisualStyleBackColor = true;
+
+            // chkValencia
+            chkValencia.AutoSize = true;
+            chkValencia.Location = new Point(180, 53);
+            chkValencia.Name = "chkValencia";
+            chkValencia.Size = new Size(161, 23);
+            chkValencia.TabIndex = 2;
+            chkValencia.Text = "Comunitat Valenciana";
+            chkValencia.UseVisualStyleBackColor = true;
+
+            // chkCataluna
+            chkCataluna.AutoSize = true;
+            chkCataluna.Location = new Point(180, 80);
+            chkCataluna.Name = "chkCataluna";
+            chkCataluna.Size = new Size(89, 23);
+            chkCataluna.TabIndex = 3;
+            chkCataluna.Text = "Catalunya";
+            chkCataluna.UseVisualStyleBackColor = true;
+
             // btnCancelar
-            // 
             btnCancelar.Location = new Point(25, 190);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(133, 35);
@@ -119,9 +108,8 @@
             btnCancelar.Text = "Buscar estaciones";
             btnCancelar.UseVisualStyleBackColor = true;
             btnCancelar.Click += btnBusqueda_Click;
-            // 
+
             // btnCargar
-            // 
             btnCargar.BackColor = Color.LightSkyBlue;
             btnCargar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             btnCargar.Location = new Point(205, 190);
@@ -131,21 +119,19 @@
             btnCargar.Text = "Cargar";
             btnCargar.UseVisualStyleBackColor = false;
             btnCargar.Click += btnCargar_Click;
-            // 
+
             // btnBorrar
-            // 
             btnBorrar.BackColor = Color.LightCoral;
             btnBorrar.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             btnBorrar.Location = new Point(357, 190);
             btnBorrar.Name = "btnBorrar";
-            btnBorrar.Size = new Size(208, 35);
+            btnBorrar.Size = new Size(218, 35);
             btnBorrar.TabIndex = 4;
             btnBorrar.Text = "Borrar almacén de datos";
             btnBorrar.UseVisualStyleBackColor = false;
             btnBorrar.Click += btnBorrar_Click;
-            // 
+
             // lblLog
-            // 
             lblLog.AutoSize = true;
             lblLog.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             lblLog.Location = new Point(25, 250);
@@ -153,25 +139,24 @@
             lblLog.Size = new Size(158, 19);
             lblLog.TabIndex = 5;
             lblLog.Text = "Resultado de la carga:";
-            // 
+
             // rtbResumen
-            // 
+            rtbResumen.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             rtbResumen.BackColor = Color.WhiteSmoke;
             rtbResumen.BorderStyle = BorderStyle.FixedSingle;
             rtbResumen.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
             rtbResumen.Location = new Point(25, 280);
             rtbResumen.Name = "rtbResumen";
             rtbResumen.ReadOnly = true;
-            rtbResumen.Size = new Size(540, 200);
+            rtbResumen.Size = new Size(750, 295);
             rtbResumen.TabIndex = 6;
-            rtbResumen.Text = "";
-            // 
+
             // FormularioCarga
-            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(600, 500);
+            ClientSize = new Size(800, 600);
+            MinimumSize = new Size(800, 600);
             Controls.Add(rtbResumen);
             Controls.Add(lblLog);
             Controls.Add(btnBorrar);
@@ -181,6 +166,7 @@
             Controls.Add(lblTitulo);
             Name = "FormularioCarga";
             Text = "Carga de Datos";
+
             grpSeleccion.ResumeLayout(false);
             grpSeleccion.PerformLayout();
             ResumeLayout(false);
