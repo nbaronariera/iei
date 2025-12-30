@@ -53,7 +53,13 @@ namespace UI.Parsers
             var resultados = new List<ResultObject>();
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
-            
+            var estacionesValidas = new List<Estacion>();
+
+            var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var coordenadasEnEsteFichero = new HashSet<string>();
+
+
+
             int numValidas = 0;
 
             foreach (var dato in datosParseados)
@@ -180,13 +186,7 @@ namespace UI.Parsers
                         
                     }
 
-                    // Chequeo de duplicados (Nº Estación)
-                    if (EstacionYaExiste(contexto, dato.Nº_ESTACION))
-                    {
-                        resultadoDebug.Motivos.Add("Estación duplicada al contener el mismo Nº ESTACIÓN.");
-                        resultadoDebug.Añadida = false;
-
-                    }
+                  
 
                     if (UbicacionRepetida(contexto,lat, lon) && tipo == TipoEstacion.Estacion_fija)
                     {
@@ -228,6 +228,34 @@ namespace UI.Parsers
                         resultadoDebug.Nombre = "Otro" + " " + dato.Nº_ESTACION;
                     }
 
+                    // En el foreach, después de todas las validaciones
+                    string nombreNormalizado = resultadoDebug.Nombre.Trim();
+                    string coordsKey = $"{lat:F6},{lon:F6}";
+
+                    // Duplicados internos
+                    if (!nombresEnEsteFichero.Add(nombreNormalizado))
+                    {
+                        resultadoDebug.Motivos.Add($"Nombre o número repetido dentro del archivo CV ({nombreNormalizado}).");
+                        resultadoDebug.Añadida = false;
+                    }
+                    if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
+                    {
+                        resultadoDebug.Motivos.Add($"Coordenadas repetidas dentro del archivo CV ({lat:F6}, {lon:F6}).");
+                        resultadoDebug.Añadida = false;
+                    }
+
+                    // Duplicados en BD
+                    if (contexto.Estaciones.Any(e => string.Equals(e.nombre, nombreNormalizado, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        resultadoDebug.Motivos.Add($"Nombre o número ya existe en la base de datos ({nombreNormalizado}).");
+                        resultadoDebug.Añadida = false;
+                    }
+                    if (lat != 0 && lon != 0 && UbicacionRepetida(contexto, lat, lon))
+                    {
+                        resultadoDebug.Motivos.Add($"Ubicación ya usada en la base de datos ({lat:F6}, {lon:F6}).");
+                        resultadoDebug.Añadida = false;
+                    }
+
                     if (resultadoDebug.Añadida == false)
                     {
 
@@ -241,7 +269,7 @@ namespace UI.Parsers
                     var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.MUNICIPIO, provincia);
 
-
+                   
 
                     resultadoDebug.Provincia = provincia.nombre;
 
@@ -262,12 +290,17 @@ namespace UI.Parsers
                         codigoLocalidad = localidad.codigo
                     };
 
-                    contexto.Estaciones.Add(estacion);
+                    
+
+                    estacionesValidas.Add(estacion);
+
                     resultados.Add(new ResultObject { Estacion = estacion, Localidad = localidad, Provincia = provincia });
                     numValidas++;
 
                     Debug.WriteLine($"[CVExtractor] Carga completada: {resultados.Count} añadidas, {debugResultados.Count(r => !r.Añadida)} rechazadas");
                     resultadoDebug.Añadida = true;
+                    
+                   
                     debugResultados.Add(resultadoDebug);
 
                 }
@@ -277,6 +310,13 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add($"Excepción: {ex.Message}");
                     debugResultados.Add(resultadoDebug);
                 }
+            }
+
+            // Al final
+            if (estacionesValidas.Any())
+            {
+                contexto.Estaciones.AddRange(estacionesValidas);
+                contexto.SaveChanges();
             }
 
             contexto.SaveChanges();
