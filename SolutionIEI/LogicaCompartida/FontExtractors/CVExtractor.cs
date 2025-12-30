@@ -73,11 +73,11 @@ namespace UI.Parsers
 
                 resultadoDebug.Fuente = "CV";
 
-                
-               
 
-                //Nombre en base a la localización o tipo si no es fija más ID estación
-                resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
+
+
+               
+                
 
                 resultadoDebug.Municipio = dato.MUNICIPIO;
 
@@ -175,7 +175,9 @@ namespace UI.Parsers
                     if (dato.TIPO_ESTACION != null)
                     {
                         if (dato.TIPO_ESTACION.Contains("Móvil", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Estacion_movil;
-                        else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
+                        else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase) || 
+                            !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
+                        
                     }
 
                     // Chequeo de duplicados (Nº Estación)
@@ -209,6 +211,23 @@ namespace UI.Parsers
                     var horario = dato.HORARIOS ?? "Sin horario";
 
 
+                    if (tipo == TipoEstacion.Estacion_fija)
+                    {
+                        resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
+                    }
+                    else if (tipo == TipoEstacion.Estacion_movil)
+                    {
+                        resultadoDebug.Nombre = "Móvil" + " " + dato.Nº_ESTACION;
+                    }
+                    else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
+                    {
+                        resultadoDebug.Nombre = "Agrícola" + " " + dato.Nº_ESTACION;
+                    }
+                    else
+                    {
+                        resultadoDebug.Nombre = "Otro" + " " + dato.Nº_ESTACION;
+                    }
+
                     if (resultadoDebug.Añadida == false)
                     {
 
@@ -229,7 +248,7 @@ namespace UI.Parsers
                     // Creación del objeto Estacion
                     var estacion = new Estacion
                     {
-                        nombre = string.IsNullOrWhiteSpace(dato.MUNICIPIO) ? (dato.DIRECCION ?? "Estación") : dato.MUNICIPIO + " " + dato.Nº_ESTACION,
+                        nombre = resultadoDebug.Nombre,
                         tipo = tipo,
                         direccion = dato.DIRECCION,
                         codigoPostal = dato.C_POSTAL,

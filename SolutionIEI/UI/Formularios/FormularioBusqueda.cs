@@ -191,9 +191,11 @@ namespace UI.UI_Gestor
 
                 _localidadesCompletas = localidades; // Guardar lista completa
 
+                // === ORDENACIÓN: primero por provincia, luego por localidad ===
                 var nombres = localidades
+                    .OrderBy(l => l.NombreProvincia)
+                    .ThenBy(l => l.NombreLocalidad)
                     .Select(l => $"{l.NombreLocalidad} ({l.NombreProvincia})")
-                    .OrderBy(n => n)
                     .Prepend("Cualquiera")
                     .ToList();
 
@@ -217,11 +219,15 @@ namespace UI.UI_Gestor
 
             string seleccion = comboProvincia.SelectedItem?.ToString() ?? "Cualquiera";
 
+            List<string> nombres;
+
             if (seleccion == "Cualquiera")
             {
-                var nombres = _localidadesCompletas
+                // Todo ordenado por provincia y luego por localidad
+                nombres = _localidadesCompletas
+                    .OrderBy(l => l.NombreProvincia)
+                    .ThenBy(l => l.NombreLocalidad)
                     .Select(l => $"{l.NombreLocalidad} ({l.NombreProvincia})")
-                    .OrderBy(n => n)
                     .Prepend("Cualquiera")
                     .ToList();
 
@@ -229,15 +235,17 @@ namespace UI.UI_Gestor
             }
             else
             {
-                var localidadesFiltradas = _localidadesCompletas
+                // Solo las de la provincia seleccionada, ordenadas alfabéticamente
+                nombres = _localidadesCompletas
                     .Where(l => l.NombreProvincia == seleccion)
+                    .OrderBy(l => l.NombreLocalidad)
                     .Select(l => $"{l.NombreLocalidad} ({l.NombreProvincia})")
-                    .OrderBy(n => n)
                     .Prepend("Cualquiera")
                     .ToList();
 
-                comboLocalidad.DataSource = localidadesFiltradas;
+               
             }
+            comboLocalidad.DataSource = nombres;
         }
 
         private void comboLocalidad_SelectedIndexChanged(object sender, EventArgs e)

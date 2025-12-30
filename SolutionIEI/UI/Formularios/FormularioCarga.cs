@@ -50,6 +50,9 @@ namespace UI
         {
             if (MessageBox.Show("¿Seguro que quieres borrar TODOS los datos?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
+                this.Enabled = false;                    // ← Bloquea toda la ventana
+                
+
                 try
                 {
                     var response = await _http.DeleteAsync("carga/delete"); // sin barra inicial
@@ -69,6 +72,11 @@ namespace UI
                 {
                     MessageBox.Show("Error al borrar: " + ex.Message);
                 }
+                finally
+                {
+                    this.Enabled = true;                     // ← Rehabilita siempre
+                   
+                }
             }
         }
 
@@ -78,7 +86,7 @@ namespace UI
             StringBuilder log = new StringBuilder();
             log.AppendLine("--- INICIO DE CARGA ---\n");
 
-            Cursor.Current = Cursors.WaitCursor;
+            this.Enabled = false;
 
             int totalCargadas = 0;
             List<string> todasReparadas = new List<string>();
@@ -126,7 +134,7 @@ namespace UI
             }
             finally
             {
-                Cursor.Current = Cursors.Default;
+                this.Enabled = true;
             }
 
             rtbResumen.Text = log.ToString();

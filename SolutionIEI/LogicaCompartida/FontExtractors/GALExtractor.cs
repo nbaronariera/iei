@@ -112,6 +112,29 @@ namespace UI.Parsers
 
                 resultadoDebug.Fuente = "GAL";
 
+
+                // Normalizar variantes ortográficas comunes (La Coruña -> A Coruña)
+                if (!string.IsNullOrWhiteSpace(dato.Provincia) &&
+                    dato.Provincia.Trim().Equals("La Coruña", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.Provincia = "A Coruña";
+                    resultadoDebug.Reparada = true;
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: " +dato.Provincia+ ".");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de " + dato.Provincia + " a A Coruña.");
+                }
+
+                // Normalizar variantes ortográficas comunes (Orense -> Ourense)
+                if (!string.IsNullOrWhiteSpace(dato.Provincia) &&
+                    dato.Provincia.Trim().Equals("Orense", StringComparison.OrdinalIgnoreCase))
+                {
+                    dato.Provincia = "Ourense";
+                    resultadoDebug.Reparada = true;
+                    resultadoDebug.Motivos.Add("Provincia incorrecta: " + dato.Provincia + ".");
+                    resultadoDebug.Reparaciones.Add("Para arreglar la provincia, esta se normalizó, pasándola de " + dato.Provincia + " a Ourense.");
+                }
+
+             
+
                 if (string.IsNullOrWhiteSpace(dato.NombreEstacion))
                 {
                     resultadoDebug.Motivos.Add("Nombre de estación vacío o nulo.");
