@@ -31,6 +31,7 @@ namespace UI.UI_Gestor
         private List<LocalidadDTO> _localidadesCompletas = new();
 
         private bool cargando = false;
+        private bool _apiVerificada = false;
 
         public FormularioBusqueda()
         {
@@ -39,7 +40,7 @@ namespace UI.UI_Gestor
             _http = new HttpClient
             {
                 BaseAddress = new Uri("http://localhost:8080"), // Puerto de la API de búsqueda
-                Timeout = Timeout.InfiniteTimeSpan
+                Timeout = TimeSpan.FromSeconds(30) // Tiempo de espera razonable
             };
 
             // FIJAR EL PANEL IZQUIERDO
@@ -71,7 +72,7 @@ namespace UI.UI_Gestor
                 this.Enabled = false;                    // Bloquear ventana mientras carga
                 Cursor.Current = Cursors.WaitCursor;
 
-                this.MinimumSize = new Size(900, 600);
+                this.MinimumSize = new Size(1536, 864);
                 this.WindowState = FormWindowState.Normal;
                 this.StartPosition = FormStartPosition.CenterScreen;
 
@@ -80,17 +81,79 @@ namespace UI.UI_Gestor
                 dataGridView1.AutoGenerateColumns = true;
                 dataGridView1.Columns.Clear();
 
+                // VERIFICAR QUE LA API ESTÁ DISPONIBLE
+                if (!await VerificarAPI())
+                {
+                    MessageBox.Show("La API de búsqueda no está disponible.\n\n" +
+                                  "Asegúrate de que:\n" +
+                                  "1. La API de búsqueda esté ejecutándose (puerto 8080)\n" +
+                                  "2. Has cargado datos previamente en la ventana de carga",
+                                  "Error de conexión",
+                                  MessageBoxButtons.OK,
+                                  MessageBoxIcon.Error);
+                    this.Close();
+                    return;
+                }
+
                 await PrepararCombos();
                 await AplicarFiltros();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar el formulario: " + ex.Message);
+                MessageBox.Show("Error al cargar el formulario: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
                 this.Enabled = true;                     // Rehabilitar ventana
                 Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private async Task<bool> VerificarAPI()
+        {
+            try
+            {
+                // Intentar varias veces con timeout progresivo
+                for (int intento = 1; intento <= 5; intento++)
+                {
+                    try
+                    {
+                        // Intento rápido de conexión
+                        var cts = new System.Threading.CancellationTokenSource();
+                        cts.CancelAfter(2000); // 2 segundos de timeout
+
+                        var response = await _http.GetAsync("/provincias", cts.Token);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            _apiVerificada = true;
+                            Debug.WriteLine($"[CLIENTE] API verificada correctamente en intento {intento}");
+                            return true;
+                        }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Debug.WriteLine($"[CLIENTE] Timeout en intento {intento}/5");
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Debug.WriteLine($"[CLIENTE] Error HTTP en intento {intento}/5: {ex.Message}");
+                    }
+
+                    if (intento < 5)
+                    {
+                        // Esperar progresivamente más tiempo
+                        await Task.Delay(intento * 1000);
+                    }
+                }
+
+                Debug.WriteLine("[CLIENTE] API no disponible después de 5 intentos");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[CLIENTE] Error verificando API: {ex.Message}");
+                return false;
             }
         }
 
@@ -123,8 +186,67 @@ namespace UI.UI_Gestor
             comboTipo.Items.Add("Otros");
             comboTipo.SelectedIndex = 0;
 
-            await CargarProvincias();
-            await CargarLocalidades();
+            // Cargar provincias con reintento
+            if (!await CargarProvinciasConReintento())
+            {
+                // Si no se pueden cargar provincias, poner valores por defecto
+                comboProvincia.DataSource = new List<string> { "Cualquiera" };
+                comboLocalidad.DataSource = new List<string> { "Cualquiera" };
+                return;
+            }
+
+            // Cargar localidades
+            await CargarLocalidadesConReintento();
+        }
+
+        private async Task<bool> CargarProvinciasConReintento()
+        {
+            for (int intento = 1; intento <= 3; intento++)
+            {
+                try
+                {
+                    await CargarProvincias();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[CLIENTE] Intento {intento} de cargar provincias falló: {ex.Message}");
+
+                    if (intento == 3)
+                    {
+                        Debug.WriteLine($"[CLIENTE] No se pudieron cargar provincias después de 3 intentos");
+                        return false;
+                    }
+
+                    await Task.Delay(1000 * intento);
+                }
+            }
+            return false;
+        }
+
+        private async Task<bool> CargarLocalidadesConReintento()
+        {
+            for (int intento = 1; intento <= 3; intento++)
+            {
+                try
+                {
+                    await CargarLocalidades();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[CLIENTE] Intento {intento} de cargar localidades falló: {ex.Message}");
+
+                    if (intento == 3)
+                    {
+                        Debug.WriteLine($"[CLIENTE] No se pudieron cargar localidades después de 3 intentos");
+                        return false;
+                    }
+
+                    await Task.Delay(1000 * intento);
+                }
+            }
+            return false;
         }
 
         private async Task CargarProvincias()
@@ -133,14 +255,12 @@ namespace UI.UI_Gestor
             try
             {
                 var response = await _http.GetAsync("/provincias");
-                Console.WriteLine($"[CLIENTE] /provincias → Status: {response.StatusCode}");
+                Debug.WriteLine($"[CLIENTE] /provincias → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"Error API provincias: {response.StatusCode}");
-                    MessageBox.Show($"Error al cargar provincias: {response.StatusCode}");
-                    comboProvincia.DataSource = new List<string> { "Cualquiera" };
-                    return;
+                    Debug.WriteLine($"[CLIENTE] Error API provincias: {response.StatusCode}");
+                    throw new Exception($"Error HTTP {response.StatusCode}");
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -156,12 +276,12 @@ namespace UI.UI_Gestor
                     .ToList();
 
                 comboProvincia.DataSource = nombres;
+                Debug.WriteLine($"[CLIENTE] {provincias.Count} provincias cargadas");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}\n{ex.StackTrace}");
-                
-                comboProvincia.DataSource = new List<string> { "Cualquiera" };
+                Debug.WriteLine($"[CLIENTE] Excepción al cargar provincias: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -175,14 +295,12 @@ namespace UI.UI_Gestor
             try
             {
                 var response = await _http.GetAsync("/localidades");
-                Console.WriteLine($"[CLIENTE] /localidades → Status: {response.StatusCode}");
+                Debug.WriteLine($"[CLIENTE] /localidades → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"Error API localidades: {response.StatusCode}");
-                    MessageBox.Show($"Error al cargar localidades: {response.StatusCode}");
-                    comboLocalidad.DataSource = new List<string> { "Cualquiera" };
-                    return;
+                    Debug.WriteLine($"[CLIENTE] Error API localidades: {response.StatusCode}");
+                    throw new Exception($"Error HTTP {response.StatusCode}");
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -200,12 +318,12 @@ namespace UI.UI_Gestor
                     .ToList();
 
                 comboLocalidad.DataSource = nombres;
+                Debug.WriteLine($"[CLIENTE] {localidades.Count} localidades cargadas");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CLIENTE] Excepción al cargar localidades: {ex.Message}\n{ex.StackTrace}");
-                
-                comboLocalidad.DataSource = new List<string> { "Cualquiera" };
+                Debug.WriteLine($"[CLIENTE] Excepción al cargar localidades: {ex.Message}");
+                throw;
             }
             finally
             {
@@ -243,9 +361,8 @@ namespace UI.UI_Gestor
                     .Prepend("Cualquiera")
                     .ToList();
 
-               
+                comboLocalidad.DataSource = nombres;
             }
-            comboLocalidad.DataSource = nombres;
         }
 
         private void comboLocalidad_SelectedIndexChanged(object sender, EventArgs e)
@@ -291,18 +408,18 @@ namespace UI.UI_Gestor
             string tipoParam = tipo == "Cualquiera" ? "" : tipo;
 
             var url = $"/estaciones?cp={cp}&provincia={provinciaParam}&localidad={localidadParam}&tipo={tipoParam}";
-            Console.WriteLine($"[CLIENTE] Llamando a API: {url}");
+            Debug.WriteLine($"[CLIENTE] Llamando a API: {url}");
 
             try
             {
                 var response = await _http.GetAsync(url);
-                Console.WriteLine($"[CLIENTE] /estaciones → Status: {response.StatusCode}");
+                Debug.WriteLine($"[CLIENTE] /estaciones → Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[CLIENTE] ERROR API estaciones: {response.StatusCode} → {errorContent}");
-                    MessageBox.Show($"Error al obtener estaciones: {response.StatusCode}");
+                    Debug.WriteLine($"[CLIENTE] ERROR API estaciones: {response.StatusCode} → {errorContent}");
+                    MessageBox.Show($"Error al obtener estaciones: {response.StatusCode}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     ActualizarGrid(new List<EstacionParaMostrar>());
                     ActualizarMapa(new List<EstacionParaMostrar>());
                     return;
@@ -312,7 +429,7 @@ namespace UI.UI_Gestor
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var resultado = JsonSerializer.Deserialize<List<EstacionParaMostrar>>(json, options) ?? new List<EstacionParaMostrar>();
 
-                Console.WriteLine($"[CLIENTE] Estaciones recibidas: {resultado.Count}");
+                Debug.WriteLine($"[CLIENTE] Estaciones recibidas: {resultado.Count}");
 
                 var paraMapa = resultado.Where(e => e.latitud != 0 && e.longitud != 0).ToList();
 
@@ -321,8 +438,8 @@ namespace UI.UI_Gestor
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CLIENTE] Excepción en AplicarFiltros: {ex.Message}");
-              
+                Debug.WriteLine($"[CLIENTE] Excepción en AplicarFiltros: {ex.Message}");
+                MessageBox.Show($"Error al aplicar filtros: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -352,7 +469,6 @@ namespace UI.UI_Gestor
                     args.FormattingApplied = true;
                 }
             };
-
         }
 
         private void ActualizarMapa(List<EstacionParaMostrar> estaciones)

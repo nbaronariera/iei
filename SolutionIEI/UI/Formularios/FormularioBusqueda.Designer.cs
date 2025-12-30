@@ -71,8 +71,8 @@
             splitVertical.Panel2.BackColor = Color.White;
             splitVertical.Panel2.Controls.Add(dataGridView1);
             splitVertical.Panel2.Controls.Add(lblResultados);
-            splitVertical.Size = new Size(1100, 836);
-            splitVertical.SplitterDistance = 593;
+            splitVertical.Size = new Size(1520, 825);
+            splitVertical.SplitterDistance = 585;
             splitVertical.TabIndex = 0;
             // 
             // splitHorizontal
@@ -102,8 +102,8 @@
             splitHorizontal.Panel2.BackColor = Color.White;
             splitHorizontal.Panel2.Controls.Add(gMapControl1);
             splitHorizontal.Panel2MinSize = 300;
-            splitHorizontal.Size = new Size(1100, 593);
-            splitHorizontal.SplitterDistance = 350;
+            splitHorizontal.Size = new Size(1520, 585);
+            splitHorizontal.SplitterDistance = 483;
             splitHorizontal.TabIndex = 0;
             // 
             // comboTipo
@@ -112,7 +112,7 @@
             comboTipo.FormattingEnabled = true;
             comboTipo.Location = new Point(114, 257);
             comboTipo.Name = "comboTipo";
-            comboTipo.Size = new Size(200, 23);
+            comboTipo.Size = new Size(333, 23);
             comboTipo.TabIndex = 10;
             // 
             // comboProvincia
@@ -121,7 +121,7 @@
             comboProvincia.FormattingEnabled = true;
             comboProvincia.Location = new Point(114, 207);
             comboProvincia.Name = "comboProvincia";
-            comboProvincia.Size = new Size(200, 23);
+            comboProvincia.Size = new Size(333, 23);
             comboProvincia.TabIndex = 9;
             comboProvincia.SelectedIndexChanged += comboProvincia_SelectedIndexChanged;
             // 
@@ -131,7 +131,7 @@
             comboLocalidad.FormattingEnabled = true;
             comboLocalidad.Location = new Point(114, 110);
             comboLocalidad.Name = "comboLocalidad";
-            comboLocalidad.Size = new Size(200, 23);
+            comboLocalidad.Size = new Size(333, 23);
             comboLocalidad.TabIndex = 8;
             comboLocalidad.SelectedIndexChanged += comboLocalidad_SelectedIndexChanged;
             // 
@@ -140,7 +140,7 @@
             txtBoxCodPostal.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtBoxCodPostal.Location = new Point(114, 160);
             txtBoxCodPostal.Name = "txtBoxCodPostal";
-            txtBoxCodPostal.Size = new Size(200, 23);
+            txtBoxCodPostal.Size = new Size(333, 23);
             txtBoxCodPostal.TabIndex = 7;
             // 
             // lblTipo
@@ -193,10 +193,10 @@
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            button1.Location = new Point(204, 476);
+            button1.Location = new Point(204, 468);
             button1.MinimumSize = new Size(75, 23);
             button1.Name = "button1";
-            button1.Size = new Size(120, 27);
+            button1.Size = new Size(253, 27);
             button1.TabIndex = 0;
             button1.Text = "Buscar";
             button1.UseVisualStyleBackColor = true;
@@ -204,11 +204,13 @@
             // 
             // btnCargarDatos
             // 
+            btnCargarDatos.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             btnCargarDatos.BackColor = Color.LightGray;
             btnCargarDatos.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            btnCargarDatos.Location = new Point(20, 476);
+            btnCargarDatos.Location = new Point(20, 468);
+            btnCargarDatos.MinimumSize = new Size(100, 0);
             btnCargarDatos.Name = "btnCargarDatos";
-            btnCargarDatos.Size = new Size(120, 27);
+            btnCargarDatos.Size = new Size(181, 27);
             btnCargarDatos.TabIndex = 11;
             btnCargarDatos.Text = "Gestionar Datos";
             btnCargarDatos.UseVisualStyleBackColor = false;
@@ -237,7 +239,7 @@
             gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             gMapControl1.SelectedAreaFillColor = Color.FromArgb(33, 65, 105, 225);
             gMapControl1.ShowTileGridLines = false;
-            gMapControl1.Size = new Size(746, 593);
+            gMapControl1.Size = new Size(1033, 585);
             gMapControl1.TabIndex = 0;
             gMapControl1.Zoom = 0D;
             gMapControl1.Load += gMapControl1_Load;
@@ -253,7 +255,7 @@
             dataGridView1.Name = "dataGridView1";
             dataGridView1.RowHeadersWidth = 51;
             dataGridView1.RowTemplate.Height = 25;
-            dataGridView1.Size = new Size(1100, 198);
+            dataGridView1.Size = new Size(1520, 195);
             dataGridView1.TabIndex = 1;
             // 
             // lblResultados
@@ -261,7 +263,7 @@
             lblResultados.Anchor = AnchorStyles.Top;
             lblResultados.AutoSize = true;
             lblResultados.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            lblResultados.Location = new Point(454, 10);
+            lblResultados.Location = new Point(664, 10);
             lblResultados.Name = "lblResultados";
             lblResultados.RightToLeft = RightToLeft.Yes;
             lblResultados.Size = new Size(195, 21);
@@ -334,8 +336,9 @@
             // 
             // FormularioBusqueda
             // 
-            ClientSize = new Size(1100, 836);
+            ClientSize = new Size(1520, 825);
             Controls.Add(splitVertical);
+            MinimumSize = new Size(1536, 864);
             Name = "FormularioBusqueda";
             Text = "Buscador ITV";
             Load += Form1_Load;
