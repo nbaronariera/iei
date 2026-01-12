@@ -6,6 +6,10 @@ using UI.Logica;
 
 namespace ProyectoAPIBusqueda
 {
+    /// <summary>
+    /// API pública de consulta. Provee endpoints para que aplicaciones cliente
+    /// puedan recuperar listados de estaciones, provincias y localidades.
+    /// </summary>
     [ApiController]
     [Route("/")] // rutas directas: /provincias, /localidades, /estaciones
     [Produces("application/json")]
@@ -16,11 +20,10 @@ namespace ProyectoAPIBusqueda
         public APIBusqueda(LogicaBusqueda logica) => _logica = logica;
 
         /// <summary>
-        /// Devuelve todas las provincias disponibles.
+        /// Obtiene el listado de todas las provincias que tienen estaciones registradas.
         /// </summary>
-        /// 
-        ///<returns> Devuelve una lista de Provincias</returns> 
-        ///<response code="200">Retorna la lista de Provincias</response>
+        /// <returns>Lista de objetos Provincia.</returns>
+        /// <response code="200">Retorna la lista correctamente.</response>
         [HttpGet("provincias")]
         [ProducesResponseType(typeof(List<Provincia>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -40,11 +43,10 @@ namespace ProyectoAPIBusqueda
         }
 
         /// <summary>
-        /// Obtiene las localidades.
+        /// Obtiene el listado de todas las localidades registradas.
         /// </summary>
-        /// 
-        ///<returns> Devuelve una lista de Localidad</returns> 
-        ///<response code="200">Retorna la lista de Localidades</response>
+        /// <returns>Lista de objetos Localidad.</returns>
+        /// <response code="200">Retorna la lista correctamente.</response>
         [HttpGet("localidades")]
         [ProducesResponseType(typeof(List<Localidad>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -67,14 +69,15 @@ namespace ProyectoAPIBusqueda
         /// <summary>
         /// Obtiene estaciones filtradas por CP, provincia, localidad y tipo.
         /// </summary>
-        /// 
+        /// <remarks>
+        /// Los filtros funcionan de manera aditiva (AND). Si un parámetro se omite o es null, se ignora ese criterio.
+        /// </remarks>
         /// <param name="cp">El cdigo postal de la estacion. Opcional</param>
         /// <param name="provincia">La provincia de la estacion. Opcional</param>
         /// <param name="localidad">La localidad de la estacion. Opcional</param>
-        /// <param name="tipo">El tipo de la estacion. Opcional</param>
-        /// 
-        ///<returns> Devuelve una lista de Estaciones</returns> 
-        ///<response code="200">Retorna la lista de Estaciones</response>
+        /// <param name="tipo">El tipo de la estacion. Opcional</param> 
+        ///<returns> Devuelve una lista de Estaciones filtrada</returns> 
+        ///<response code="200">Retorna la lista de Estaciones(puede estar vacía).</response>
         [HttpGet("estaciones")]
         [ProducesResponseType(typeof(List<Estacion>), StatusCodes.Status200OK)]
         public IActionResult GetEstaciones(
@@ -83,7 +86,7 @@ namespace ProyectoAPIBusqueda
           [FromQuery] string? localidad,
           [FromQuery] string? tipo)
         {
-            // Convertimos explícitamente null → cadena vacía
+            // Sanitización: Convertimos explícitamente null a cadena vacía para evitar errores en la lógica
             cp ??= "";
             provincia ??= "";
             localidad ??= "";
