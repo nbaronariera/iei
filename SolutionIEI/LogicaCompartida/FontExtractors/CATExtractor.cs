@@ -11,19 +11,27 @@ using UI.Wrappers;
 
 namespace UI.Parsers
 {
+    // Clase encargada de la extracción, transformación y carga (ETL) de los datos de Cataluña.
+    // Hereda de Parser<XMLData> porque originalmente los datos venían en XML, aunque ahora se consumen en JSON.
     public class CATExtractor : Parser<XMLData>
     {
         private int codigoPostal;
-        HttpClient _http = new HttpClient { 
+
+        // Cliente HTTP configurado para conectar con la API Wrapper de Cataluña (Puerto 8083)
+        HttpClient _http = new HttpClient
+        {
             BaseAddress = new Uri("http://localhost:8083"),
             Timeout = Timeout.InfiniteTimeSpan
         };
 
-    private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
+        // Lista blanca de provincias válidas en Cataluña para filtrar datos erróneos
+        private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
             "Barcelona", "Tarragona", "Lleida", "Girona"
         };
 
+        // Diccionario de prefijos de Código Postal para validar la consistencia geográfica.
+        // Permite comprobar si una estación declarada en "Barcelona" tiene realmente un CP que empieza por "08".
         private static readonly Dictionary<string, string> prefijosCpPorTerritorio = new(StringComparer.OrdinalIgnoreCase)
         {
             { "Lleida", "25" },
@@ -32,23 +40,28 @@ namespace UI.Parsers
             { "Tarragona", "43" }
         };
 
+        // Método de parseo básico: Deserializa el contenido (JSON) a objetos C#
         protected override List<XMLData> ExecuteParse()
         {
             if (file == null) return new List<XMLData>();
 
+            // Configuramos CaseInsensitive para tolerar diferencias de mayúsculas en el JSON origen
             var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
 
             return JsonSerializer.Deserialize<List<XMLData>>(contenido, opciones) ?? new List<XMLData>();
         }
 
+        // Método principal de Transformación y Carga (ETL).
+        // Procesa la lista de datos crudos, aplica reglas de negocio, valida y guarda en BD.
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<XMLData> datosParseados)
         {
             var resultados = new List<ResultObject>();
             var estacionesValidas = new List<Estacion>();
-            using var contexto = new AppDbContext();
+            using var contexto = new AppDbContext(); // Contexto de BD para esta operación
             var debugResultados = new List<ResultadoDebug>();
 
+            // Sets para detectar duplicados DENTRO del propio archivo antes de consultar a la BD
             var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
@@ -56,6 +69,7 @@ namespace UI.Parsers
 
             foreach (var dato in datosParseados)
             {
+                // Objeto auxiliar para registrar el estado de validación de cada registro
                 var resultadoDebug = new ResultadoDebug
                 {
                     Nombre = dato.denominaci?.Trim() ?? "(sin nombre)",
@@ -69,6 +83,7 @@ namespace UI.Parsers
 
                 try
                 {
+                    // --- VALIDACIONES DE INTEGRIDAD BÁSICA ---
                     if (string.IsNullOrWhiteSpace(dato.denominaci))
                     {
                         resultadoDebug.Motivos.Add("Nombre estación vacío o nulo.");
@@ -85,6 +100,7 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
+                    // Validación de formato de Código Postal (debe tener 5 dígitos)
                     string cpRaw = dato.cp?.Trim() ?? "";
                     if (!Regex.IsMatch(cpRaw, @"^\d{5}$"))
                     {
@@ -92,7 +108,9 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Provincia según código postal (siempre la referencia correcta)
+                    // --- VALIDACIÓN DE COHERENCIA GEOGRÁFICA ---
+
+                    // Inferencia de provincia basada estrictamente en el Código Postal
                     string provinciaPorCP = ObtenerProvinciaPorCodigoPostal(cpRaw, resultadoDebug.Motivos);
                     if (string.IsNullOrWhiteSpace(provinciaPorCP))
                     {
@@ -103,39 +121,44 @@ namespace UI.Parsers
                     string provinciaCampoOriginal = dato.serveis_territorials?.Trim() ?? "";
                     string provinciaCampo = provinciaCampoOriginal;
 
-                    // === Mapeo de variantes en castellano a catalán para la comprobación ===
+                    // Normalización de nombres de provincias (Castellano -> Catalán) para la comparación
                     var variantesCastellano = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Gerona", "Girona" },
-                { "Lérida", "Lleida" }
-                // Barcelona y Tarragona son iguales
-            };
+                    {
+                        { "Gerona", "Girona" },
+                        { "Lérida", "Lleida" }
+                        // Barcelona y Tarragona se escriben igual
+                    };
 
                     if (variantesCastellano.TryGetValue(provinciaCampoOriginal, out string provinciaCatalana))
                     {
                         provinciaCampo = provinciaCatalana;
                     }
 
-                    // === Comprobación de coherencia: solo si es una provincia catalana principal (incluyendo variantes) ===
+                    // Comprobación: ¿Coincide la provincia declarada en el JSON con la que indica el CP?
+                    // Solo se comprueba si la provincia declarada es una de las 4 principales.
                     var provinciasPrincipales = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "Barcelona", "Girona", "Lleida", "Tarragona"
-            };
+                    {
+                        "Barcelona", "Girona", "Lleida", "Tarragona"
+                    };
 
                     if (provinciasPrincipales.Contains(provinciaCampo) &&
                         !string.Equals(provinciaCampo, provinciaPorCP, StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add($"Código postal {cpRaw} no coincide con la provincia almacenada en el campo serveis_territorials ({provinciaCampoOriginal}).");
-                        resultadoDebug.Añadida = false; // ← Se descarta directamente
+                        resultadoDebug.Añadida = false; // Se descarta por incoherencia
                     }
 
-                    // Si es "Terres de l'Ebre" o cualquier otro valor → no se comprueba coherencia
-                    resultadoDebug.Provincia = provinciaPorCP; // Siempre usamos la del CP como definitiva
+                    // Asignamos la provincia deducida por el CP como la definitiva para guardar en BD
+                    resultadoDebug.Provincia = provinciaPorCP;
 
+                    // --- EXTRACCIÓN DE COORDENADAS ---
                     double lat = 0.0;
                     double lon = 0.0;
+
+                    // Prioridad 1: Extraer coordenadas de la URL de Google Maps (más preciso)
                     if (dato.localitzador_a_google_maps?.url != null)
                     {
+                        // Buscamos el patrón "q=latitud+longitud"
                         var match = Regex.Match(dato.localitzador_a_google_maps.url, @"q=([\d\.]+)\+([\d\.]+)");
                         if (match.Success)
                         {
@@ -150,6 +173,7 @@ namespace UI.Parsers
                     }
                     else
                     {
+                        // Prioridad 2: Usar campos lat/long directos (suelen venir en formato entero que requiere parseo)
                         lat = ParsearCoordenada(dato.lat);
                         lon = ParsearCoordenada(dato.long_coord);
                     }
@@ -157,7 +181,7 @@ namespace UI.Parsers
                     string nombreNormalizado = dato.denominaci?.Trim() ?? "";
                     string coordsKey = $"{lat:F6},{lon:F6}";
 
-                    // Duplicados internos
+                    // --- DETECCIÓN DE DUPLICADOS (INTRA-ARCHIVO) ---
                     if (!string.IsNullOrWhiteSpace(nombreNormalizado) && !nombresEnEsteFichero.Add(nombreNormalizado))
                     {
                         resultadoDebug.Motivos.Add($"Nombre repetido dentro del archivo CAT ({nombreNormalizado}).");
@@ -169,12 +193,14 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Duplicados en BD
+                    // --- DETECCIÓN DE DUPLICADOS (BASE DE DATOS) ---
+                    // Comprobamos si el nombre ya existe
                     if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                     {
                         resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
                         resultadoDebug.Añadida = false;
                     }
+                    // Comprobamos si la ubicación ya existe (con tolerancia de ~11 metros)
                     if (lat != 0 && lon != 0 && contexto.Estaciones.Any(e =>
                         Math.Abs(e.latitud - lat) < 0.0001 && Math.Abs(e.longitud - lon) < 0.0001))
                     {
@@ -182,29 +208,33 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
+                    // Validación geográfica: debe estar en España peninsular
                     if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
                     {
                         resultadoDebug.Motivos.Add($"Coordenadas fuera de España peninsular ({lat}, {lon}).");
                         resultadoDebug.Añadida = false;
                     }
 
+                    // Si hay algún motivo de rechazo, no procesamos más
                     if (!resultadoDebug.Añadida)
                     {
                         debugResultados.Add(resultadoDebug);
                         continue;
                     }
 
-                    // Todo válido → crear objetos
+                    // --- CREACIÓN DE ENTIDADES ---
+                    // Obtenemos o creamos Provincia y Localidad para mantener integridad referencial
                     var provincia = ObtenerOCrearProvincia(contexto, provinciaPorCP);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.municipi, provincia);
 
+                    // Limpieza de campo email
                     string correoLimpio = EsUrl(dato.correu_electr_nic) ? "" : dato.correu_electr_nic;
                     string contactoFormateado = $"Correo electrónico: {correoLimpio} Teléfono: {dato.tel_atenc_public}";
 
                     var estacion = new Estacion
                     {
                         nombre = dato.denominaci,
-                        tipo = TipoEstacion.Estacion_fija,
+                        tipo = TipoEstacion.Estacion_fija, // En CAT asumimos fijas por defecto según PDF
                         direccion = dato.adre_a ?? "",
                         codigoPostal = dato.cp,
                         latitud = lat,
@@ -234,6 +264,7 @@ namespace UI.Parsers
                 }
             }
 
+            // Guardado en bloque (Bulk Save) para mejorar rendimiento
             if (estacionesValidas.Any())
             {
                 contexto.Estaciones.AddRange(estacionesValidas);
@@ -243,6 +274,7 @@ namespace UI.Parsers
             MostrarResumen(debugResultados);
             Console.WriteLine($"[CAT] Carga finalizada. {resultados.Count} estaciones guardadas.");
 
+            // Preparación de strings de log para devolver a la API de Carga
             int agregadas = resultados.Count;
             string estacionesReparadas = string.Join("\n",
                 debugResultados.Where(r => r.Añadida && r.Reparada)
@@ -256,6 +288,7 @@ namespace UI.Parsers
         }
 
 
+        // Deduce la provincia a partir de los 2 primeros dígitos del Código Postal
         private string ObtenerProvinciaPorCodigoPostal(string cp, List<string> motivos)
         {
             if (string.IsNullOrWhiteSpace(cp) || cp.Length != 5)
@@ -273,6 +306,7 @@ namespace UI.Parsers
             };
         }
 
+        // Verifica si las coordenadas caen dentro de un cuadro delimitador (bounding box) de la península
         private bool EsCoordenadaEnEspañaPeninsular(double lat, double lon)
         {
             const double latMin = 36.0, latMax = 43.8;
@@ -280,6 +314,7 @@ namespace UI.Parsers
             return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
         }
 
+        // Busca la provincia en BD por nombre; si no existe, la crea
         private Provincia ObtenerOCrearProvincia(AppDbContext ctx, string nombre)
         {
             nombre = nombre.Trim();
@@ -292,6 +327,7 @@ namespace UI.Parsers
             return nueva;
         }
 
+        // Busca la localidad en BD vinculada a una provincia; si no existe, la crea
         private Localidad ObtenerOCrearLocalidad(AppDbContext ctx, string nombre, Provincia provincia)
         {
             nombre = nombre.Trim();
@@ -304,18 +340,21 @@ namespace UI.Parsers
             return nueva;
         }
 
+        // Chequeo de duplicados por coincidencia exacta de nombre y coordenadas
         private bool EstacionYaExiste(AppDbContext ctx, string nombre, double lat, double lon)
         {
             return ctx.Estaciones.Any(e => e.nombre == nombre && e.latitud == lat && e.longitud == lon);
         }
 
+        // Convierte strings de coordenadas sucios (ej: con puntos de miles) a double
         private double ParsearCoordenada(string coord)
         {
             if (string.IsNullOrWhiteSpace(coord)) return 0.0;
-            string s = Regex.Replace(coord, @"[^\d]", "");
+            string s = Regex.Replace(coord, @"[^\d]", ""); // Quitar todo lo que no sea dígito
 
             if (!long.TryParse(s, out long n)) return 0.0;
 
+            // Lógica heurística para determinar dónde va el punto decimal
             if (s.Length == 8) return n / 1_000_000.0;
 
             if (s.Length == 6 || s.Length == 7) return n / 1_000_000.0;
@@ -335,6 +374,7 @@ namespace UI.Parsers
             return raw;
         }
 
+        // Muestra un resumen por consola para depuración
         private void MostrarResumen(List<ResultadoDebug> resultados)
         {
             var añadidas = resultados.Where(r => r.Añadida).ToList();
@@ -357,23 +397,28 @@ namespace UI.Parsers
             Console.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
+        // Método orquestador que es llamado desde la API de Carga
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             try
             {
+                // 1. Llamada a la API externa (Wrapper) para obtener el JSON
                 var response = await _http.GetAsync("/cat/json");
                 if (!response.IsSuccessStatusCode)
                 {
                     return (new List<ResultObject>(), 0, "", "ERROR CAT HTTP");
                 }
 
+                // 2. Lectura del contenido
                 var JsonCAT = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"[CATExtractor] Recibido JSON de {JsonCAT.Length} caracteres");
 
+                // 3. Deserialización
                 this.LoadFromString(JsonCAT);
                 var datosParseados = this.ParseList();
                 Console.WriteLine($"[CATExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
+                // 4. Transformación y Carga en BD
                 var resultados = this.FromParsedToUsefull(datosParseados);
 
                 return resultados; // Devuelve directamente la tupla

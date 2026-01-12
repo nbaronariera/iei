@@ -12,6 +12,7 @@ using UI.Wrappers;
 
 namespace UI.Parsers
 {
+    // Clase auxiliar para el reporte de depuración de cada registro procesado
     class ResultadoDebug
     {
         public string Fuente { get; set; } = "";
@@ -25,15 +26,22 @@ namespace UI.Parsers
         public List<string> Reparaciones { get; set; } = new();
     }
 
+    // Clase encargada de la extracción, transformación y carga (ETL) de los datos de Galicia.
+    // Procesa datos provenientes de un CSV convertido a JSON.
     public class GALExtractor : Parser<GALData>
     {
 
         private string Text { get; set; } = ""; // <-- esta línea corrige los errores
 
-        HttpClient _http = new HttpClient { 
+        // Cliente HTTP para conectar con la API Wrapper de Galicia (Puerto 8084)
+        HttpClient _http = new HttpClient
+        {
             BaseAddress = new Uri("http://localhost:8084"),
             Timeout = Timeout.InfiniteTimeSpan
         };
+
+        // Diccionario para validar la correspondencia entre provincia y prefijo de código postal.
+        // Se usa para asegurar la integridad de los datos geográficos.
         private static readonly Dictionary<string, int> provinciasGallegas = new(StringComparer.OrdinalIgnoreCase)
         {
             {"A Coruña", 15},
@@ -42,10 +50,13 @@ namespace UI.Parsers
             {"Pontevedra", 36}
         };
 
+        // Lista simple de provincias válidas para normalización y filtrado
         List<string> provincias = new List<string> { "A Coruña", "Pontevedra", "Lugo", "Ourense" };
 
         private int codigoPostal;
 
+        // Método de parseo: Deserializa el JSON obtenido del Wrapper a objetos intermedios (GALData).
+        // El JSON de origen es una lista de diccionarios string-string debido a la conversión CSV->JSON.
         protected override List<GALData> ExecuteParse()
         {
             if (file == null) return new List<GALData>();
@@ -57,11 +68,13 @@ namespace UI.Parsers
                 PropertyNameCaseInsensitive = true // ← CLAVE: permite coincidencia sin importar mayúsculas
             };
 
+            // Deserializamos primero a diccionario dinámico porque las claves del JSON pueden variar (espacios, acentos)
             var filas = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(contenido, opciones) ?? new List<Dictionary<string, string>>();
 
             var resultado = new List<GALData>();
             foreach (var fila in filas)
             {
+                // Mapeo manual de las columnas del CSV original a las propiedades del objeto GALData
                 var gal = new GALData
                 {
                     // Usa las claves originales del CSV convertido
@@ -83,11 +96,14 @@ namespace UI.Parsers
             return resultado;
         }
 
+        // Helper seguro para obtener valores del diccionario manejando nulos
         private string Obtener(Dictionary<string, string> fila, string clave)
         {
             return fila.TryGetValue(clave, out var valor) ? valor?.Trim() ?? "" : "";
         }
 
+        // Método principal de Transformación y Carga (ETL).
+        // Aplica limpieza de datos, validaciones de negocio y guarda en la base de datos.
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<GALData> datosParseados)
         {
             var resultados = new List<ResultObject>();
@@ -95,6 +111,7 @@ namespace UI.Parsers
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
 
+            // Sets para control de duplicados dentro del propio archivo
             var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
@@ -115,9 +132,11 @@ namespace UI.Parsers
                 };
                 resultadoDebug.Fuente = "GAL";
 
-                // Normalización de provincia
+                // --- 1. NORMALIZACIÓN DE DATOS ---
+
                 string provinciaOriginal = dato?.Provincia?.Trim() ?? "";
 
+                // Normalización de nombres de provincia (Castellano -> Gallego oficial)
                 if (!string.IsNullOrWhiteSpace(dato.Provincia) &&
                     dato.Provincia.Trim().Equals("La Coruña", StringComparison.OrdinalIgnoreCase))
                 {
@@ -130,6 +149,8 @@ namespace UI.Parsers
                     dato.Provincia = "Ourense";
                     resultadoDebug.Reparada = true;
                 }
+
+                // --- 2. VALIDACIONES DE INTEGRIDAD ---
 
                 if (string.IsNullOrWhiteSpace(dato.NombreEstacion))
                 {
@@ -146,11 +167,15 @@ namespace UI.Parsers
                     resultadoDebug.Motivos.Add("Municipio vacío o nulo.");
                     resultadoDebug.Añadida = false;
                 }
+
+                // Validación de formato numérico del CP
                 if (!int.TryParse(dato.CodigoPostal, out int codigoPostal) || codigoPostal < 10000 || codigoPostal > 99999)
                 {
                     resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.CodigoPostal}'), al no tener 5 caracteres");
                     resultadoDebug.Añadida = false;
                 }
+
+                // Validación geográfica del CP (Prefijo vs Provincia)
                 if (dato.CodigoPostal.Length >= 2)
                 {
                     var cpPrefijo = dato.CodigoPostal.Substring(0, 2);
@@ -161,16 +186,21 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
                 }
+
+                // Validación de provincia permitida
                 if (!provincias.Contains(dato.Provincia.Trim()))
                 {
                     resultadoDebug.Motivos.Add("Provincia no válida.");
                     resultadoDebug.Añadida = false;
                 }
+                // Validación cruzada CP vs Provincia
                 else if (!CodigoPostalValido(codigoPostal, dato.Provincia))
                 {
                     resultadoDebug.Motivos.Add($"Código postal {codigoPostal} no coincide con provincia '{dato.Provincia}'.");
                     resultadoDebug.Añadida = false;
                 }
+
+                // --- 3. EXTRACCIÓN Y VALIDACIÓN DE COORDENADAS ---
 
                 double lat = ExtraerLatitud(dato.Coordenadas);
                 double lon = ExtraerLongitud(dato.Coordenadas);
@@ -184,7 +214,9 @@ namespace UI.Parsers
 
                 string nombreNormalizado = dato.NombreEstacion?.Trim() ?? "";
 
-                // Duplicados internos
+                // --- 4. DETECCIÓN DE DUPLICADOS ---
+
+                // Duplicados internos (dentro del mismo lote)
                 if (!string.IsNullOrWhiteSpace(nombreNormalizado) && !nombresEnEsteFichero.Add(nombreNormalizado))
                 {
                     resultadoDebug.Motivos.Add($"Nombre repetido dentro del mismo archivo GAL ({nombreNormalizado}).");
@@ -196,12 +228,13 @@ namespace UI.Parsers
                     resultadoDebug.Añadida = false;
                 }
 
-                // Duplicados en BD
+                // Duplicados en Base de Datos (existentes previamente)
                 if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                 {
                     resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
                     resultadoDebug.Añadida = false;
                 }
+                // Coincidencia por ubicación geográfica con tolerancia
                 if (lat != 0 && lon != 0 && contexto.Estaciones.Any(e =>
                     Math.Abs(e.latitud - lat) < 0.0001 && Math.Abs(e.longitud - lon) < 0.0001))
                 {
@@ -209,13 +242,14 @@ namespace UI.Parsers
                     resultadoDebug.Añadida = false;
                 }
 
+                // Si falló alguna validación, registramos el error y pasamos al siguiente
                 if (!resultadoDebug.Añadida)
                 {
                     debugResultados.Add(resultadoDebug);
                     continue;
                 }
 
-                // === Solo si se añade, registramos el mensaje de reparación ===
+                // === Registro de reparaciones realizadas ===
                 if (resultadoDebug.Reparada)
                 {
                     if (provinciaOriginal.Equals("La Coruña", StringComparison.OrdinalIgnoreCase))
@@ -230,13 +264,15 @@ namespace UI.Parsers
                     }
                 }
 
+                // Gestión de entidades relacionadas (Provincia y Localidad)
                 var provincia = ObtenerOCrearProvincia(contexto, dato.Provincia);
                 var localidad = ObtenerOCrearLocalidad(contexto, dato.Municipio, provincia);
 
+                // Creación de la entidad Estacion final
                 var estacion = new Estacion
                 {
                     nombre = dato.NombreEstacion,
-                    tipo = TipoEstacion.Estacion_fija,
+                    tipo = TipoEstacion.Estacion_fija, // En Galicia todas las del listado son fijas
                     direccion = dato.Direccion,
                     codigoPostal = dato.CodigoPostal,
                     latitud = lat,
@@ -259,6 +295,7 @@ namespace UI.Parsers
                 debugResultados.Add(resultadoDebug);
             }
 
+            // Inserción en bloque a la base de datos
             if (estacionesValidas.Any())
             {
                 contexto.Estaciones.AddRange(estacionesValidas);
@@ -266,6 +303,8 @@ namespace UI.Parsers
             }
 
             MostrarResumen(debugResultados);
+
+            // Generación de informes de texto para la respuesta de la API
             int agregadas = resultados.Count;
             string estacionesReparadas = string.Join("\n",
                 debugResultados.Where(r => r.Reparada && r.Añadida)
@@ -327,6 +366,7 @@ namespace UI.Parsers
 
         // --- Métodos auxiliares ---
 
+        // Extrae latitud de string de coordenadas (formato decimal o DMS)
         private double ExtraerLatitud(string coordenadas)
         {
             if (string.IsNullOrWhiteSpace(coordenadas)) return 0;
@@ -334,6 +374,7 @@ namespace UI.Parsers
             return ParsearCoordenadaDMS(partes[0].Trim());
         }
 
+        // Extrae longitud de string de coordenadas
         private double ExtraerLongitud(string coordenadas)
         {
             if (string.IsNullOrWhiteSpace(coordenadas)) return 0;
@@ -342,14 +383,15 @@ namespace UI.Parsers
             return ParsearCoordenadaDMS(partes[1].Trim());
         }
 
+        // Parsea coordenadas que pueden venir en formato Grados Minutos Segundos (DMS) o decimal
         private double ParsearCoordenadaDMS(string dms)
         {
             if (string.IsNullOrWhiteSpace(dms)) return 0;
 
-            // Normalizar símbolos
+            // Normalizar símbolos extraños que pueden venir en el CSV
             dms = dms
                 .Replace("º", "°")
-              //  .Replace("", "°")
+                //  .Replace("", "°")
                 .Replace("’", "'")
                 .Replace("′", "'")
                 .Replace("“", "\"")
@@ -361,7 +403,7 @@ namespace UI.Parsers
             if (double.TryParse(dms, NumberStyles.Any, CultureInfo.InvariantCulture, out double dec))
                 return dec;
 
-            // 2) Detectar patrón tipo DMS (43° 18.856')
+            // 2) Detectar patrón tipo DMS (43° 18.856') mediante Regex
             var match = Regex.Match(dms, @"(-?\d+(?:\.\d*)?)\s*°\s*(\d+(?:\.\d*)?)?");
 
             if (match.Success)
@@ -381,6 +423,7 @@ namespace UI.Parsers
             return 0;
         }
 
+        // Valida que el código postal corresponda al prefijo de la provincia indicada
         private bool CodigoPostalValido(int codigo, string provincia)
         {
             if (string.IsNullOrWhiteSpace(provincia)) return false;
@@ -401,6 +444,7 @@ namespace UI.Parsers
             return prefijoCP == prefijoEsperadoStr;
         }
 
+        // Filtro de bounding box para descartar coordenadas erróneas fuera de la península
         private bool EsCoordenadaEnEspañaPeninsular(double lat, double lon)
         {
             const double latMin = 36.0, latMax = 43.8;
@@ -408,6 +452,7 @@ namespace UI.Parsers
             return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
         }
 
+        // Convierte el texto de horario libre a un formato estructurado y normalizado
         private string ConvertirHorario(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -453,9 +498,9 @@ namespace UI.Parsers
                 var rangos = Regex.Matches(bloque.RangosRaw,
                                            @"(\d{1,2}[:]\d{1,2})\s*a\s*(\d{1,2}[:]\d{1,2})",
                                            RegexOptions.IgnoreCase)
-                                  .Cast<Match>()
-                                  .Select(m => $"{m.Groups[1].Value}-{m.Groups[2].Value}")
-                                  .ToList();
+                                 .Cast<Match>()
+                                 .Select(m => $"{m.Groups[1].Value}-{m.Groups[2].Value}")
+                                 .ToList();
 
                 if (rangos.Count > 0)
                 {
@@ -497,6 +542,7 @@ namespace UI.Parsers
 
         private string FormatearContacto(string correo, string telefono) => $"Correo electrónico: {correo} Teléfono: {telefono}";
 
+        // Muestra un resumen en consola de las operaciones realizadas
         private void MostrarResumen(List<ResultadoDebug> resultados)
         {
             var añadidas = resultados.Where(r => r.Añadida).ToList();
@@ -519,23 +565,28 @@ namespace UI.Parsers
             Console.WriteLine($"\n Total añadidas: {añadidas.Count}, descartadas: {descartadas.Count}");
         }
 
+        // Método orquestador para cargar los datos llamando al wrapper y procesándolos
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             try
             {
+                // Llamada a la API Wrapper externa
                 var response = await _http.GetAsync("/gal/json");
                 if (!response.IsSuccessStatusCode)
                 {
                     return (new List<ResultObject>(), 0, "", "ERROR GAL HTTP");
                 }
 
+                // Lectura del contenido JSON
                 var JsonGAL = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"[GALExtractor] Recibido JSON de {JsonGAL.Length} caracteres");
 
+                // Deserialización y Parseo
                 this.LoadFromString(JsonGAL);
                 var datosParseados = this.ParseList();
                 Console.WriteLine($"[GALExtractor] ParseList() devolvió {datosParseados.Count} objetos");
 
+                // Transformación y Carga
                 return this.FromParsedToUsefull(datosParseados);
             }
             catch (Exception ex)
@@ -544,10 +595,6 @@ namespace UI.Parsers
                 return (new List<ResultObject>(), 0, "", "ERROR GAL");
             }
         }
-
-
-
-
 
     }
 }
