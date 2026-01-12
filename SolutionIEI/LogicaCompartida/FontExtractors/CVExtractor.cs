@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Json;using System.IO;
+using System.Net.Http.Json;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -13,24 +14,29 @@ using static System.Net.WebRequestMethods;
 
 namespace UI.Parsers
 {
-
-
+    // Clase encargada de interpretar y transformar el JSON específico de la Comunidad Valenciana.
+    // Realiza la extracción de datos, la limpieza (sanitización), validación y carga en la base de datos.
     public class CVExtractor : Parser<JSONData>
     {
         private List<JSONData> objetosParseados = new List<JSONData>();
 
-      
-
-        HttpClient _http = new HttpClient { 
+        // Cliente HTTP para conectar con la API Wrapper de la Comunidad Valenciana (Puerto 8082)
+        HttpClient _http = new HttpClient
+        {
             BaseAddress = new Uri("http://localhost:8082"),
             Timeout = Timeout.InfiniteTimeSpan
         };
 
+        // Lista blanca de territorios válidos para filtrar datos erróneos de origen.
+        // Se utiliza para validación cruzada entre el código postal y la provincia declarada.
         private static readonly HashSet<string> territoriosValidos = new(StringComparer.OrdinalIgnoreCase)
         {
             "Castellón", "Valencia", "Alicante"
         };
 
+        // Diccionario para inferir códigos postales cuando faltan, basándonos en la provincia.
+        // Es esencial para las estaciones móviles/agrícolas que no tienen una dirección física fija
+        // y por tanto carecen de CP en el JSON original.
         private static readonly Dictionary<string, string> prefijosCpPorTerritorio = new(StringComparer.OrdinalIgnoreCase)
         {
             { "Castellón", "12" },
@@ -38,14 +44,19 @@ namespace UI.Parsers
             { "Alicante", "03" },
         };
 
+        // Método principal de deserialización del archivo fuente local (si se usara archivo directo).
         protected override List<JSONData> ExecuteParse()
         {
             if (file == null) return new List<JSONData>();
             string contenido = new StreamReader(file, Encoding.UTF8).ReadToEnd();
+            // CaseInsensitive es vital porque las claves del JSON a veces cambian mayúsculas/minúsculas 
+            // en los datos de origen (ej: "Municipio" vs "MUNICIPIO").
             var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             return JsonSerializer.Deserialize<List<JSONData>>(contenido, opciones) ?? new List<JSONData>();
         }
 
+        // Método principal de Transformación (La 'T' de ETL).
+        // Convierte objetos JSON crudos en entidades de negocio 'Estacion' validadas.
         public (List<ResultObject>, int, String, String) FromParsedToUsefull(List<JSONData> datosParseados)
         {
             Debug.WriteLine($"[CVExtractor] Procesando {datosParseados.Count} registros...");
@@ -54,6 +65,7 @@ namespace UI.Parsers
             using var contexto = new AppDbContext();
             var debugResultados = new List<ResultadoDebug>();
 
+            // Sets para detección de duplicados DENTRO del mismo fichero antes de ir a BD
             var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
@@ -74,7 +86,10 @@ namespace UI.Parsers
 
                 resultadoDebug.Municipio = dato.MUNICIPIO;
 
-                // Normalización de provincias (se hace siempre, pero solo se registra si se añade)
+                // 1. CORRECCIÓN AUTOMÁTICA DE DATOS (SANITIZACIÓN)
+                // Normalización lingüística.
+                // Unificamos nombres en valenciano/catalán a su versión en castellano para mantener
+                // consistencia en las búsquedas (ej: València -> Valencia).
                 bool provinciaReparada = false;
                 string provinciaOriginal = dato.PROVINCIA?.Trim() ?? "";
 
@@ -99,33 +114,40 @@ namespace UI.Parsers
 
                 resultadoDebug.CodigoPostal = dato.C_POSTAL;
 
+                // 2. VALIDACIÓN Y PERSISTENCIA
                 try
                 {
+                    // Validaciones de integridad obligatorias
                     if (string.IsNullOrWhiteSpace(dato.PROVINCIA))
                     {
                         resultadoDebug.Motivos.Add("Provincia vacía.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Regla de negocio: Estaciones fijas deben tener municipio.
                     if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add("Municipio vacío.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Regla de negocio: Estaciones móviles/agrícolas NO deben tener municipio (son itinerantes).
                     if (!string.IsNullOrWhiteSpace(dato.MUNICIPIO) && !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add("El municipio de una estación no fija ha de estar vacío.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Validación de formato de Código Postal (5 dígitos) para fijas.
                     if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$") && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add($"Código postal inválido ('{dato.C_POSTAL}'), al no tener 5 caracteres.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Regla: Estaciones no fijas no deben tener CP específico.
                     if (!string.IsNullOrWhiteSpace(dato.C_POSTAL) && !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add($"El código postal de una estación no fija ha de estar vacío.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Validación cruzada: El CP debe coincidir con la provincia declarada.
                     if (!string.IsNullOrWhiteSpace(dato.PROVINCIA) && !territoriosValidos.Contains(dato.PROVINCIA))
                     {
                         resultadoDebug.Motivos.Add("Provincia no válida.");
@@ -136,6 +158,7 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add($"Código postal {dato.C_POSTAL} no coincide con provincia '{dato.PROVINCIA}'.");
                         resultadoDebug.Añadida = false;
                     }
+                    // Validación de prefijo de CP (debe ser 12, 46 o 03).
                     if (dato.C_POSTAL.Length >= 2)
                     {
                         var cpPrefijo = dato.C_POSTAL.Substring(0, 2);
@@ -149,6 +172,8 @@ namespace UI.Parsers
 
                     double lat = (double)dato.Latitud;
                     double lon = (double)dato.Longitud;
+
+                    // Determinación del tipo (Fija, Móvil, Otros)
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
                     if (dato.TIPO_ESTACION != null)
                     {
@@ -157,6 +182,7 @@ namespace UI.Parsers
                                  !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase)) tipo = TipoEstacion.Otros;
                     }
 
+                    // Validación de coordenadas (si es fija, debe tenerlas y ser válidas)
                     if (lat == 0 && lon == 0 && tipo == TipoEstacion.Estacion_fija)
                     {
                         resultadoDebug.Añadida = false;
@@ -168,7 +194,7 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Nombre para debug
+                    // Generación de nombre descriptivo para debug
                     if (tipo == TipoEstacion.Estacion_fija)
                     {
                         resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
@@ -189,7 +215,7 @@ namespace UI.Parsers
                     string nombreNormalizado = resultadoDebug.Nombre.Trim();
                     string coordsKey = $"{lat:F6},{lon:F6}";
 
-                    // Duplicados internos
+                    // Detección de Duplicados Internos (mismo fichero)
                     if (!nombresEnEsteFichero.Add(nombreNormalizado))
                     {
                         resultadoDebug.Motivos.Add($"Nombre repetido dentro del archivo CV ({nombreNormalizado}).");
@@ -201,7 +227,7 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Duplicados en BD
+                    // Detección de Duplicados en Base de Datos
                     if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                     {
                         resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
@@ -213,6 +239,7 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
+                    // Si se ha marcado como no válida por alguno de los motivos anteriores, saltamos.
                     if (!resultadoDebug.Añadida)
                     {
                         debugResultados.Add(resultadoDebug);
@@ -227,12 +254,14 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add("Provincia incorrecta: " + provinciaOriginal + ".");
                     }
 
+                    // Gestión de relaciones DB: Obtener o crear entidades Provincia y Localidad
                     var provincia = ObtenerOCrearProvincia(contexto, dato.PROVINCIA);
                     var localidad = ObtenerOCrearLocalidad(contexto, dato.MUNICIPIO, provincia);
                     resultadoDebug.Provincia = provincia.nombre;
 
                     var horario = dato.HORARIOS ?? "Sin horario";
 
+                    // Creación final de la entidad Estacion
                     var estacion = new Estacion
                     {
                         nombre = resultadoDebug.Nombre,
@@ -262,6 +291,7 @@ namespace UI.Parsers
                 }
             }
 
+            // Inserción en bloque (Bulk Insert) para mejorar el rendimiento
             if (estacionesValidas.Any())
             {
                 contexto.Estaciones.AddRange(estacionesValidas);
@@ -270,6 +300,8 @@ namespace UI.Parsers
 
             MostrarResumen(debugResultados);
             int agregadas = resultados.Count;
+
+            // Generación de logs de texto para la API
             string estacionesReparadas = string.Join("\n",
                 debugResultados.Where(r => r.Reparada && r.Añadida)
                     .Select(r => $"{{{r.Fuente}, {r.Nombre}, {r.Municipio}, [{string.Join("; ", r.Motivos)}], [{string.Join("; ", r.Reparaciones)}]}}"));
@@ -283,8 +315,8 @@ namespace UI.Parsers
 
         private bool EstacionYaExiste(AppDbContext ctx, string numeroEstacion)
         {
-            
-            
+
+
             return ctx.Estaciones.Any(e => e.nombre.Contains(numeroEstacion));
         }
         private bool EsCorreo(string texto)
@@ -293,12 +325,13 @@ namespace UI.Parsers
             return Regex.IsMatch(texto, @"^[^\s@]+@[^\s@]+\.[^\s@]+$");
         }
 
+        // Comprueba si ya existe una estación en las mismas coordenadas con una pequeña tolerancia
         private bool UbicacionRepetida(AppDbContext ctx, double lat, double lon)
         {
-         
+
 
             const double tolerancia = 0.0001; // ~11 metros
-            return ctx.Estaciones.Any(e =>   Math.Abs(e.latitud - lat) < tolerancia && Math.Abs(e.longitud - lon) < tolerancia );
+            return ctx.Estaciones.Any(e => Math.Abs(e.latitud - lat) < tolerancia && Math.Abs(e.longitud - lon) < tolerancia);
         }
 
         private bool EsCoordenadaEnEspañaPeninsular(double lat, double lon)
@@ -358,13 +391,13 @@ namespace UI.Parsers
             return codigoPostal.StartsWith(prefijo);
         }
 
-       
-
+        // Orquesta la carga de datos de la Comunidad Valenciana llamando a la API Wrapper y procesando el JSON.
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
             Debug.WriteLine("[CVExtractor] === INICIO CARGA COMUNIDAD VALENCIANA ===");
             try
             {
+                // Llamada a la API Wrapper externa
                 var response = await _http.GetAsync("/cv/json");
                 Debug.WriteLine($"[CVExtractor] Respuesta HTTP: {response.StatusCode}");
                 if (!response.IsSuccessStatusCode)
@@ -372,15 +405,16 @@ namespace UI.Parsers
                     return (new List<ResultObject>(), 0, "", "ERROR CV HTTP");
                 }
 
-               
 
+                // Lectura del contenido JSON
                 var JsonCV = await response.Content.ReadAsStringAsync();
                 Debug.WriteLine($"[CVExtractor] Recibido JSON de {JsonCV.Length} caracteres");
 
+                // Invocación a LoadFromString para deserializar y enriquecer datos
                 this.LoadFromString(JsonCV);
 
-                
 
+                // Procesamiento ETL de los objetos ya enriquecidos
                 Debug.WriteLine($"[CVExtractor] objetosParseados devolvió {objetosParseados.Count} objetos");
 
                 var resultados = this.FromParsedToUsefull(objetosParseados);
@@ -394,6 +428,7 @@ namespace UI.Parsers
             }
         }
 
+        // Deserializa una cadena JSON y aplica el enriquecimiento de coordenadas mediante Selenium.
         public override void LoadFromString(string json)
         {
 
@@ -413,7 +448,7 @@ namespace UI.Parsers
 
                 Debug.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
 
-                //Obtención coordenadas de las estaciones mediante Selenium
+                // Obtención coordenadas de las estaciones mediante Selenium (Scraping de Google Maps)
                 ApplySelenium(listaObjetos);
 
                 // Guardamos en variable de instancia para usarla en otros metodos
@@ -429,12 +464,14 @@ namespace UI.Parsers
             }
         }
 
+        // Recorre la lista de datos y, para las estaciones fijas, utiliza Selenium para obtener coordenadas geográficas.
         private static void ApplySelenium(List<JSONData> elementos)
         {
             Debug.WriteLine($"[CVExtractor] Aplicando Selenium a {elementos.Count} elementos");
 
             var selenium = CoordenadasSelenium.Instance;
 
+            // Si Selenium no está disponible (ej: falta driver), ponemos todo a 0 para no romper el flujo
             if (!selenium.Disponible)
             {
                 Debug.WriteLine("[SELENIUM] No disponible → todas las coordenadas a (0,0)");
@@ -448,6 +485,7 @@ namespace UI.Parsers
 
             foreach (var elemento in elementos)
             {
+                // Solo buscamos coordenadas para Estaciones Fijas (las móviles no tienen ubicación estática)
                 bool esEstacionFija = elemento.TIPO_ESTACION != null &&
                                       elemento.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase);
 
@@ -457,7 +495,7 @@ namespace UI.Parsers
 
                     try
                     {
-                      
+
                         var coords = selenium.ObtenerCoordenadas(elemento.DIRECCION ?? "", elemento.MUNICIPIO ?? "");
                         elemento.Latitud = coords.Lat;
                         elemento.Longitud = coords.Lng;
