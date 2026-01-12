@@ -10,24 +10,30 @@ using System.Threading;
 
 namespace UI.Helpers
 {
+    // Clase Helper que utiliza Selenium WebDriver para obtener coordenadas geográficas (Latitud/Longitud)
+    // a partir de una dirección postal, haciendo scraping de una web de terceros.
     internal class CoordenadasSelenium : IDisposable
     {
+        // Singleton thread-safe para reutilizar la instancia del navegador
         private static CoordenadasSelenium instance;
         private static readonly object _lock = new();
         public bool Disponible { get; private set; }
         private IWebDriver driver;
         private Random rnd = new Random();
 
+        // Constructor privado: Inicializa el driver de Chrome con las opciones necesarias
         public CoordenadasSelenium()
         {
             try
             {
                 var options = new ChromeOptions();
+                // Opciones para entorno servidor/headless (sin interfaz gráfica) y compatibilidad Docker
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--disable-dev-shm-usage");
                 options.AddArgument("--window-size=1920,1080");
                 options.AddArgument("--ignore-certificate-errors");
 
+                // Configuración específica para entornos CI/CD o contenedores donde las rutas son fijas
                 string chromeBinEnv = Environment.GetEnvironmentVariable("CHROME_BIN");
                 string driverPathEnv = Environment.GetEnvironmentVariable("CHROMEDRIVER_PATH");
 
@@ -45,10 +51,13 @@ namespace UI.Helpers
                     service = ChromeDriverService.CreateDefaultService();
                 }
 
+                // Ocultar ventana de consola del driver para limpieza visual
                 service.HideCommandPromptWindow = true;
                 service.SuppressInitialDiagnosticInformation = true;
 
                 driver = new ChromeDriver(service, options);
+
+                // Timeout implícito para búsqueda de elementos
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
                 Disponible = true;
             }
@@ -59,6 +68,7 @@ namespace UI.Helpers
             }
         }
 
+        // Acceso a la instancia única (Patrón Singleton)
         public static CoordenadasSelenium Instance
         {
             get
@@ -71,6 +81,7 @@ namespace UI.Helpers
             }
         }
 
+        // Método principal: Obtiene Lat/Lon scrapeando 'coordenadas-gps.com'
         public (double Lat, double Lng) ObtenerCoordenadas(string direccion, string municipio)
         {
             if (!Disponible)
@@ -80,20 +91,18 @@ namespace UI.Helpers
 
             try
             {
-               
-
-
                 // Construir dirección completa
                 string direccionCompleta = $"{direccion}, {municipio}, España";
                 Debug.WriteLine($"[SELENIUM] Dirección para búsqueda: '{direccionCompleta}'");
 
-                // Navegar a la página
+                // 1. Navegar a la página objetivo
                 driver.Navigate().GoToUrl("https://www.coordenadas-gps.com");
 
                 // Espera para carga inicial
                 Thread.Sleep(rnd.Next(2000, 3000));
 
-                // INTENTAR MANEJAR COOKIES - ESTO ES LO CRÍTICO
+                // 2. GESTIÓN DE CONSENTIMIENTO DE COOKIES (CRÍTICO)
+                // Muchos sitios bloquean la interacción hasta aceptar cookies.
                 bool cookiesManejadas = false;
                 for (int intento = 0; intento < 3; intento++)
                 {
@@ -115,6 +124,7 @@ namespace UI.Helpers
                                 if (btn.Displayed && btn.Enabled)
                                 {
                                     Debug.WriteLine($"[SELENIUM] Encontrado botón cookies: '{btn.Text}'");
+                                    // Click mediante JS para saltar superposiciones visuales
                                     IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
                                     js.ExecuteScript("arguments[0].click();", btn);
                                     Thread.Sleep(1000);
@@ -141,7 +151,7 @@ namespace UI.Helpers
                 // Esperar un poco más después de manejar cookies
                 Thread.Sleep(1000);
 
-                // Obtener elementos
+                // 3. INTERACCIÓN CON EL FORMULARIO
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
                 // Encontrar campo de dirección
@@ -171,7 +181,7 @@ namespace UI.Helpers
                 jsExecutor.ExecuteScript("arguments[0].value = arguments[1];", addressInput, direccionCompleta);
                 Thread.Sleep(500);
 
-                // Disparar evento change para que la página se entere
+                // Disparar evento 'change' para que scripts de la página detecten el cambio
                 jsExecutor.ExecuteScript("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", addressInput);
 
                 // Buscar botón de búsqueda
@@ -201,13 +211,14 @@ namespace UI.Helpers
                     return (0.0, 0.0);
                 }
 
-                // Hacer clic con JavaScript
+                // Click en botón de búsqueda
                 jsExecutor.ExecuteScript("arguments[0].click();", submitButton);
 
-                // Esperar resultados
+                // Esperar a que la página procese y actualice los campos de lat/lon
                 Thread.Sleep(rnd.Next(3000, 4000));
 
-                // Obtener coordenadas
+                // 4. EXTRACCIÓN DE RESULTADOS
+                // Los resultados suelen aparecer en inputs con IDs 'latitude' y 'longitude'
                 var latInput = driver.FindElement(By.Id("latitude"));
                 var lngInput = driver.FindElement(By.Id("longitude"));
 
@@ -216,6 +227,7 @@ namespace UI.Helpers
 
                 Debug.WriteLine($"[SELENIUM] Coordenadas obtenidas: Lat={latStr}, Lng={lngStr}");
 
+                // Parseo de strings a double (Culture Invariant para punto decimal)
                 if (double.TryParse(latStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
                     double.TryParse(lngStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double lng))
                 {
@@ -233,8 +245,8 @@ namespace UI.Helpers
             }
         }
 
-       
 
+        // Limpieza de recursos (cerrar navegador)
         public void Dispose()
         {
             try
