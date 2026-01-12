@@ -9,6 +9,8 @@ using UI.Formularios;
 
 namespace UI.Logica
 {
+    // Clase que encapsula las consultas a la base de datos (Data Access Layer).
+    // Permite filtrar estaciones y obtener listas maestras de provincias/localidades.
     public class LogicaBusqueda
     {
         private readonly Persistencia.Persistencia _persistencia;

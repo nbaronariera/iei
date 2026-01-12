@@ -11,6 +11,8 @@ using UI.Wrappers;
 
 namespace UI.Logica
 {
+    // Clase que actúa como fachada (Facade) para el proceso de ETL.
+    // Centraliza la llamadas a los distintos extractores y gestiona la limpieza de la base de datos.
     public class LogicaCarga
     {
         private readonly Persistencia.Persistencia _persistencia;
@@ -20,6 +22,8 @@ namespace UI.Logica
             _persistencia = new Persistencia.Persistencia();
         }
 
+        // Orquesta la carga de Galicia.
+        // Utiliza GALExtractor para procesar los datos que provienen originalmente de CSV.
         public async Task<(List<ResultObject>, int, string, string)> ObtenerGal()
         {
             Debug.WriteLine("[LOGICA CARGA] Creando GALExtractor");
@@ -27,6 +31,8 @@ namespace UI.Logica
             return await galExtractor.LoadData(); // ← Ahora LoadData() devuelve tupla
         }
 
+        // Orquesta la carga de Cataluña.
+        // Utiliza CATExtractor para procesar los datos específicos de Catalunya.
         public async Task<(List<ResultObject>, int, string, string)> ObtenerCat()
         {
             Debug.WriteLine("[LOGICA CARGA] Creando CATExtractor");
@@ -34,6 +40,10 @@ namespace UI.Logica
             return await catExtractor.LoadData(); // ← Tupla
         }
 
+        // Orquesta la carga de la Comunidad Valenciana.
+        // 1. Instancia el extractor específico.
+        // 2. Llama al método LoadData que se conecta al Wrapper y procesa el JSON.
+        // 3. Devuelve las estadísticas.
         public async Task<(List<ResultObject>, int, string, string)> ObtenerCV()
         {
             Debug.WriteLine("[LOGICA] === INICIANDO CARGA CV ===");
@@ -43,6 +53,8 @@ namespace UI.Logica
             return resultado;
         }
 
+        // Método para borrar y recrear la base de datos desde cero.
+        // Útil para realizar una carga limpia y evitar duplicados o datos corruptos antiguos.
         public bool Clean()
         {
             try
