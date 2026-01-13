@@ -66,7 +66,7 @@ namespace UI.Parsers
             var debugResultados = new List<ResultadoDebug>();
 
             // Sets para detección de duplicados DENTRO del mismo fichero antes de ir a BD
-            var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var numerosEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
             foreach (var dato in datosParseados)
@@ -127,6 +127,12 @@ namespace UI.Parsers
                     if (string.IsNullOrWhiteSpace(dato.MUNICIPIO) && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         resultadoDebug.Motivos.Add("Municipio vacío.");
+                        resultadoDebug.Añadida = false;
+                    }
+                    // Regla de negocio: La estación ha de tener un número de estación.
+                    if (string.IsNullOrWhiteSpace(dato.Nº_ESTACION))
+                    {
+                        resultadoDebug.Motivos.Add("Número de estación vacío.");
                         resultadoDebug.Añadida = false;
                     }
                     // Regla de negocio: Estaciones móviles/agrícolas NO deben tener municipio (son itinerantes).
@@ -197,28 +203,28 @@ namespace UI.Parsers
                     // Generación de nombre descriptivo para debug
                     if (tipo == TipoEstacion.Estacion_fija)
                     {
-                        resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION;
+                        resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION.Trim();
                     }
                     else if (tipo == TipoEstacion.Estacion_movil)
                     {
-                        resultadoDebug.Nombre = "Móvil " + dato.Nº_ESTACION;
+                        resultadoDebug.Nombre = "Móvil " + dato.Nº_ESTACION.Trim();
                     }
                     else if (dato.TIPO_ESTACION.Contains("Agrícola", StringComparison.OrdinalIgnoreCase))
                     {
-                        resultadoDebug.Nombre = "Agrícola " + dato.Nº_ESTACION;
+                        resultadoDebug.Nombre = "Agrícola " + dato.Nº_ESTACION.Trim();
                     }
                     else
                     {
-                        resultadoDebug.Nombre = "Otro " + dato.Nº_ESTACION;
+                        resultadoDebug.Nombre = "Otro " + dato.Nº_ESTACION.Trim();
                     }
 
-                    string nombreNormalizado = resultadoDebug.Nombre.Trim();
+                    string numeroEstacion = dato.Nº_ESTACION.Trim();
                     string coordsKey = $"{lat:F6},{lon:F6}";
 
                     // Detección de Duplicados Internos (mismo fichero)
-                    if (!nombresEnEsteFichero.Add(nombreNormalizado))
+                    if (!String.IsNullOrEmpty(numeroEstacion) && !numerosEnEsteFichero.Add(numeroEstacion))
                     {
-                        resultadoDebug.Motivos.Add($"Nombre repetido dentro del archivo CV ({nombreNormalizado}).");
+                        resultadoDebug.Motivos.Add($"Número de estación repetido dentro del archivo CV ({numeroEstacion}).");
                         resultadoDebug.Añadida = false;
                     }
                     if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
@@ -228,9 +234,9 @@ namespace UI.Parsers
                     }
 
                     // Detección de Duplicados en Base de Datos
-                    if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
+                    if (!String.IsNullOrEmpty(numeroEstacion) && contexto.Estaciones.Any(e => e.nombre.ToLower() == numeroEstacion.ToLower()))
                     {
-                        resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
+                        resultadoDebug.Motivos.Add($"Número de estación repetido en la base de datos ({numeroEstacion}).");
                         resultadoDebug.Añadida = false;
                     }
                     if (lat != 0 && lon != 0 && UbicacionRepetida(contexto, lat, lon))
@@ -391,6 +397,26 @@ namespace UI.Parsers
             return codigoPostal.StartsWith(prefijo);
         }
 
+        //Obtenemos el número de la estación a partir del nombre de una estación de la base de datos
+        private string ExtraerNumeroEstacion(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return string.Empty;
+
+            // Quitamos espacios al inicio y final
+            nombre = nombre.Trim();
+
+            // Dividimos por espacios y tomamos la última parte
+            var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length == 0) return string.Empty;
+
+            string ultimaParte = partes[^1]; // última posición
+
+            // Limpiamos: quitamos cualquier carácter no numérico (por si viene con letras o símbolos)
+            string numeroLimpio = Regex.Replace(ultimaParte, @"[^\d]", "");
+
+            return numeroLimpio;
+        }
+
         // Orquesta la carga de datos de la Comunidad Valenciana llamando a la API Wrapper y procesando el JSON.
         public async Task<(List<ResultObject>, int, string, string)> LoadData()
         {
@@ -447,6 +473,22 @@ namespace UI.Parsers
                 }
 
                 Debug.WriteLine($"[CVExtractor] Parseados {listaObjetos.Count} objetos del JSON original");
+
+                // ← NORMALIZACIÓN AQUÍ: limpiamos Nº_ESTACION en todos los objetos
+                foreach (var dato in listaObjetos)
+                {
+                    if (!string.IsNullOrWhiteSpace(dato.Nº_ESTACION))
+                    {
+                        // Quitamos espacios del número de estación
+                        dato.Nº_ESTACION = Regex.Replace(dato.Nº_ESTACION.Trim(), @"[^\d]", "");
+
+                        
+                    }
+                    else
+                    {
+                        dato.Nº_ESTACION = string.Empty; 
+                    }
+                }
 
                 // Obtención coordenadas de las estaciones mediante Selenium (Scraping de Google Maps)
                 ApplySelenium(listaObjetos);

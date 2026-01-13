@@ -229,7 +229,7 @@ namespace UI.Parsers
                 }
 
                 // Duplicados en Base de Datos (existentes previamente)
-                if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
+                if (!string.IsNullOrWhiteSpace(nombreNormalizado) && contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                 {
                     resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
                     resultadoDebug.Añadida = false;

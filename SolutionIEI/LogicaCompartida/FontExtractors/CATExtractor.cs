@@ -62,7 +62,7 @@ namespace UI.Parsers
             var debugResultados = new List<ResultadoDebug>();
 
             // Sets para detectar duplicados DENTRO del propio archivo antes de consultar a la BD
-            var nombresEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var denominacisEnEsteFichero = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var coordenadasEnEsteFichero = new HashSet<string>();
 
             Console.WriteLine($"[CAT] Iniciando procesamiento de {datosParseados.Count} registros CAT.");
@@ -178,13 +178,14 @@ namespace UI.Parsers
                         lon = ParsearCoordenada(dato.long_coord);
                     }
 
-                    string nombreNormalizado = dato.denominaci?.Trim() ?? "";
+                    string nombreNormalizado = "Estación de " + dato.denominaci?.Trim() ?? "";
                     string coordsKey = $"{lat:F6},{lon:F6}";
+                    string denominaci = dato.denominaci?.Trim();
 
                     // --- DETECCIÓN DE DUPLICADOS (INTRA-ARCHIVO) ---
-                    if (!string.IsNullOrWhiteSpace(nombreNormalizado) && !nombresEnEsteFichero.Add(nombreNormalizado))
+                    if (!string.IsNullOrWhiteSpace(denominaci) && !denominacisEnEsteFichero.Add(denominaci))
                     {
-                        resultadoDebug.Motivos.Add($"Nombre repetido dentro del archivo CAT ({nombreNormalizado}).");
+                        resultadoDebug.Motivos.Add($"denominaci repetido dentro del archivo CAT ({denominaci}).");
                         resultadoDebug.Añadida = false;
                     }
                     if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
@@ -195,7 +196,7 @@ namespace UI.Parsers
 
                     // --- DETECCIÓN DE DUPLICADOS (BASE DE DATOS) ---
                     // Comprobamos si el nombre ya existe
-                    if (contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
+                    if (!String.IsNullOrEmpty(nombreNormalizado) && contexto.Estaciones.Any(e => e.nombre.ToLower() == nombreNormalizado.ToLower()))
                     {
                         resultadoDebug.Motivos.Add($"Nombre ya existe en la base de datos ({nombreNormalizado}).");
                         resultadoDebug.Añadida = false;
@@ -233,7 +234,7 @@ namespace UI.Parsers
 
                     var estacion = new Estacion
                     {
-                        nombre = "Estación de " + dato.denominaci,
+                        nombre = "Estación de " + dato.denominaci?.Trim(),
                         tipo = TipoEstacion.Estacion_fija, // En CAT asumimos fijas por defecto según PDF
                         direccion = dato.adre_a ?? "",
                         codigoPostal = dato.cp,
