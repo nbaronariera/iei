@@ -233,7 +233,7 @@ namespace UI.Parsers
 
                     var estacion = new Estacion
                     {
-                        nombre = dato.denominaci,
+                        nombre = "Estación de " + dato.denominaci,
                         tipo = TipoEstacion.Estacion_fija, // En CAT asumimos fijas por defecto según PDF
                         direccion = dato.adre_a ?? "",
                         codigoPostal = dato.cp,

@@ -84,7 +84,7 @@ namespace UI
         {
             rtbResumen.Clear();
             StringBuilder log = new StringBuilder();
-            log.AppendLine("--- INICIO DE CARGA ---\n");
+            
 
             this.Enabled = false;
 
@@ -100,7 +100,7 @@ namespace UI
                     totalCargadas += result.cargados;
                     if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
                     if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                    log.AppendLine("--- CARGA GALICIA COMPLETADA ---");
+                    
                 }
 
                 if (chkCataluna.Checked)
@@ -109,7 +109,7 @@ namespace UI
                     totalCargadas += result.cargados;
                     if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
                     if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                    log.AppendLine("--- CARGA CATALUÑA COMPLETADA ---");
+                   
                 }
 
                 if (chkValencia.Checked)
@@ -118,7 +118,7 @@ namespace UI
                     totalCargadas += result.cargados;
                     if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
                     if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                    log.AppendLine("--- CARGA COMUNIDAD VALENCIANA COMPLETADA ---");
+                   
                 }
 
                 log.AppendLine($"\nNúmero de registros cargados correctamente: {totalCargadas}");

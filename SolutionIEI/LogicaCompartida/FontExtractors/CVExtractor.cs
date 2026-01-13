@@ -270,7 +270,7 @@ namespace UI.Parsers
                         codigoPostal = dato.C_POSTAL,
                         latitud = lat,
                         longitud = lon,
-                        descripcion = dato.TIPO_ESTACION ?? "",
+                        descripcion = "",
                         horario = horario,
                         contacto = $"Correo electrónico: {dato.CORREOS}",
                         URL = "https://www.sitval.com/",
