@@ -234,10 +234,23 @@ namespace UI.Parsers
                     }
 
                     // Detección de Duplicados en Base de Datos
-                    if (!String.IsNullOrEmpty(numeroEstacion) && contexto.Estaciones.Any(e => e.nombre.ToLower() == numeroEstacion.ToLower()))
+                    if (!string.IsNullOrEmpty(numeroEstacion))
                     {
-                        resultadoDebug.Motivos.Add($"Número de estación repetido en la base de datos ({numeroEstacion}).");
-                        resultadoDebug.Añadida = false;
+                        //Tramos todos los nombres de la BD
+                        var nombresExistentes = contexto.Estaciones
+                        .Select(e => e.nombre)
+                        .ToList();  // ← Aquí se ejecuta la consulta SQL y traemos a memoria
+
+                        bool duplicadoEnBD = nombresExistentes.Any(nombreBD =>
+                            ExtraerNumeroEstacion(nombreBD) == numeroEstacion);
+
+                        //Comprobamos si se duplica el numero de la estación en alguna de ellas
+                        if (duplicadoEnBD)
+                        {
+                            resultadoDebug.Motivos.Add($"Número de estación ya existe en la base de datos ({numeroEstacion}).");
+                            resultadoDebug.Añadida = false;
+                        }
+                       
                     }
                     if (lat != 0 && lon != 0 && UbicacionRepetida(contexto, lat, lon))
                     {
