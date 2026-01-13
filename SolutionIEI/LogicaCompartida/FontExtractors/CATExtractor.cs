@@ -72,7 +72,7 @@ namespace UI.Parsers
                 // Objeto auxiliar para registrar el estado de validación de cada registro
                 var resultadoDebug = new ResultadoDebug
                 {
-                    Nombre = dato.denominaci?.Trim() ?? "(sin nombre)",
+                    Nombre = "Estación de " + dato.denominaci?.Trim() ?? "(sin nombre)",
                     Provincia = dato.serveis_territorials?.Trim() ?? "",
                     Municipio = dato.municipi?.Trim() ?? "",
                     CodigoPostal = dato.cp?.Trim() ?? "",
@@ -178,6 +178,9 @@ namespace UI.Parsers
                         lon = ParsearCoordenada(dato.long_coord);
                     }
 
+                    resultadoDebug.Latitud = lat;
+                    resultadoDebug.Longitud = lon;
+
                     string nombreNormalizado = "Estación de " + dato.denominaci?.Trim() ?? "";
                     string coordsKey = $"{lat:F6},{lon:F6}";
                     string denominaci = dato.denominaci?.Trim();
@@ -185,12 +188,12 @@ namespace UI.Parsers
                     // --- DETECCIÓN DE DUPLICADOS (INTRA-ARCHIVO) ---
                     if (!string.IsNullOrWhiteSpace(denominaci) && !denominacisEnEsteFichero.Add(denominaci))
                     {
-                        resultadoDebug.Motivos.Add($"denominaci repetido dentro del archivo CAT ({denominaci}).");
+                        resultadoDebug.Motivos.Add($"denominaci repetida con estación válida en el mismo archivo CAT ({denominaci}).");
                         resultadoDebug.Añadida = false;
                     }
                     if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
                     {
-                        resultadoDebug.Motivos.Add($"Coordenadas repetidas dentro del archivo CAT ({lat:F6}, {lon:F6}).");
+                        resultadoDebug.Motivos.Add($"Ubicación repetida con estación válida en el mismo archivo CAT ({lat:F6}, {lon:F6}).");
                         resultadoDebug.Añadida = false;
                     }
 
@@ -216,9 +219,31 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Si hay algún motivo de rechazo, no procesamos más
+                    /* 
+                     Si hay algún motivo de rechazo, saltamos iteración, no sin antes
+                     eliminar último denominaci y coordenadas (si no son nulos o lat: 0 lon: 0 
+                     para indicar que no se encontró respectivamente) para que no tenga en cuenta duplicados de estaciones descartadas
+                    */
                     if (!resultadoDebug.Añadida)
                     {
+                      
+                        if (!String.IsNullOrEmpty(denominaci))
+                        {
+                            if (denominacisEnEsteFichero.Count > 0) {
+
+                                
+                                denominacisEnEsteFichero.Remove(denominaci);
+                            }
+                        }
+                        if (lat != 0 && lon != 0)
+                        {
+                            if (coordenadasEnEsteFichero.Count > 0)
+                            {
+
+
+                                coordenadasEnEsteFichero.Remove(coordsKey);
+                            }
+                        }
                         debugResultados.Add(resultadoDebug);
                         continue;
                     }
@@ -262,6 +287,55 @@ namespace UI.Parsers
                     Console.WriteLine($"[CAT] Error procesando estación {dato.denominaci}: {ex.Message}");
                     resultadoDebug.Motivos.Add($"Excepción: {ex.Message}");
                     debugResultados.Add(resultadoDebug);
+                }
+            }
+
+            // Conjuntos con SOLO las válidas que se van a insertar
+            var denominacisValidas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var coordenadasValidas = new HashSet<string>();
+
+            // Recorremos SOLO las que van a insertarse para obtener el conjunto de denominacis y coordenadas validos
+            foreach (var debug in debugResultados.Where(r => r.Añadida || r.Reparada))
+            {
+                // Buscamos el dato original comparando el nombre sin prefijo
+                var datoValido = datosParseados.FirstOrDefault(d =>
+                    d.denominaci?.Trim()?.ToLower() == debug.Nombre.Replace("Estación de ", "").Trim().ToLower());
+
+                if (datoValido == null) continue;
+
+                string denomNorm = datoValido.denominaci?.Trim()?.ToLower() ?? "";
+                string coordsVal = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                if (!string.IsNullOrEmpty(denomNorm))
+                    denominacisValidas.Add(denomNorm);
+
+                if (debug.Latitud != 0 || debug.Longitud != 0)
+                    coordenadasValidas.Add(coordsVal);
+            }
+
+            // Ahora recorremos SOLO las inválidas y añadimos motivos por datos duplicados si coinciden y no estaban
+            foreach (var debug in debugResultados.Where(r => !r.Añadida))
+            {
+                var datoInv = datosParseados.FirstOrDefault(d =>
+                d.denominaci?.Trim()?.ToLower() == debug.Nombre.Replace("Estación de ", "").Trim().ToLower());
+
+                if (datoInv == null) continue;
+
+                string denomNorm = datoInv.denominaci?.Trim()?.ToLower() ?? "";
+                string coordsKey = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                // Evitamos repetir el motivo
+                bool yaTieneDenom = debug.Motivos.Any(m => m.Contains("denominaci repetido"));
+                bool yaTieneCoords = debug.Motivos.Any(m => m.Contains("Ubicación repetida"));
+
+                if (!string.IsNullOrEmpty(denomNorm) && denominacisValidas.Contains(denomNorm) && !yaTieneDenom)
+                {
+                    debug.Motivos.Add($"denominaci repetida con estación válida en el mismo archivo CAT ({datoInv.denominaci})");
+                }
+
+                if ((debug.Latitud != 0 || debug.Longitud != 0) && coordenadasValidas.Contains(coordsKey) && !yaTieneCoords)
+                {
+                    debug.Motivos.Add($"Ubicación repetida con estación válida en el mismo archivo CAT  ({coordsKey})");
                 }
             }
 

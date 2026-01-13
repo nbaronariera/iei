@@ -13,7 +13,7 @@ namespace UI.Wrappers
         public static string Ejecutar()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string csvPath = Path.Combine(baseDirectory, "Fuentes", "Estacions_ITVEntrega.csv");
+            string csvPath = Path.Combine(baseDirectory, "Fuentes", "Estacions_ITVEntrega2.csv");
             if (!File.Exists(csvPath))
                 throw new FileNotFoundException($"No se encontró el CSV: {csvPath}");
 

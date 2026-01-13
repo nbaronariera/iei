@@ -24,6 +24,10 @@ namespace UI.Parsers
         public List<string> Motivos { get; set; } = new();
         public bool Reparada { get; set; }
         public List<string> Reparaciones { get; set; } = new();
+
+        public double Latitud { get; set; }
+
+        public double Longitud { get; set; }
     }
 
     // Clase encargada de la extracción, transformación y carga (ETL) de los datos de Galicia.
@@ -204,6 +208,10 @@ namespace UI.Parsers
 
                 double lat = ExtraerLatitud(dato.Coordenadas);
                 double lon = ExtraerLongitud(dato.Coordenadas);
+
+                resultadoDebug.Latitud = lat;
+                resultadoDebug.Longitud = lon;
+
                 string coordsKey = $"{lat:F6},{lon:F6}";
 
                 if (!EsCoordenadaEnEspañaPeninsular(lat, lon))
@@ -224,7 +232,7 @@ namespace UI.Parsers
                 }
                 if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
                 {
-                    resultadoDebug.Motivos.Add($"Coordenadas repetidas dentro del mismo archivo GAL ({lat:F6}, {lon:F6}).");
+                    resultadoDebug.Motivos.Add($"Ubicación repetida dentro del mismo archivo GAL ({lat:F6}, {lon:F6}).");
                     resultadoDebug.Añadida = false;
                 }
 
@@ -242,9 +250,27 @@ namespace UI.Parsers
                     resultadoDebug.Añadida = false;
                 }
 
-                // Si falló alguna validación, registramos el error y pasamos al siguiente
+                /* 
+                  Si hay algún motivo de rechazo, saltamos iteración no sin antes
+                  eliminar el último nombre de estación y coordenadas (si no son nulos o lat: 0 lon: 0 
+                  para indicar que no se encontró la ubicación respectivamente) para que no tenga en cuenta duplicados de estaciones descartadas
+                 */
                 if (!resultadoDebug.Añadida)
                 {
+                    if (!string.IsNullOrWhiteSpace(nombreNormalizado))
+                    {
+                        if (nombresEnEsteFichero.Count > 0)
+                        {
+                            nombresEnEsteFichero.Remove(nombreNormalizado);
+                        }
+                    }
+                    if (lat != 0 && lon != 0)
+                    {
+                        if (coordenadasEnEsteFichero.Count > 0)
+                        {
+                            coordenadasEnEsteFichero.Remove(coordsKey);
+                        }
+                    }
                     debugResultados.Add(resultadoDebug);
                     continue;
                 }
@@ -293,6 +319,44 @@ namespace UI.Parsers
                     Provincia = provincia
                 });
                 debugResultados.Add(resultadoDebug);
+            }
+
+            // BLOQUE FINAL: Añadir motivos de duplicado a las inválidas si coinciden con válidas
+            var nombresValidos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var coordenadasValidas = new HashSet<string>();
+
+            // 1. Conjuntos solo con válidas (incluyendo reparadas)
+            foreach (var debug in debugResultados.Where(r => r.Añadida || r.Reparada))
+            {
+                string nombreNorm = debug.Nombre?.Trim()?.ToLower() ?? "";
+                string coordsVal = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                if (!string.IsNullOrEmpty(nombreNorm))
+                    nombresValidos.Add(nombreNorm);
+
+                if (debug.Latitud != 0 || debug.Longitud != 0)
+                    coordenadasValidas.Add(coordsVal);
+            }
+
+            // 2. Añadir motivos a inválidas
+            foreach (var debug in debugResultados.Where(r => !r.Añadida))
+            {
+                string nombreNorm = debug.Nombre?.Trim()?.ToLower() ?? "";
+                string coordsKey = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                // Evitamos repetir el motivo
+                bool yaTieneNombre = debug.Motivos.Any(m => m.Contains("Nombre repetido"));
+                bool yaTieneCoords = debug.Motivos.Any(m => m.Contains("Ubicación repetida"));
+
+                if (!string.IsNullOrEmpty(nombreNorm) && nombresValidos.Contains(nombreNorm) && !yaTieneNombre)
+                {
+                    debug.Motivos.Add($"Nombre repetido con estación válida procesada ({debug.Nombre})");
+                }
+
+                if ((debug.Latitud != 0 || debug.Longitud != 0) && coordenadasValidas.Contains(coordsKey) && !yaTieneCoords)
+                {
+                    debug.Motivos.Add($"Coordenadas repetidas con estación válida procesada ({coordsKey})");
+                }
             }
 
             // Inserción en bloque a la base de datos

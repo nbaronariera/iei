@@ -12,7 +12,7 @@ namespace UI.Wrappers
         public static string Ejecutar()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string csvPath = Path.Combine(baseDirectory, "Fuentes", "ITV-CATEntrega.xml");
+            string csvPath = Path.Combine(baseDirectory, "Fuentes", "ITV-CATEntrega2.xml");
 
             if (!File.Exists(csvPath))
                 throw new FileNotFoundException($"No se encontró el XML: {csvPath}");

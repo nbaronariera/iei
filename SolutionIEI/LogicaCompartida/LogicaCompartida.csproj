@@ -7,22 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="Fuentes\estaciones.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Fuentes\estacionesEntrega.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Fuentes\estaciones_modificado.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Fuentes\Estacions_ITV.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Fuentes\Estacions_ITVEntrega.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Fuentes\ITV-CAT.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Fuentes\ITV-CATEntrega.xml">

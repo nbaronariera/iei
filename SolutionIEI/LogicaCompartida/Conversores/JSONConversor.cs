@@ -9,7 +9,7 @@ namespace UI.Wrappers
         public static string Ejecutar()
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string jsonPath = Path.Combine(baseDirectory, "Fuentes", "estacionesEntrega.json");
+            string jsonPath = Path.Combine(baseDirectory, "Fuentes", "estacionesEntrega2.json");
 
             if (!File.Exists(jsonPath))
                 throw new FileNotFoundException($"No se encontró el JSON: {jsonPath}");

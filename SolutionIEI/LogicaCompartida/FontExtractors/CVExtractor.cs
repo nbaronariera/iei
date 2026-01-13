@@ -135,12 +135,7 @@ namespace UI.Parsers
                         resultadoDebug.Motivos.Add("Número de estación vacío.");
                         resultadoDebug.Añadida = false;
                     }
-                    // Regla de negocio: Estaciones móviles/agrícolas NO deben tener municipio (son itinerantes).
-                    if (!string.IsNullOrWhiteSpace(dato.MUNICIPIO) && !dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
-                    {
-                        resultadoDebug.Motivos.Add("El municipio de una estación no fija ha de estar vacío.");
-                        resultadoDebug.Añadida = false;
-                    }
+                  
                     // Validación de formato de Código Postal (5 dígitos) para fijas.
                     if (!Regex.IsMatch(dato.C_POSTAL, @"^\d{5}$") && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
@@ -165,7 +160,7 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
                     // Validación de prefijo de CP (debe ser 12, 46 o 03).
-                    if (dato.C_POSTAL.Length >= 2)
+                    if (dato.C_POSTAL.Length >= 2 && dato.TIPO_ESTACION.Contains("Fija", StringComparison.OrdinalIgnoreCase))
                     {
                         var cpPrefijo = dato.C_POSTAL.Substring(0, 2);
                         var prefijosValidos = prefijosCpPorTerritorio.Values.ToHashSet();
@@ -178,6 +173,9 @@ namespace UI.Parsers
 
                     double lat = (double)dato.Latitud;
                     double lon = (double)dato.Longitud;
+
+                    resultadoDebug.Latitud = lat;
+                    resultadoDebug.Longitud = lon;
 
                     // Determinación del tipo (Fija, Móvil, Otros)
                     TipoEstacion tipo = TipoEstacion.Estacion_fija;
@@ -203,7 +201,7 @@ namespace UI.Parsers
                     // Generación de nombre descriptivo para debug
                     if (tipo == TipoEstacion.Estacion_fija)
                     {
-                        resultadoDebug.Nombre = dato.MUNICIPIO + " " + dato.Nº_ESTACION.Trim();
+                        resultadoDebug.Nombre = dato.MUNICIPIO.Trim() + " " + dato.Nº_ESTACION.Trim();
                     }
                     else if (tipo == TipoEstacion.Estacion_movil)
                     {
@@ -224,12 +222,12 @@ namespace UI.Parsers
                     // Detección de Duplicados Internos (mismo fichero)
                     if (!String.IsNullOrEmpty(numeroEstacion) && !numerosEnEsteFichero.Add(numeroEstacion))
                     {
-                        resultadoDebug.Motivos.Add($"Número de estación repetido dentro del archivo CV ({numeroEstacion}).");
+                        resultadoDebug.Motivos.Add($"Número de estación repetido con estación válida procesada en el archivo CV ({numeroEstacion}).");
                         resultadoDebug.Añadida = false;
                     }
                     if (lat != 0 && lon != 0 && !coordenadasEnEsteFichero.Add(coordsKey))
                     {
-                        resultadoDebug.Motivos.Add($"Coordenadas repetidas dentro del archivo CV ({lat:F6}, {lon:F6}).");
+                        resultadoDebug.Motivos.Add($"Ubicación repetida con estación válida procesada en el archivo CV ({lat:F6}, {lon:F6}).");
                         resultadoDebug.Añadida = false;
                     }
 
@@ -258,9 +256,33 @@ namespace UI.Parsers
                         resultadoDebug.Añadida = false;
                     }
 
-                    // Si se ha marcado como no válida por alguno de los motivos anteriores, saltamos.
+                    /* 
+                    Si hay algún motivo de rechazo, saltamos iteración, no sin antes
+                    eliminar último número de estación y coordenadas (si no son nulos o lat: 0 lon: 0 
+                     o la ubicación no se encuentra en españa respectivamente) para que no tenga en cuenta duplicados de estaciones descartadas
+                   */
                     if (!resultadoDebug.Añadida)
                     {
+
+                        
+                        if (!String.IsNullOrEmpty(numeroEstacion))
+                        {
+                            if (numerosEnEsteFichero.Count > 0)
+                            {
+
+
+                                numerosEnEsteFichero.Remove(numeroEstacion);
+                            }
+                        }
+                        if (lat != 0 && lon != 0)
+                        {
+                            if (coordenadasEnEsteFichero.Count > 0)
+                            {
+
+
+                                coordenadasEnEsteFichero.Remove(coordsKey);
+                            }
+                        }
                         debugResultados.Add(resultadoDebug);
                         continue;
                     }
@@ -309,6 +331,50 @@ namespace UI.Parsers
                     debugResultados.Add(resultadoDebug);
                 }
             }
+
+            // Conjuntos SOLO con las válidas que se van a insertar
+            var numerosValidos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);  // Usamos número de estación
+            var coordenadasValidas = new HashSet<string>();
+
+            // Recorremos SOLO las válidas o reparadas para construir conjuntos
+            foreach (var debug in debugResultados.Where(r => r.Añadida || r.Reparada))
+            {
+                // Extraemos el número de estación del nombre (como ya tienes el método)
+                string numeroEstacion = ExtraerNumeroEstacion(debug.Nombre);
+                string coordsVal = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                if (!string.IsNullOrEmpty(numeroEstacion))
+                    numerosValidos.Add(numeroEstacion);
+
+                if (debug.Latitud != 0 || debug.Longitud != 0)
+                    coordenadasValidas.Add(coordsVal);
+            }
+
+            // Ahora recorremos SOLO las inválidas y añadimos motivos por datos duplicados si coinciden y no estaban
+            foreach (var debug in debugResultados.Where(r => !r.Añadida))
+            {
+                string numeroEstacion = ExtraerNumeroEstacion(debug.Nombre);
+                string coordsKey = $"{debug.Latitud:F6},{debug.Longitud:F6}";
+
+                // Evitamos repetir el motivo
+                bool yaTieneNumero = debug.Motivos.Any(m => m.Contains("Número de estación repetido"));
+                bool yaTieneCoords = debug.Motivos.Any(m => m.Contains("Ubicación repetida"));
+
+                if (!string.IsNullOrEmpty(numeroEstacion) &&
+                    numerosValidos.Contains(numeroEstacion) &&
+                    !yaTieneNumero)
+                {
+                    debug.Motivos.Add($"Número de estación repetido con estación válida procesada en el archivo CV ({numeroEstacion})");
+                }
+
+                if ((debug.Latitud != 0 || debug.Longitud != 0) &&
+                    coordenadasValidas.Contains(coordsKey) &&
+                    !yaTieneCoords)
+                {
+                    debug.Motivos.Add($"Ubicación repetida con estación válida procesada en el archivo CV ({coordsKey})");
+                }
+            }
+
 
             // Inserción en bloque (Bulk Insert) para mejorar el rendimiento
             if (estacionesValidas.Any())
