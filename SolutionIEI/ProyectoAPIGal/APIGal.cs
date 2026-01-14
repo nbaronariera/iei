@@ -22,15 +22,15 @@ namespace ProyectoAPIGal
         public APIGal(LogicaParseo logica) => _logica = logica;
 
         /// <summary>
-        /// Obtiene el JSON crudo con los datos de las estaciones de Galicia.
+        /// Obtiene el JSON crudo con los datos de las estaciones (sin procesar por el extractor de la comunidad) de Galicia.
         /// </summary>
         /// <remarks>
-        /// Este endpoint realiza internamente la conversión del archivo fuente (CSV) a JSON
-        /// y devuelve el contenido textual resultante. Es consumido por el proceso de carga (ETL).
+        /// Este endpoint procesa el archivo fuente original (CSV), lo convierte a JSON
+        /// y devuelve el resultado.
         /// </remarks>
-        /// <returns>Cadena de texto con el contenido JSON.</returns>
-        /// <response code="200">Devuelve el archivo JSON correctamente.</response>
-        /// <response code="500">Se produjo un error al leer o convertir el archivo fuente.</response>
+        /// <returns>(Si la operación es exitosa) Un archivo JSON con los datos de las estaciones de Galicia</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar leer o convertir el archivo fuente de Galicia (indicado al cliente mediante un mensaje de error).</response>
         [HttpGet("json")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -48,7 +48,7 @@ namespace ProyectoAPIGal
             {
                 // Manejo de errores y logging en consola para depuración
                 Console.WriteLine($"[API] ERROR en gal/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "ERROR interno la intentar leer o convertir el archivo fuente de Galicia");
             }
         }
     }

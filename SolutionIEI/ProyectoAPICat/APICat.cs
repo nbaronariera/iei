@@ -23,15 +23,15 @@ namespace ProyectoAPICat
         public APICat(LogicaParseo logica) => _logica = logica;
 
         /// <summary>
-        /// Obtiene el JSON crudo con los datos de las estaciones de Cataluña.
+        /// Obtiene el JSON crudo con los datos de las estaciones (sin procesar por el extractor de la comunidad) de Cataluña.
         /// </summary>
         /// <remarks>
         /// Este endpoint procesa el archivo fuente original (XML), lo convierte a JSON
-        /// y devuelve el resultado como texto plano para ser consumido por el extractor ETL.
+        /// y devuelve el resultado.
         /// </remarks>
-        /// <returns>Cadena de texto con el contenido JSON.</returns>
-        /// <response code="200">Devuelve el archivo JSON correctamente.</response>
-        /// <response code="500">Se produjo un error al leer o convertir el archivo fuente.</response>
+        /// <returns>(Si la operación es exitosa) Un archivo JSON con los datos de las estaciones de Cataluña</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar leer o convertir el archivo fuente de Cataluña (indicado al cliente mediante un mensaje de error).</response>
         [HttpGet("json")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -50,7 +50,7 @@ namespace ProyectoAPICat
             {
                 // Captura de errores de I/O o de parseo
                 Console.WriteLine($"[API] ERROR en cat/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "ERROR interno la intentar leer o convertir el archivo fuente de Cataluña");
             }
         }
     }

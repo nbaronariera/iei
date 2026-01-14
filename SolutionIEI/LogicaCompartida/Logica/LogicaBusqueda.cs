@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UI.Entidades;
-using UI.Formularios;
 
 namespace UI.Logica
 {
@@ -26,7 +25,7 @@ namespace UI.Logica
         // ============================================================
         // ========= Conversión común lista y mapa ===================
         // ============================================================
-        public List<EstacionParaMostrar> ObtenerEstaciones(
+        public List<EstacionDTO> ObtenerEstaciones(
           string codPostal,
           string provincia,
           string localidad,
@@ -46,7 +45,7 @@ namespace UI.Logica
             if (!string.IsNullOrWhiteSpace(codPostal))
             {
                 if (codPostal.EndsWith("000") || codPostal.Length != 5)
-                    return new List<EstacionParaMostrar>();
+                    return new List<EstacionDTO>();
                 estaciones = estaciones.Where(e => e.codigoPostal == codPostal).ToList();
             }
 
@@ -59,7 +58,7 @@ namespace UI.Logica
                 estaciones = estaciones.Where(e => e.localidad?.nombre == localidad).ToList();
 
             // Conversión final con lógica de visibilidad
-            return estaciones.Select(e => new EstacionParaMostrar
+            return estaciones.Select(e => new EstacionDTO
             {
                 nombre = e.nombre,
                 Tipo = TraducirTipo(e.tipo.ToString()),

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UI.Formularios
+namespace LogicaCompartida.DTOs
 {
-    public class EstacionParaMostrar
+    public class EstacionDTO
     {
         [DisplayName("Nombre")]
         public string nombre { get; set; } = "";

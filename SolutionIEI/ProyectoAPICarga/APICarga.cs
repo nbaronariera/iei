@@ -24,13 +24,15 @@ namespace ProyectoAPICarga
         /// </summary>
         /// <remarks>
         /// Este endpoint realiza los siguientes pasos:
-        /// 1. Conecta con el Wrapper de CV para obtener el JSON crudo.
-        /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas).
+        /// 1. Conecta con el Wrapper de CV para obtener el JSON crudo con todas las estaciones.
+        /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
         /// 3. Inserta los registros válidos en la base de datos.
         /// </remarks>
-        /// <returns>Un objeto JSON con el resumen de registros insertados, reparados y rechazados.</returns>
-        /// <response code="200">Proceso finalizado correctamente.</response>
-        /// <response code="500">Error crítico durante la carga.</response>
+        /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de la Comunidad Valenciana cargadas,
+        /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
+        /// incluyendo los motivos por lo que no fueron cargadas.</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar cargar las estaciones de la Comunidad Valenciana (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("cv")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -56,15 +58,9 @@ namespace ProyectoAPICarga
             }
             catch (Exception ex)
             {
-                // Manejo de errores para no tirar el servidor
-                var errorResponse = new
-                {
-                    RegistrosCargados = 0,
-                    RegistrosReparados = "",
-                    RegistrosRechazados = $"ERROR al cargar Comunidad Valenciana: {ex.Message}"
-                };
+               
                 Debug.WriteLine($"[API] ERROR en LoadCV: {ex}");
-                return StatusCode(500, errorResponse);
+                return StatusCode(500, "ERROR interno al intentar cargar las estaciones de la Comunidad Valenciana");
             }
         }
 
@@ -73,7 +69,8 @@ namespace ProyectoAPICarga
         /// </summary>
         /// 
         ///<returns> Devuelve un booleando indicando si ha ido bien </returns> 
-        ///<response code="200">Retorna true</response>
+        ///<response code="200">Operación exitosa (devuelve true)</response>
+        ///<response code="500">Error interno del servidor al intentar limpiar la base de datos (devuelve false)</response>
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -86,7 +83,7 @@ namespace ProyectoAPICarga
             }
             catch (Exception ex)
             {
-                string errorMsg = $"ERROR al borrar la base de datos: {ex.Message}";
+                string errorMsg = $"ERROR interno al borrar la base de datos";
                 if (ex.InnerException != null)
                     errorMsg += $"\nInner: {ex.InnerException.Message}";
                 Console.WriteLine($"[API] ERROR en Delete: {ex}");
@@ -95,11 +92,19 @@ namespace ProyectoAPICarga
         }
 
         /// <summary>
-        /// Ejecuta la carga ETL para las estaciones de Cataluña.
+        /// Ejecuta el proceso ETL para las estaciones de Cataluña.
         /// </summary>
-        /// <returns>Objeto JSON con estadísticas de la carga.</returns>
-        /// <response code="200">Carga finalizada correctamente.</response>
-        /// <response code="500">Error interno del servidor.</response>
+        /// <remarks>
+        /// Este endpoint realiza los siguientes pasos:
+        /// 1. Conecta con el Wrapper de Cataluña para obtener el JSON crudo con todas las estaciones.
+        /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
+        /// 3. Inserta los registros válidos en la base de datos.
+        /// </remarks>
+        /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de Cataluña cargadas,
+        /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
+        /// incluyendo los motivos por lo que no fueron cargadas.</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar cargar las estaciones de Cataluña (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("cat")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -123,23 +128,26 @@ namespace ProyectoAPICarga
             }
             catch (Exception ex)
             {
-                var errorResponse = new
-                {
-                    RegistrosCargados = 0,
-                    RegistrosReparados = "",
-                    RegistrosRechazados = $"ERROR al cargar Cataluña: {ex.Message}"
-                };
+               
                 Debug.WriteLine($"[API] ERROR en LoadCat: {ex}");
-                return StatusCode(500, errorResponse);
+                return StatusCode(500, "ERROR interno al intentar cargar las estaciones de Cataluña");
             }
         }
 
         /// <summary>
-        /// Ejecuta la carga ETL para las estaciones de Galicia.
+        /// Ejecuta el proceso ETL para las estaciones de Galicia.
         /// </summary>
-        /// <returns>Objeto JSON con estadísticas de la carga.</returns>
-        /// <response code="200">Carga finalizada correctamente.</response>
-        /// <response code="500">Error interno del servidor.</response>
+        /// <remarks>
+        /// Este endpoint realiza los siguientes pasos:
+        /// 1. Conecta con el Wrapper de Galicia para obtener el JSON crudo con todas las estaciones.
+        /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
+        /// 3. Inserta los registros válidos en la base de datos.
+        /// </remarks>
+        /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de Galicia cargadas,
+        /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
+        /// incluyendo los motivos por lo que no fueron cargadas.</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar cargar las estaciones de Galicia (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("gal")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -163,14 +171,9 @@ namespace ProyectoAPICarga
             }
             catch (Exception ex)
             {
-                var errorResponse = new
-                {
-                    RegistrosCargados = 0,
-                    RegistrosReparados = "",
-                    RegistrosRechazados = $"ERROR al cargar Galicia: {ex.Message}"
-                };
+                
                 Debug.WriteLine($"[API] ERROR en LoadGal: {ex}");
-                return StatusCode(500, errorResponse);
+                return StatusCode(500, "ERROR interno al intentar cargar las estaciones de Galicia");
             }
         }
     }

@@ -21,15 +21,14 @@ namespace ProyectoAPICV
         public APICV(LogicaParseo logica) => _logica = logica;
 
         /// <summary>
-        /// Obtiene el listado completo de estaciones de ITV de la Comunidad Valenciana.
+        /// Obtiene el JSON crudo con los datos de las estaciones (sin procesar por el extractor de la comunidad) de la Comunidad Valenciana.
         /// </summary>
         /// <remarks>
-        /// Este endpoint lee el archivo fuente original (JSON), procesa posibles conversiones de formato si fuera necesario,
-        /// y devuelve el contenido listo para ser consumido por el proceso de extracción.
+        /// Este endpoint no realiza ninguna conversión de formatos al ya estar el archivo fuente en formato JSON y por ello únicamente lo devuelve.
         /// </remarks>
-        /// <returns>Archivo JSON con los datos de las estaciones.</returns>
-        /// <response code="200">Devuelve el JSON correctamente.</response>
-        /// <response code="500">Si no se encuentra el archivo fuente o hay error de lectura.</response>
+        /// <returns>(Si la operación es exitosa) Un archivo JSON con los datos de las estaciones de la Comunidad Valenciana</returns>
+        /// <response code="200">Operación exitosa.</response>
+        /// <response code="500">Error interno del servidor al intentar leer el archivo fuente de la Comunidad Valenciana (indicado al cliente mediante un mensaje de error).</response>
         [HttpGet("json")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -48,7 +47,7 @@ namespace ProyectoAPICV
             {
                 // Manejo de errores y logging en consola para depuración
                 Console.WriteLine($"[API] ERROR en cv/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "ERROR interno la intentar leer el archivo fuente de la Comunidad Valenciana");
             }
         }
     }
