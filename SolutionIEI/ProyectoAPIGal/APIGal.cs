@@ -78,7 +78,7 @@ namespace ProyectoAPIGal
             {
                 // Manejo de errores y logging en consola para depuración
                 Console.WriteLine($"[API] ERROR en gal/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, "ERROR interno la intentar leer o convertir el archivo fuente de Galicia");
+                return StatusCode(500, "ERROR interno al intentar leer o convertir el archivo fuente de Galicia");
             }
         }
     }

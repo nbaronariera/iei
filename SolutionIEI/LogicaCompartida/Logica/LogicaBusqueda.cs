@@ -50,11 +50,11 @@ namespace UI.Logica
             }
 
             // Filtro provincia
-            if (!string.IsNullOrWhiteSpace(provincia) && provincia != "Cualquiera")
+            if (!string.IsNullOrWhiteSpace(provincia))
                 estaciones = estaciones.Where(e => e.localidad?.Provincia?.nombre == provincia).ToList();
 
             // Filtro localidad
-            if (!string.IsNullOrWhiteSpace(localidad) && localidad != "Cualquiera")
+            if (!string.IsNullOrWhiteSpace(localidad))
                 estaciones = estaciones.Where(e => e.localidad?.nombre == localidad).ToList();
 
             // Conversión final con lógica de visibilidad

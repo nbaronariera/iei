@@ -398,10 +398,11 @@ namespace UI.UI_Gestor
             Cursor.Current = Cursors.WaitCursor;
 
             string cp = txtBoxCodPostal.Text.Trim();
-            string prov = comboProvincia.SelectedItem?.ToString() ?? "Cualquiera";
-            string loc = comboLocalidad.SelectedItem?.ToString() ?? "Cualquiera";
-            string tipo = comboTipo.SelectedItem?.ToString() ?? "Cualquiera";
+            string prov = comboProvincia.SelectedItem?.ToString() ?? "";
+            string loc = comboLocalidad.SelectedItem?.ToString() ?? "";
+            string tipo = comboTipo.SelectedItem?.ToString() ?? "";
 
+            // Convertir "Cualquiera" a cadena vacía para indicar a la API que queremos todas las provincias, localidades y/o tipos de estación
             string provinciaParam = prov == "Cualquiera" ? "" : prov;
             string localidadParam = loc == "Cualquiera" ? ""
                 : (loc.Contains("(") ? loc.Substring(0, loc.LastIndexOf("(")).Trim() : loc);

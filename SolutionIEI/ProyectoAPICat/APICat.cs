@@ -100,7 +100,7 @@ namespace ProyectoAPICat
             {
                 // Captura de errores de I/O o de parseo
                 Console.WriteLine($"[API] ERROR en cat/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, "ERROR interno la intentar leer o convertir el archivo fuente de Cataluña");
+                return StatusCode(500, "ERROR interno al intentar leer o convertir el archivo fuente de Cataluña");
             }
         }
     }

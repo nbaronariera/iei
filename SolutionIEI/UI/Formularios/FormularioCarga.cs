@@ -91,34 +91,58 @@ namespace UI
             int totalCargadas = 0;
             List<string> todasReparadas = new List<string>();
             List<string> todasRechazadas = new List<string>();
+            List<string> erroresServidor = new List<string>();
 
             try
             {
                 if (chkGalicia.Checked)
                 {
-                    var result = await CargarComunidad("gal");
-                    totalCargadas += result.cargados;
-                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
-                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                    
+                    var (exito, cargados, reparados, rechazados, errorMsg) = await ProcesarComunidad("gal");
+
+                    if (exito)
+                    {
+                        totalCargadas += cargados;
+                        if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                        if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(errorMsg))
+                    {
+                        erroresServidor.Add(errorMsg);
+                    }
+
                 }
 
                 if (chkCataluna.Checked)
                 {
-                    var result = await CargarComunidad("cat");
-                    totalCargadas += result.cargados;
-                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
-                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                   
+
+                    var (exito, cargados, reparados, rechazados, errorMsg) = await ProcesarComunidad("cat");
+                    if (exito)
+                    {
+                        totalCargadas += cargados;
+                        if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                        if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(errorMsg))
+                    {
+                        erroresServidor.Add(errorMsg);
+                    }
+
                 }
 
                 if (chkValencia.Checked)
                 {
-                    var result = await CargarComunidad("cv");
-                    totalCargadas += result.cargados;
-                    if (!string.IsNullOrWhiteSpace(result.reparados)) todasReparadas.Add(result.reparados);
-                    if (!string.IsNullOrWhiteSpace(result.rechazados)) todasRechazadas.Add(result.rechazados);
-                   
+                    var (exito, cargados, reparados, rechazados, errorMsg) = await ProcesarComunidad("cv");
+                    if (exito)
+                    {
+                        totalCargadas += cargados;
+                        if (!string.IsNullOrWhiteSpace(reparados)) todasReparadas.Add(reparados);
+                        if (!string.IsNullOrWhiteSpace(rechazados)) todasRechazadas.Add(rechazados);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(errorMsg))
+                    {
+                        erroresServidor.Add(errorMsg);
+                    }
+
                 }
 
                 log.AppendLine($"\nNúmero de registros cargados correctamente: {totalCargadas}");
@@ -126,6 +150,13 @@ namespace UI
                 log.AppendLine(todasReparadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasReparadas));
                 log.AppendLine("\nRegistros con errores y rechazados:");
                 log.AppendLine(todasRechazadas.Count == 0 ? "(Ninguno)" : string.Join("\n", todasRechazadas));
+
+                if (erroresServidor.Count > 0)
+                {
+                    log.AppendLine("\nErrores del servidor:");
+                    log.AppendLine(string.Join("\n", erroresServidor));
+                }
+
                 log.AppendLine("\n--- CARGA FINALIZADA ---");
             }
             catch (Exception ex)
@@ -140,34 +171,58 @@ namespace UI
             rtbResumen.Text = log.ToString();
         }
 
-        private async Task<(int cargados, string reparados, string rechazados)> CargarComunidad(string endpoint)
+        private async Task<(bool exito, int cargados, string reparados, string rechazados, string errorMsg)> ProcesarComunidad(string endpoint)
         {
-            var response = await _http.PostAsync($"carga/{endpoint}", null);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var json = await response.Content.ReadAsStringAsync();
-                try
+                var response = await _http.PostAsync($"carga/{endpoint}", null);
+
+                if (response.IsSuccessStatusCode)
                 {
+                    var json = await response.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
                     var obj = JsonSerializer.Deserialize<JsonCargaResponse>(json, options);
 
                     return (
-                        obj?.RegistrosCargados ?? 0,
-                        obj?.RegistrosReparados ?? "",
-                        obj?.RegistrosRechazados ?? ""
+                        exito: true,
+                        cargados: obj?.RegistrosCargados ?? 0,
+                        reparados: obj?.RegistrosReparados ?? "",
+                        rechazados: obj?.RegistrosRechazados ?? "",
+                        errorMsg: ""
                     );
                 }
-                catch (Exception ex)
+                else
                 {
-                    Debug.WriteLine($"[CLIENTE] Error deserializando {endpoint}: {ex.Message}\nJSON: {json}");
-                    return (0, "", $"Error al procesar JSON: {ex.Message}");
+                    // ← Aquí recuperamos exactamente lo que envía la API
+                    string mensajeApi = await response.Content.ReadAsStringAsync();
+
+                    // Si la API no devuelve nada útil, ponemos un fallback mínimo
+                    if (string.IsNullOrWhiteSpace(mensajeApi))
+                    {
+                        mensajeApi = $"Error del servidor: {response.StatusCode} ({response.ReasonPhrase ?? "Sin descripción"})";
+                    }
+
+                    return (
+                        exito: false,
+                        cargados: 0,
+                        reparados: "",
+                        rechazados: "",
+                        errorMsg: mensajeApi   // ← Mensaje directo de la API
+                    );
                 }
             }
-            else
+            catch (Exception ex)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return (0, "", $"Error HTTP {response.StatusCode}: {error}");
+                // Para errores de red, timeout, etc. → aquí sí usamos el mensaje de la excepción
+                Debug.WriteLine($"[CLIENTE] Excepción al procesar {endpoint}: {ex.Message}");
+                return (
+                    exito: false,
+                    cargados: 0,
+                    reparados: "",
+                    rechazados: "",
+                    errorMsg: ex.Message
+                );
             }
         }
 

@@ -72,7 +72,7 @@ namespace ProyectoAPICV
             {
                 // Manejo de errores y logging en consola para depuración
                 Console.WriteLine($"[API] ERROR en cv/GetJSON: {ex.Message}\n{ex.StackTrace}");
-                return StatusCode(500, "ERROR interno la intentar leer el archivo fuente de la Comunidad Valenciana");
+                return StatusCode(500, "ERROR interno al intentar leer el archivo fuente de la Comunidad Valenciana");
             }
         }
     }
