@@ -27,11 +27,22 @@ namespace ProyectoAPICarga
         /// 1. Conecta con el Wrapper de CV para obtener el JSON crudo con todas las estaciones.
         /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
         /// 3. Inserta los registros válidos en la base de datos.
+        ///
+        /// Ejemplo de respuesta (201 Created):
+        /// <code>
+        /// {
+        ///   "RegistrosCargados": 11,
+        ///   "RegistrosReparados": "{CV, Agrícola 4653, , [Provincia incorrecta: València.], [La provincia se normalizó de València a Valencia.]}",
+        ///   "RegistrosRechazados": "{CV, Móvil 4651, , [El código postal de una estación no fija ha de estar vacío.]}
+        ///   {CV, Orihuela 0303, Orihuela, [Código postal inválido (''); no coincide con la provincia Alicante.]}
+        ///   {CV, Alcoy 0304, Alcoy, [Provincia no válida.]}"
+        /// }
+        /// </code>
         /// </remarks>
         /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de la Comunidad Valenciana cargadas,
         /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
         /// incluyendo los motivos por lo que no fueron cargadas.</returns>
-        /// <response code="200">Operación exitosa.</response>
+        /// <response code="201">Operación exitosa.</response>
         /// <response code="500">Error interno del servidor al intentar cargar las estaciones de la Comunidad Valenciana (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("cv")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
@@ -54,7 +65,7 @@ namespace ProyectoAPICarga
                 };
 
                 Debug.WriteLine("[API CARGA] FIN LoadCV OK");
-                return Ok(respuesta);
+                return Created("",respuesta);
             }
             catch (Exception ex)
             {
@@ -99,11 +110,20 @@ namespace ProyectoAPICarga
         /// 1. Conecta con el Wrapper de Cataluña para obtener el JSON crudo con todas las estaciones.
         /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
         /// 3. Inserta los registros válidos en la base de datos.
+        /// 
+        /// Ejemplo de respuesta (201 Created):
+        /// <code>
+        /// {
+        ///   "RegistrosCargados": 9,
+        ///   "RegistrosReparados": "(Ninguno)",
+        ///   "RegistrosRechazados": "{CAT, Manresa, Manresa, [Código postal '80242' no corresponde con ninguna provincia catalana.]}"
+        /// }
+        /// </code>
         /// </remarks>
         /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de Cataluña cargadas,
         /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
         /// incluyendo los motivos por lo que no fueron cargadas.</returns>
-        /// <response code="200">Operación exitosa.</response>
+        /// <response code="201">Operación exitosa.</response>
         /// <response code="500">Error interno del servidor al intentar cargar las estaciones de Cataluña (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("cat")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
@@ -124,7 +144,7 @@ namespace ProyectoAPICarga
                 };
 
                 Debug.WriteLine("[API CARGA] FIN LoadCat OK");
-                return Ok(respuesta);
+                return Created("",respuesta);
             }
             catch (Exception ex)
             {
@@ -142,11 +162,20 @@ namespace ProyectoAPICarga
         /// 1. Conecta con el Wrapper de Galicia para obtener el JSON crudo con todas las estaciones.
         /// 2. Parsea y sanitiza los datos (corrige CPs, asigna coordenadas...).
         /// 3. Inserta los registros válidos en la base de datos.
+        /// 
+        /// Ejemplo de respuesta (201 Created):
+        /// <code>
+        /// {
+        ///   "RegistrosCargados": 8,
+        ///   "RegistrosReparados": "(Ninguno)",
+        ///   "RegistrosRechazados": "{GAL, Estación ITV do Allo, Zas, [Provincia no válida.]}"
+        /// }
+        /// </code>
         /// </remarks>
         /// <returns>(Si la operación es exitosa) Un objeto JSON con la siguiente estructura: Primero, indica el número de estaciones de Galicia cargadas,
         /// luego muestra con una cadena qué estaciones presentan erorres pero que se pudieron reparar, indicando qué errores tenían y cómo se arreglaron, y por último otra cadena con las estaciones que fueron rechazadas, 
         /// incluyendo los motivos por lo que no fueron cargadas.</returns>
-        /// <response code="200">Operación exitosa.</response>
+        /// <response code="201">Operación exitosa.</response>
         /// <response code="500">Error interno del servidor al intentar cargar las estaciones de Galicia (indicado al cliente mediante un mensaje de error).</response>
         [HttpPost("gal")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
@@ -167,7 +196,7 @@ namespace ProyectoAPICarga
                 };
 
                 Debug.WriteLine("[API CARGA] FIN LoadGal OK");
-                return Ok(respuesta);
+                return Created("", respuesta);
             }
             catch (Exception ex)
             {

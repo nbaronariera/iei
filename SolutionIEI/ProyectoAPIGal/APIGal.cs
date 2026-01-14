@@ -27,6 +27,36 @@ namespace ProyectoAPIGal
         /// <remarks>
         /// Este endpoint procesa el archivo fuente original (CSV), lo convierte a JSON
         /// y devuelve el resultado.
+        ///
+        /// Ejemplo de respuesta (200 OK):
+        /// <code>
+        /// [
+        ///   {
+        ///     "NOME DA ESTACIÓN": "Estación ITV de Viveiro",
+        ///     "ENDEREZO": "Rúa A Xunqueira, s/n",
+        ///     "CONCELLO": "Viveiro",
+        ///     "CÓDIGO POSTAL": "27850",
+        ///     "PROVINCIA": "Lugo",
+        ///     "TELÉFONO": "881 920 963",
+        ///     "HORARIO": "de 8:30 a 14:00 e de 16:00 a 19:30 horas (de luns a venres) e de 8:00 a 14:30 horas (sábados)",
+        ///     "SOLICITUDE DE CITA PREVIA": "https://www.sycitv.com/gl/cita-previa-particulares/?estacion=viveiro",
+        ///     "CORREO ELECTRÓNICO": "viveiro@sycitv.com",
+        ///     "COORDENADAS GMAPS": "43° 39.382', -7° 36.091'"
+        ///   },
+        ///   {
+        ///     "NOME DA ESTACIÓN": "Estación ITV de Verín",
+        ///     "ENDEREZO": "Polígono de Pazos - Parcela A-6",
+        ///     "CONCELLO": "Verín",
+        ///     "CÓDIGO POSTAL": "32600",
+        ///     "PROVINCIA": "Ourense",
+        ///     "TELÉFONO": "988 411 539 - 881 920 966",
+        ///     "HORARIO": "de 8:30 a 14:00 e de 16:00 a 19:30 horas (de luns a venres) e de 8:00 a 14:30 horas (sábados)",
+        ///     "SOLICITUDE DE CITA PREVIA": "https://www.sycitv.com/gl/cita-previa-particulares/?estacion=verin",
+        ///     "CORREO ELECTRÓNICO": "verin@sycitv.com",
+        ///     "COORDENADAS GMAPS": "41° 55.723', -7° 27.876'"
+        ///   }
+        /// ]
+        /// </code>
         /// </remarks>
         /// <returns>(Si la operación es exitosa) Un archivo JSON con los datos de las estaciones de Galicia</returns>
         /// <response code="200">Operación exitosa.</response>
