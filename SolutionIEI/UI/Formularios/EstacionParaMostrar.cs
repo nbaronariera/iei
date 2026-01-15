@@ -6,9 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace UI.Formularios
-{
+{   
+    /// <summary>
+    /// Este formulario especifica como debería mostrarse cada estación de ITV
+    /// </summary>
+  
     public class EstacionParaMostrar
     {
+        // Los atributos [DisplayName] definen el texto que aparecerá en la cabecera de la tabla (UI)
+
         [DisplayName("Nombre")]
         public string nombre { get; set; } = "";
 

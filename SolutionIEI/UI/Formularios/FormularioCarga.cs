@@ -15,12 +15,19 @@ using static System.Net.WebRequestMethods;
 
 namespace UI
 {
-
+    /// <summary>
+    /// Modelo para deserializar la respuesta del servidor tras una operación de persistencia.
+    /// </summary>
     class RespuestaJSON
     {
         public int numRegistrosAnyadidos { get; set; }
         public String data { get; set; }
     }
+
+    /// <summary>
+    /// Formulario encargado de la gestión de datos (carga y borrado) de estaciones ITV.
+    /// Actúa como cliente frente a una API REST para procesar ficheros de diferentes CC.AA.
+    /// </summary>
 
     public partial class FormularioCarga : Form
     {
@@ -28,6 +35,10 @@ namespace UI
         public FormularioCarga()
         {
             InitializeComponent();
+
+            // Configuración del cliente HTTP. 
+            // Se utiliza un timeout infinito porque el procesamiento de archivos grandes 
+            // en el servidor puede exceder los 100 segundos por defecto de HttpClient.
             _http = new HttpClient { 
                 
                 BaseAddress = new Uri("http://localhost:8081"),
@@ -36,6 +47,9 @@ namespace UI
             };
         }
 
+        /// <summary>
+        /// Sincroniza el estado de todos los selectores de comunidad con el checkbox maestro.
+        /// </summary>
         private void chkTodos_CheckedChanged(object sender, EventArgs e)
         {
             bool estado = chkTodos.Checked;
@@ -44,10 +58,13 @@ namespace UI
             chkCataluna.Checked = estado;
         }
 
-      
 
+        /// <summary>
+        /// Solicita al servidor el borrado completo de la base de datos tras confirmación del usuario.
+        /// </summary>
         private async void btnBorrar_Click(object sender, EventArgs e)
         {
+            // Verificación preventiva antes de realizar una acción destructiva
             if (MessageBox.Show("¿Seguro que quiere borrar TODOS los datos de TODAS las comunidades autónomas?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 this.Enabled = false;                    // ← Bloquea toda la ventana
@@ -80,6 +97,10 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Coordina el proceso de carga secuencial de las comunidades seleccionadas.
+        /// Agrega los resultados de cada petición para generar un informe final de logs.
+        /// </summary>
         private async void btnCargar_Click(object sender, EventArgs e)
         {
             rtbResumen.Clear();
@@ -95,6 +116,10 @@ namespace UI
 
             try
             {
+                // El proceso se ejecuta de forma secuencial por comunidad para no saturar 
+                // el servidor y facilitar la trazabilidad de errores.
+
+                // --- Bloque Galicia ---
                 if (chkGalicia.Checked)
                 {
                     var (exito, cargados, reparados, rechazados, errorMsg) = await ProcesarComunidad("gal");
@@ -112,6 +137,7 @@ namespace UI
 
                 }
 
+                // --- Bloque Cataluña ---
                 if (chkCataluna.Checked)
                 {
 
@@ -128,6 +154,8 @@ namespace UI
                     }
 
                 }
+
+                // --- Bloque Valencia ---
 
                 if (chkValencia.Checked)
                 {
@@ -171,6 +199,11 @@ namespace UI
             rtbResumen.Text = log.ToString();
         }
 
+        /// <summary>
+        /// Realiza la llamada HTTP POST al endpoint de carga y gestiona la respuesta JSON.
+        /// </summary>
+        /// <param name="endpoint">Segmento final de la URL correspondiente a la comunidad autónoma.</param>
+        /// <returns>Tupla con: éxito, registros cargados, detalles de reparación, detalles de rechazo y errores.</returns>
         private async Task<(bool exito, int cargados, string reparados, string rechazados, string errorMsg)> ProcesarComunidad(string endpoint)
         {
             try
@@ -235,7 +268,10 @@ namespace UI
             public string? RegistrosRechazados { get; set; }
         }
 
-
+        /// <summary>
+        /// Lógica de búsqueda de archivos locales en caso de que la ruta por defecto no exista.
+        /// Permite al usuario localizar manualmente los datasets.
+        /// </summary>
         private string ObtenerRutaArchivo(string nombreFuente, string rutaDefecto, string filtro)
         {
             if (System.IO.File.Exists(rutaDefecto)) return rutaDefecto;
