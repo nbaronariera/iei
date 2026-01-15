@@ -1,6 +1,16 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\SolutionIEI",
+    "\\SolutionIEI\\LogicaCompartida",
+    "\\SolutionIEI\\LogicaCompartida\\Migrations",
+    "\\SolutionIEI\\LogicaCompartida\\Parsers",
+    "\\SolutionIEI\\LogicaCompartida\\Parsers\\FileParsers",
+    "\\SolutionIEI\\LogicaCompartida\\Parsers\\ParsedObjects",
+    "\\SolutionIEI\\LogicaCompartida\\Persistencia",
+    "\\SolutionIEI\\LogicaCompartida\\Properties",
+    "\\SolutionIEI\\LogicaCompartida\\Properties\\DataSources"
   ],
+  "SelectedNode": "\\SolutionIEI\\LogicaCompartida\\Properties\\DataSources",
   "PreviewInSolutionExplorer": false
 }
