@@ -21,32 +21,43 @@ using UI.Wrappers;
 using LogicaCompartida.DTOs;
 
 namespace UI.UI_Gestor
-{
+{    
+    /// <summary>
+    /// Formulario de búsqueda y visualización de estaciones ITV en el mapa y tabla de datos
+    /// Permite filtrar por provincia, localidad, código postal y tipo de estación 
+    /// <\summary>
+
     public partial class FormularioBusqueda : Form
     {
+        //Capas para el control del mapa (Gmap)
         private GMapOverlay markersOverlay;
         private GMapOverlay routeOverlay;
+
         private readonly HttpClient _http;
+
+        //Caché local con provincias y localidades para evitar llamadas constantes a la API
         private List<ProvinciaDTO> _provinciasCompletas = new();
         private List<LocalidadDTO> _localidadesCompletas = new();
 
-        private bool cargando = false;
+        private bool cargando = false; // Flag para evitar eventos disparados en cascada durante la carga
         private bool _apiVerificada = false;
 
         public FormularioBusqueda()
         {
             InitializeComponent();
 
+            // Configuración del cliente HTTP apuntando al backend local
             _http = new HttpClient
             {
                 BaseAddress = new Uri("http://localhost:8080"), // Puerto de la API de búsqueda
                 Timeout = TimeSpan.FromSeconds(30) // Tiempo de espera razonable
             };
 
-            // FIJAR EL PANEL IZQUIERDO
+            // Configuración estética y funcional del SplitContainer
             splitHorizontal.FixedPanel = FixedPanel.Panel1;
             splitHorizontal.IsSplitterFixed = true;
 
+            // Inicialización del control de mapas (OpenStreetMap)
             gMapControl1.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             gMapControl1.ShowCenter = false;
@@ -59,12 +70,17 @@ namespace UI.UI_Gestor
 
             gMapControl1.MinZoom = 2;
             gMapControl1.MaxZoom = 18;
+
+            // Posicionamiento inicial del mapa por defecto (vista global de España)
             gMapControl1.Zoom = 6;
             gMapControl1.Position = new PointLatLng(40.416775, -3.703790);
 
             dataGridView1.DataSource = estacionBindingSource;
         }
 
+        /// <summary>
+        /// Carga el formulario de búsqueda
+        /// </summary>
         private async void Form1_Load(object sender, EventArgs e)
         {
             try
@@ -109,6 +125,9 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Verifica la disponibilidad del backend mediante reintentos progresivos.
+        /// </summary>
         private async Task<bool> VerificarAPI()
         {
             try
@@ -119,7 +138,7 @@ namespace UI.UI_Gestor
                     try
                     {
                         // Intento rápido de conexión
-                        var cts = new System.Threading.CancellationTokenSource();
+                        var cts = new System.Threading.CancellationTokenSource(); //Utilizamos el token para no bloquear el hilo de la UI
                         cts.CancelAfter(2000); // 2 segundos de timeout
 
                         var response = await _http.GetAsync("/provincias", cts.Token);
@@ -173,6 +192,9 @@ namespace UI.UI_Gestor
             // Método requerido por el diseñador
         }
 
+        /// <summary>
+        /// Prepara el contenido de los ComboBox
+        /// </summary>
         private async Task PrepararCombos()
         {
             comboProvincia.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -199,6 +221,9 @@ namespace UI.UI_Gestor
             await CargarLocalidadesConReintento();
         }
 
+        /// <summary>
+        /// Intenta cargar las provincias, con tres intentos
+        /// </summary>
         private async Task<bool> CargarProvinciasConReintento()
         {
             for (int intento = 1; intento <= 3; intento++)
@@ -224,6 +249,9 @@ namespace UI.UI_Gestor
             return false;
         }
 
+        /// <summary>
+        /// Intenta cargar las localidades, con tres intentos
+        /// </summary>
         private async Task<bool> CargarLocalidadesConReintento()
         {
             for (int intento = 1; intento <= 3; intento++)
@@ -249,6 +277,9 @@ namespace UI.UI_Gestor
             return false;
         }
 
+        /// <summary>
+        /// Guardamos todas las provincias en una única lista
+        /// </summary>
         private async Task CargarProvincias()
         {
             cargando = true;
@@ -289,6 +320,9 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Guardamos todas las localidades en una única lista
+        /// </summary>
         private async Task CargarLocalidades()
         {
             cargando = true;
@@ -331,10 +365,14 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Filtra el listado de localidades según la provincia seleccionada.
+        /// </summary>
         private void comboProvincia_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cargando) return;
+            if (cargando) return; //Si todavía se están cargando los datos no se ejecuta nada
 
+            //Extraemos el texto de la provincia seleccionada
             string seleccion = comboProvincia.SelectedItem?.ToString() ?? "Cualquiera";
 
             List<string> nombres;
@@ -353,7 +391,7 @@ namespace UI.UI_Gestor
             }
             else
             {
-                // Solo las de la provincia seleccionada, ordenadas alfabéticamente
+                // Mostramos solo las localidades de la provincia seleccionada ordenadas alfabéticamente
                 nombres = _localidadesCompletas
                     .Where(l => l.NombreProvincia == seleccion)
                     .OrderBy(l => l.NombreLocalidad)
@@ -365,13 +403,17 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Filtra según la localidad seleccionada
+        /// </summary>
         private void comboLocalidad_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cargando) return;
+            if (cargando) return; //Si todavía se están cargando los datos no se ejecuta nada 
 
             var seleccion = comboLocalidad.SelectedItem?.ToString();
             if (string.IsNullOrEmpty(seleccion) || seleccion == "Cualquiera") return;
 
+            // Limpiamos el nombre de la localidad eliminando la provincia entre paréntesis "Localidad (Provincia)"
             string localidad = seleccion.Contains("(")
                 ? seleccion.Substring(0, seleccion.LastIndexOf("(")).Trim()
                 : seleccion;
@@ -392,9 +434,12 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Realiza la petición a la API con los filtros seleccionados y actualiza la UI.
+        /// </summary>
         private async Task AplicarFiltros()
         {
-            this.Enabled = false;                    // Bloquear ventana durante búsqueda
+            this.Enabled = false;                    // Bloquear ventana durante búsqueda para evitar clicks concurrentes
             Cursor.Current = Cursors.WaitCursor;
 
             string cp = txtBoxCodPostal.Text.Trim();
@@ -407,7 +452,8 @@ namespace UI.UI_Gestor
             string localidadParam = loc == "Cualquiera" ? ""
                 : (loc.Contains("(") ? loc.Substring(0, loc.LastIndexOf("(")).Trim() : loc);
             string tipoParam = tipo == "Cualquiera" ? "" : tipo;
-
+            
+            //Construimos la url del query
             var url = $"/estaciones?cp={cp}&provincia={provinciaParam}&localidad={localidadParam}&tipo={tipoParam}";
             Debug.WriteLine($"[CLIENTE] Llamando a API: {url}");
 
@@ -449,6 +495,9 @@ namespace UI.UI_Gestor
             }
         }
 
+        /// <summary>
+        /// Actualiza la tabla de estaciones según los parámetros seleccionados
+        /// </summary>
         private void ActualizarGrid(List<EstacionParaMostrar> estaciones)
         {
             estacionBindingSource.DataSource = estaciones;
@@ -472,12 +521,16 @@ namespace UI.UI_Gestor
             };
         }
 
+        /// <summary>
+        /// Dibuja los marcadores en el mapa basándose en las coordenadas de las estaciones.
+        /// </summary>
         private void ActualizarMapa(List<EstacionParaMostrar> estaciones)
         {
-            markersOverlay.Markers.Clear();
+            markersOverlay.Markers.Clear(); // Limpiar resultados anteriores
 
             foreach (var e in estaciones)
             {
+                // Solo se posicionan estaciones con coordenadas válidas
                 var punto = new PointLatLng(e.latitud, e.longitud);
                 var marker = new GMarkerGoogle(punto, GMarkerGoogleType.red_dot)
                 {
@@ -487,7 +540,7 @@ namespace UI.UI_Gestor
                 markersOverlay.Markers.Add(marker);
             }
 
-            // Forzar refresco del mapa
+            // Forzar refresco del mapa: GMap a veces no redibuja los marcadores nuevos hasta que cambia el nivel de zoom
             gMapControl1.Zoom += 0.000001;
             gMapControl1.Zoom -= 0.000001;
         }
